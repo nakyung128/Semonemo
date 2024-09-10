@@ -9,14 +9,13 @@ import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 
-
 @Configuration
 public class S3Config {
-	@Value("AKIA5ZEGUVDFO4VNKFUR")
+	@Value("${cloud.aws.credentials.accessKey}")
 	private String accessKey;
-	@Value("ze0b8xIZMAIP/3ShCPpaqdJSF5VSClBBGuxlaFEW")
+	@Value("${cloud.aws.credentials.secretKey}")
 	private String secretKey;
-	@Value("us-east-1")
+	@Value("${cloud.aws.region.static}")
 	private String region;
 
 	@Bean

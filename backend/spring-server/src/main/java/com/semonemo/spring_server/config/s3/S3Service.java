@@ -24,10 +24,11 @@ public class S3Service {
 
 	private final AmazonS3 amazonS3;
 
-	@Value("semonemo")
+	@Value("${cloud.aws.s3.bucket}")
 	private String bucket;
 
 	private final String DIR_NAME = "picture";
+
 	// 먼저 MultipartFile을 File로 변환 (이 과정에서 실패 시 예외 발생).
 	// 이후 upload(String fileName, File uploadFile, String extend) 메서드를 호출해 실제 업로드를 진행
 	public String upload(String fileName, MultipartFile multipartFile, String extend) throws IOException {
@@ -66,6 +67,7 @@ public class S3Service {
 		String s3Url = amazonS3.getUrl(bucket, fileName).toString();
 		return s3Url;
 	}
+
 	// S3에 업로드된 후 로컬에 저장된 임시 파일을 삭제
 	private void removeNewFile(File targetFile) {
 		if (targetFile.delete()) {
@@ -74,6 +76,7 @@ public class S3Service {
 			log.info("파일이 삭제되지 못했습니다.");
 		}
 	}
+
 	// MultipartFile을 File 객체로 변환
 	private Optional<File> convert(MultipartFile file) throws IOException {
 		File convertFile = File.createTempFile("temp", file.getOriginalFilename()); // 임시 파일 생성
