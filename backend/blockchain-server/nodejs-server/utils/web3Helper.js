@@ -11,23 +11,31 @@ const coinContractABI = require('../contracts/AhoraCoin.json');
 const coinContractAddress = process.env.COIN_CONTRACT_ADDRESS;
 const coinContract = new web3.eth.Contract(coinContractABI.abi, coinContractAddress);
 
-const marketContractABI = require('../contracts/NFTMarket.json');
-const marketContractAddress = process.env.MARKET_CONTRACT_ADDRESS;
-const marketContract = new web3.eth.Contract(marketContractABI.abi, marketContractAddress);
+const systemContractABI = require('../contracts/IntegratedNFTSystem.json');
+const systemContractAddress = process.env.SYSTEM_CONTRACT_ADDRESS;
+const systemContract = new web3.eth.Contract(systemContractABI.abi, systemContractAddress);
 
-const auctionContractABI = require('../contracts/NFTAuction.json');
-const auctionContractAddress = process.env.AUCTION_CONTRACT_ADDRESS;
-const auctionContract = new web3.eth.Contract(auctionContractABI.abi, auctionContractAddress);
+// const marketContractABI = require('../contracts/NFTMarket.json');
+// const marketContractAddress = process.env.MARKET_CONTRACT_ADDRESS;
+// const marketContract = new web3.eth.Contract(marketContractABI.abi, marketContractAddress);
+
+// const auctionContractABI = require('../contracts/NFTAuction.json');
+// const auctionContractAddress = process.env.AUCTION_CONTRACT_ADDRESS;
+// const auctionContract = new web3.eth.Contract(auctionContractABI.abi, auctionContractAddress);
 
 const privateKey = process.env.ADMIN_PRIVATE_KEY;
 const account = web3.eth.accounts.privateKeyToAccount(privateKey);
 web3.eth.accounts.wallet.add(account);
 
+const testPrivateKey = process.env.TEST_PRIVATE_KEY;
+const testAccount = web3.eth.accounts.privateKeyToAccount(testPrivateKey);
+web3.eth.accounts.wallet.add(testAccount);
+
 module.exports = {
   web3,
   NFTContract,
   coinContract,
-  marketContract,
-  auctionContract,
-  account
+  systemContract,
+  account,
+  testAccount
 };

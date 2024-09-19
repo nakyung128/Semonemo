@@ -1,15 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.7;
 
-import "./NFT.sol";
-import "./Coin.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "./Base.sol";
 
-contract NFTAuction is Ownable, ReentrancyGuard {
-    NFTFrame public nftContract;
-    AhoraCoin public tokenContract;
-
+contract NFTAuction is NFTBase {
     struct Auction {
         uint256 nftId;
         address seller;
@@ -25,17 +19,11 @@ contract NFTAuction is Ownable, ReentrancyGuard {
     event BidPlaced(uint256 indexed nftId, address indexed bidder, uint256 bidAmount);
     event AuctionFinalized(uint256 indexed nftId, address indexed winner, uint256 winningBid);
 
-    constructor(address _nftContractAddress, address _tokenContractAddress) {
-        nftContract = NFTFrame(_nftContractAddress);
-        tokenContract = AhoraCoin(_tokenContractAddress);
-    }
-
-    // 경매 생성
     function createAuction(uint256 _nftId, uint256 _startingPrice) external nonReentrant {
         require(nftContract.ownerOf(_nftId) == msg.sender, "You don't own this NFT");
         require(_startingPrice > 0, "Starting price must be greater than zero");
         
-        nftContract.transferNFTUserToUser(_nftId, msg.sender, address(this));
+        nftContract.transferNFTUserToSystem(_nftId, msg.sender, address(this));
 
         auctions[_nftId] = Auction({
             nftId: _nftId,
@@ -49,7 +37,6 @@ contract NFTAuction is Ownable, ReentrancyGuard {
         emit AuctionCreated(_nftId, msg.sender, _startingPrice);
     }
 
-    // 경매 입찰
     function placeBid(uint256 _nftId, uint256 _bidAmount) external nonReentrant {
         Auction storage auction = auctions[_nftId];
         require(!auction.isFinished, "Auction is already finished");
@@ -57,11 +44,10 @@ contract NFTAuction is Ownable, ReentrancyGuard {
         require(_bidAmount >= auction.startingPrice, "Bid must be at least the starting price");
 
         if (auction.highestBidder != address(0)) {
-            // Automatically refund the previous highest bidder
             require(tokenContract.transferSenderToUser(auction.highestBidder, auction.highestBid), "Refund transfer failed");
         }
 
-        require(tokenContract.transferUserToUser(msg.sender, address(this), _bidAmount), "Bid transfer failed");
+        require(tokenContract.transferUserToSystem(msg.sender, address(this), _bidAmount), "Bid transfer failed");
 
         auction.highestBid = _bidAmount;
         auction.highestBidder = msg.sender;
@@ -69,7 +55,6 @@ contract NFTAuction is Ownable, ReentrancyGuard {
         emit BidPlaced(_nftId, msg.sender, _bidAmount);
     }
 
-    // 경매 종료
     function finalizeAuction(uint256 _nftId) external onlyOwner nonReentrant {
         Auction storage auction = auctions[_nftId];
         require(!auction.isFinished, "Auction is already finished");
@@ -85,8 +70,9 @@ contract NFTAuction is Ownable, ReentrancyGuard {
         }
     }
 
-    // 경매정보 조회
     function getAuctionInfo(uint256 _nftId) public view returns (Auction memory) {
-        return auctions[_nftId];
+        Auction memory auction = auctions[_nftId];
+        require(auction.seller != address(0), "Auction does not exist for this NFT");
+        return auction;
     }
 }

@@ -7,7 +7,9 @@ const marketRoutes = require('./routes/marketRoutes');
 
 const app = express();
 
-app.use(cors());
+app.use(cors({
+  origin: '*',
+}));
 app.use(express.json());
 
 // 모든 API 라우트에 '/bcapi' 접두사 추가

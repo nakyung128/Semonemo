@@ -1,12 +1,15 @@
-const { web3, marketContract, account } = require('../utils/web3Helper');
+const { web3, systemContract, account } = require('../utils/web3Helper');
+const { handleError, errorTypes } = require('../utils/errorHandler');
 
+// 마켓 정보 조회
 exports.getMarketInfo = async (req, res) => {
-  const nftId = req.params.nftId;
-  if (nftId === undefined || nftId === '') {
-    return res.status(400).json({ error: 'nftId is required' });
-  }
   try {
-    const result = await marketContract.methods.getSellInfo(nftId).call();
+    const nftId = req.params.nftId;
+    if (nftId === undefined || nftId === '') {
+      return res.status(400).json({ error: 'nftId is required' });
+    }
+
+    const result = await systemContract.methods.getSellInfo(nftId).call();
 
     const marketInfo = {
       nftId: result.nftId.toString(),
@@ -19,7 +22,7 @@ exports.getMarketInfo = async (req, res) => {
       result: marketInfo,
     });
   } catch (error) {
-    console.error('Failed to fetch:', error);
-    res.status(500).json({ error: 'Failed to fetch' });
+    const errorMessage = handleError(error, errorTypes.FETCH);
+    res.status(500).json({ error: errorMessage });
   }
 };

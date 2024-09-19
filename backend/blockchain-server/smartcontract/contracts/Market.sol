@@ -1,15 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.7;
 
-import "./NFT.sol";
-import "./Coin.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "./Base.sol";
 
-contract NFTMarket is Ownable, ReentrancyGuard {
-    NFTFrame public nftContract;
-    AhoraCoin public tokenContract;
-
+contract NFTMarket is NFTBase {
     struct Frame {
         uint256 nftId;
         address seller;
@@ -23,17 +17,11 @@ contract NFTMarket is Ownable, ReentrancyGuard {
     event SellCancelled(uint256 indexed nftId, address indexed seller);
     event FrameSold(uint256 indexed nftId, address indexed seller, address indexed buyer, uint256 price);
 
-    constructor(address _nftContractAddress, address _tokenContractAddress) {
-        nftContract = NFTFrame(_nftContractAddress);
-        tokenContract = AhoraCoin(_tokenContractAddress);
-    }
-
-    // 판매 생성
     function createSell(uint256 _nftId, uint256 price) external nonReentrant {
         require(nftContract.ownerOf(_nftId) == msg.sender, "You don't own this NFT");
         require(price > 0, "Price must be greater than zero");
         
-        nftContract.transferNFTUserToUser(_nftId, msg.sender, address(this));
+        nftContract.transferNFTUserToSystem(_nftId, msg.sender, address(this));
 
         frames[_nftId] = Frame({
             nftId: _nftId,
@@ -45,8 +33,7 @@ contract NFTMarket is Ownable, ReentrancyGuard {
         emit SellCreated(_nftId, msg.sender, price);
     }
 
-    // 판매 취소
-    function cancleSell(uint256 _nftId) external nonReentrant {
+    function cancelSell(uint256 _nftId) external nonReentrant {
         Frame storage frame = frames[_nftId];
         require(nftContract.ownerOf(_nftId) == address(this), "NFT not in market");
         require(frame.seller == msg.sender, "You don't own this NFT");
@@ -59,7 +46,6 @@ contract NFTMarket is Ownable, ReentrancyGuard {
         emit SellCancelled(_nftId, msg.sender);
     }
 
-    // 프레임 구매
     function buyFrame(uint256 _nftId) external nonReentrant {
         Frame storage frame = frames[_nftId];
         require(!frame.isFinished, "This sale is already finished");
@@ -72,15 +58,16 @@ contract NFTMarket is Ownable, ReentrancyGuard {
 
         frame.isFinished = true;
 
-        require(tokenContract.transferUserToUser(msg.sender, address(this), price), "Token transfer failed");
+        require(tokenContract.transferUserToSystem(msg.sender, address(this), price), "Token transfer failed");
         require(nftContract.transferNFT(_nftId, msg.sender), "NFT transfer failed");
         require(tokenContract.transferSenderToUser(seller, price), "Token transfer to seller failed");
 
         emit FrameSold(_nftId, seller, msg.sender, price);
     }
 
-    // 판매 정보 조회
     function getSellInfo(uint256 _nftId) public view returns (Frame memory) {
-        return frames[_nftId];
+        Frame memory frame = frames[_nftId];
+        require(frame.seller != address(0), "Sell does not exist for this NFT");
+        return frame;
     }
 }

@@ -1,5 +1,31 @@
 const { uploadToIPFS } = require('../utils/ipfsHelper');
 const { web3, NFTContract, account } = require('../utils/web3Helper');
+const { handleError, errorTypes } = require('../utils/errorHandler');
+
+// 활성화된 NFT 리스트 조회
+exports.getActiveNFTs = async (req, res) => {
+  try {
+    const startIndex = parseInt(req.query.startIndex) || 0;
+    const count = parseInt(req.query.count) || 10;
+
+    const result = await NFTContract.methods.getActiveNFTs(startIndex, count).call();
+
+    const nfts = result.nfts.map(nft => ({
+      tokenId: nft.tokenId.toString(),
+      creator: nft.creator,
+      currentOwner: nft.currentOwner,
+      tokenURI: nft.tokenURI
+    }));
+    
+    res.json({
+      nfts: nfts,
+      nextIndex: result.nextIndex.toString()
+    });
+  } catch (error) {
+    const errorMessage = handleError(error, errorTypes.FETCH);
+    res.status(500).json({ error: errorMessage });
+  }
+};
 
 exports.mintNFT = async (req, res) => {
   try {
@@ -52,31 +78,7 @@ exports.mintNFT = async (req, res) => {
       transactionHash: receipt.transactionHash
     });
   } catch (error) {
-    console.error('Error minting NFT:', error);
-    res.status(500).json({ error: 'Failed to mint NFT' });
-  }
-};
-
-exports.getActiveNFTs = async (req, res) => {
-  try {
-    const startIndex = parseInt(req.query.startIndex) || 0;
-    const count = parseInt(req.query.count) || 10;
-
-    const result = await NFTContract.methods.getActiveNFTs(startIndex, count).call();
-
-    const nfts = result.nfts.map(nft => ({
-      tokenId: nft.tokenId.toString(),
-      creator: nft.creator,
-      currentOwner: nft.currentOwner,
-      tokenURI: nft.tokenURI
-    }));
-    
-    res.json({
-      nfts: nfts,
-      nextIndex: result.nextIndex.toString()
-    });
-  } catch (error) {
-    console.error('Error fetching active NFTs:', error);
-    res.status(500).json({ error: 'Failed to fetch active NFTs' });
+    const errorMessage = handleError(error, errorTypes.MINT);
+    res.status(500).json({ error: errorMessage });
   }
 };
