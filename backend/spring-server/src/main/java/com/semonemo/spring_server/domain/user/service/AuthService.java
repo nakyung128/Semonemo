@@ -1,12 +1,17 @@
 package com.semonemo.spring_server.domain.user.service;
 
-import com.semonemo.spring_server.domain.user.dto.UserRegisterDTO;
+import com.semonemo.spring_server.domain.user.dto.request.UserRegisterRequestDTO;
+import com.semonemo.spring_server.domain.user.dto.response.UserLoginResponseDTO;
 
 public interface AuthService {
 
-	public String registerUser(UserRegisterDTO requestDTO);
+	String registerUser(UserRegisterRequestDTO requestDTO);
 
-	public boolean existsByAddress(String address);
+	boolean existsByAddress(String address);
 
-	public boolean existsByNickname(String nickname);
+	boolean existsByNickname(String nickname);
+
+	void login(String address, String password);
+
+	UserLoginResponseDTO generateUserToken(String address);
 }
