@@ -37,4 +37,13 @@ public interface AuthApi {
 	})
 	public CommonResponse<Boolean> checkUserExistence(@RequestParam String address);
 
+	@Operation(summary = "닉네임 중복 확인 API", description = "닉네임의 중복 확인을 위한 API")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "닉네임 중복 확인 성공"),
+		@ApiResponse(responseCode = "400", description = "닉네임 중복 확인 실패",
+			content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+		@ApiResponse(responseCode = "500", description = "서버 내부 오류",
+			content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+	})
+	public CommonResponse<Boolean> checkNicknameExistence(@RequestParam String nickname);
 }

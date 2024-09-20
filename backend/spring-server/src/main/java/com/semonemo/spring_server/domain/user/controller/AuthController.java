@@ -32,4 +32,10 @@ public class AuthController implements AuthApi {
 	public CommonResponse<Boolean> checkUserExistence(@RequestParam String address) {
 		return CommonResponse.success(authService.existsByAddress(address), "가입 여부 확인에 성공했습니다.");
 	}
+
+	@Override
+	@GetMapping("/validate")
+	public CommonResponse<Boolean> checkNicknameExistence(@RequestParam String nickname) {
+		return CommonResponse.success(authService.existsByNickname(nickname), "중복 확인에 성공했습니다.");
+	}
 }

@@ -13,6 +13,7 @@ public enum ErrorCode {
 
 	// Auth
 	INVALID_USER_DATA_ERROR("AU001", "유효하지 않은 값이 입력되었습니다.", HttpStatus.BAD_REQUEST),
+	INVALID_NICKNAME_ERROR("AU002", "유효하지 않은 닉네임 형식입니다.", HttpStatus.BAD_REQUEST),
 	;
 
 	private final String code;

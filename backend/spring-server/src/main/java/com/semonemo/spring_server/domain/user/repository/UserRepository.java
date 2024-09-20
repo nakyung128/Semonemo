@@ -6,4 +6,6 @@ import com.semonemo.spring_server.domain.user.entity.User;
 
 public interface UserRepository extends JpaRepository<User, Long> {
 	boolean existsByAddress(String address);
+
+	boolean existsByNickname(String nickname);
 }

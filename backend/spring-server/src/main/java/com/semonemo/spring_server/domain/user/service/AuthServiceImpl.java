@@ -1,5 +1,7 @@
 package com.semonemo.spring_server.domain.user.service;
 
+import java.util.regex.Pattern;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,6 +17,9 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
+
+	private static final String NICKNAME_REGEX = "^[가-힣a-zA-Z0-9_]{1,15}$";
+	private static final Pattern NICKNAME_PATTERN = Pattern.compile(NICKNAME_REGEX);
 
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
@@ -37,5 +42,21 @@ public class AuthServiceImpl implements AuthService {
 	@Transactional(readOnly = true)
 	public boolean existsByAddress(String address) {
 		return userRepository.existsByAddress(address);
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public boolean existsByNickname(String nickname) {
+		if(!isNicknameValid(nickname)) {
+			throw new CustomException(ErrorCode.INVALID_NICKNAME_ERROR);
+		}
+		return userRepository.existsByNickname(nickname);
+	}
+
+	private boolean isNicknameValid(String nickname) {
+		if(nickname == null || nickname.trim().isEmpty()) {
+			return false;
+		}
+		return NICKNAME_PATTERN.matcher(nickname).matches();
 	}
 }
