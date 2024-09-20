@@ -1,4 +1,4 @@
-package com.semonemo.spring_server.global;
+package com.semonemo.spring_server.global.common;
 
 import java.time.LocalDateTime;
 
