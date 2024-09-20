@@ -7,7 +7,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.semonemo.spring_server.domain.user.dto.UserRegisterDTO;
+import com.semonemo.spring_server.domain.user.dto.request.UserLoginRequestDTO;
+import com.semonemo.spring_server.domain.user.dto.request.UserRegisterRequestDTO;
+import com.semonemo.spring_server.domain.user.dto.response.UserLoginResponseDTO;
 import com.semonemo.spring_server.domain.user.service.AuthService;
 import com.semonemo.spring_server.global.common.CommonResponse;
 
@@ -21,8 +23,16 @@ public class AuthController implements AuthApi {
 	private final AuthService authService;
 
 	@Override
+	@PostMapping("/login")
+	public CommonResponse<UserLoginResponseDTO> login(@RequestBody UserLoginRequestDTO requestDTO) {
+		authService.login(requestDTO.address(), requestDTO.password());
+		UserLoginResponseDTO responseDTO = authService.generateUserToken(requestDTO.address());
+		return CommonResponse.success(responseDTO, "로그인에 성공했습니다.");
+	}
+
+	@Override
 	@PostMapping("/register")
-	public CommonResponse<Void> registerUser(@RequestBody UserRegisterDTO requestDTO) {
+	public CommonResponse<Void> registerUser(@RequestBody UserRegisterRequestDTO requestDTO) {
 		authService.registerUser(requestDTO);
 		return CommonResponse.success("회원가입에 성공했습니다.");
 	}

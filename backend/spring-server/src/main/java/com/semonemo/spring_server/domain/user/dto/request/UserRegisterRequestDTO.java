@@ -1,17 +1,17 @@
-package com.semonemo.spring_server.domain.user.dto;
+package com.semonemo.spring_server.domain.user.dto.request;
 
-import com.semonemo.spring_server.domain.user.entity.User;
+import com.semonemo.spring_server.domain.user.entity.Users;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
-public record UserRegisterDTO(
+public record UserRegisterRequestDTO(
 	String address,
 	String password,
 	String nickname,
 	String profileImage) {
 
-	public User toEntity() {
-		return User.builder()
+	public Users toEntity() {
+		return Users.builder()
 			.address(this.address)
 			.password(this.password)
 			.nickname(this.nickname)
