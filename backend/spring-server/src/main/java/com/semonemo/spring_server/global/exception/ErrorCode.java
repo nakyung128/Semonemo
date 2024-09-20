@@ -10,6 +10,9 @@ import lombok.RequiredArgsConstructor;
 public enum ErrorCode {
 	// Server
 	INTERNAL_SERVER_ERROR("S001", "서버 내부 오류", HttpStatus.INTERNAL_SERVER_ERROR),
+
+	// Auth
+	INVALID_USER_DATA_ERROR("AU001", "유효하지 않은 값이 입력되었습니다.", HttpStatus.BAD_REQUEST),
 	;
 
 	private final String code;
