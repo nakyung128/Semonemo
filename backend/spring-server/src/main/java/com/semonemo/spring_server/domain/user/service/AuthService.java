@@ -6,4 +6,5 @@ public interface AuthService {
 
 	public String registerUser(UserRegisterDTO requestDTO);
 
+	public boolean existsByAddress(String address);
 }

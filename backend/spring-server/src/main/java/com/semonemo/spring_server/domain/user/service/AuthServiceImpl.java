@@ -32,4 +32,10 @@ public class AuthServiceImpl implements AuthService {
 
 		return userRepository.save(user).getNickname();
 	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public boolean existsByAddress(String address) {
+		return userRepository.existsByAddress(address);
+	}
 }
