@@ -1,5 +1,7 @@
 const { web3, systemContract, account } = require('../utils/web3Helper');
-const { handleError, errorTypes } = require('../utils/errorHandler');
+const { handleError } = require('../utils/errorHandler');
+
+const { BigNumber } = require('bignumber.js');
 
 // 마켓 정보 조회
 exports.getMarketInfo = async (req, res) => {

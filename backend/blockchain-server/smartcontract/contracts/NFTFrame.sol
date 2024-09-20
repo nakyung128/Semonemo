@@ -102,7 +102,7 @@ contract NFTFrame is ERC721, ERC721URIStorage, Ownable {
         return true;
     }
 
-    // NFT 소유권 시스템으로 이동
+    // 특정 유저 NFT 이동 (메인 컨트랙트에서만 호출가능)
     function transferNFTUserToSystem(uint256 tokenId, address from, address to) public onlyMainContract {
         require(ownerOf(tokenId) != address(0), "Token does not exist");
         
@@ -122,53 +122,15 @@ contract NFTFrame is ERC721, ERC721URIStorage, Ownable {
         emit NFTBurned(tokenId);
     }
 
-    // NFT 정보 조회
+    // NFT 정보 단일 조회
     function getNFTInfo(uint256 tokenId) public view returns (NFTInfo memory) {
         require(ownerOf(tokenId) != address(0), "Token does not exist");
-        
+  
         return NFTInfo({
             tokenId: tokenId,
             creator: creators[tokenId],
             currentOwner: ownerOf(tokenId),
             tokenURI: tokenURI(tokenId)
-        });
-    }
-
-    // 모든 활성 NFT 조회 (페이지네이션 적용) (소각된 애들 제외)
-    function getActiveNFTs(uint256 startIndex, uint256 count) public view returns (NFTInfos memory) {
-        require(count > 0, "Count must be greater than 0");
-        require(startIndex < _nextTokenId, "Start index out of range");
-
-        NFTInfo[] memory activeNFTs = new NFTInfo[](count);
-        uint256 foundCount = 0;
-        uint256 currentIndex = startIndex;
-
-        while (foundCount < count && currentIndex < _nextTokenId) {
-            if (ownerOf(currentIndex) != address(0)) {
-                activeNFTs[foundCount] = NFTInfo({
-                    tokenId: currentIndex,
-                    creator: creators[currentIndex],
-                    currentOwner: ownerOf(currentIndex),
-                    tokenURI: tokenURI(currentIndex)
-                });
-                foundCount++;
-            }
-            currentIndex++;
-        }
-
-        // 찾은 NFT 수가 요청한 수보다 적은 경우, 배열 크기 조정
-        if (foundCount < count) {
-            assembly {
-                mstore(activeNFTs, foundCount)
-            }
-        }
-
-        bool hasNext = currentIndex < _nextTokenId;
-
-        return NFTInfos({
-            nfts: activeNFTs,
-            nextIndex: currentIndex,
-            hasNext: hasNext
         });
     }
 
@@ -199,49 +161,8 @@ contract NFTFrame is ERC721, ERC721URIStorage, Ownable {
         return result;
     }
 
-    // 유저별 NFT 조회
-    function getUserNFTs(address user, uint256 startIndex, uint256 count) public view returns (NFTInfos memory) {
-        require(count > 0, "Count must be greater than 0");
-        uint256[] storage userTokens = _ownedTokens[user];
-        require(startIndex < userTokens.length, "Start index out of range");
-
-        NFTInfo[] memory activeNFTs = new NFTInfo[](count);
-        uint256 foundCount = 0;
-        uint256 currentIndex = startIndex;
-
-        while (foundCount < count && currentIndex < userTokens.length) {
-            uint256 tokenId = userTokens[currentIndex];
-            if (_exists(tokenId)) {
-                activeNFTs[foundCount] = NFTInfo({
-                    tokenId: tokenId,
-                    creator: creators[tokenId],
-                    currentOwner: user,
-                    tokenURI: tokenURI(tokenId)
-                });
-                foundCount++;
-            }
-            currentIndex++;
-        }
-
-        // 찾은 NFT 수가 요청한 수보다 적은 경우, 배열 크기 조정
-        if (foundCount < count) {
-            assembly {
-                mstore(activeNFTs, foundCount)
-            }
-        }
-
-        bool hasNext = currentIndex < userTokens.length;
-
-        return NFTInfos({
-            nfts: activeNFTs,
-            nextIndex: currentIndex,
-            hasNext: hasNext
-        });
-    }
-
     // 유저의 보유 NFT Id만 조회
     function getUserNFTIds(address user) public view returns (uint256[] memory) {
-        require(_ownedTokens[user].length > 0, "User does not own any NFTs");
         return _ownedTokens[user];
     }
 
@@ -252,7 +173,6 @@ contract NFTFrame is ERC721, ERC721URIStorage, Ownable {
     function tokenURI(uint256 tokenId) public view override(ERC721, ERC721URIStorage) returns (string memory) {
         return super.tokenURI(tokenId);
     }
-
     function supportsInterface(bytes4 interfaceId) public view override(ERC721) returns (bool) {
         return super.supportsInterface(interfaceId);
     }

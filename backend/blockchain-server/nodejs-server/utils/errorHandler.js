@@ -1,10 +1,5 @@
 const { web3 } = require('./web3Helper');
 
-const errorTypes = {
-  MINT: 'mint',
-  FETCH: 'fetch'
-};
-
 function decodeError(error) {
   if (error.cause && error.cause.data) {
     try {
@@ -18,31 +13,28 @@ function decodeError(error) {
   return null;
 }
 
-function handleError(error, errorType) {
+function handleError(error) {
   let errorMessage = 'An unexpected error occurred';
+  let errorCode = 'BC001'; // 일반 에러코드
 
   const decodedError = decodeError(error);
   if (decodedError) {
     errorMessage = decodedError;
+    errorCode = 'BC002'; // 트랜잭션 에러코드
+    console.error('Transaction processing failed:', errorMessage);
   } else if (error.message) {
     errorMessage = error.message;
+    console.error('Error occurred:', errorMessage);
+  } else {
+    console.error('Error occurred:', errorMessage);
   }
 
-  switch (errorType) {
-    case errorTypes.MINT:
-      console.error('Failed to mint:', errorMessage);
-      break;
-    case errorTypes.FETCH:
-      console.error('Failed to fetch:', errorMessage);
-      break;
-    default:
-      console.error('Error occurred:', errorMessage);
-  }
-
-  return errorMessage;
+  return {
+    code: errorCode,
+    message: errorCode === 'BC002' ? `Transaction processing failed: ${errorMessage}` : "Error occurred."
+  };
 }
 
 module.exports = {
-  handleError,
-  errorTypes
+  handleError
 };

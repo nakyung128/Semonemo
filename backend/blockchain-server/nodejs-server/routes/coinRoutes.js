@@ -20,7 +20,7 @@ const checkIP = (req, res, next) => {
   next();
 };
 
-// 지갑 코인 잔고 확인
+// 코인 잔고 확인
 router.get('/:address', coinController.remainCoin);
 
 // 코인 발행 (메인서버에서만 요청 실행 가능)
@@ -28,9 +28,11 @@ router.post('/buy', checkIP, upload.none(), coinController.buyCoin);
 
 // 코인 전송
 router.post('/transfer', upload.none(), coinController.transferCoin);
-router.post('/transfer/signed', upload.none(), coinController.transferCoinSigned);
 
-router.post('/transfer/signed/test', upload.none(), coinController.transferCoinTEST);
+// 선입금 코인으로 전환
+router.post('/deposit', upload.none(), coinController.depositCoin);
 
+// 선입금 코인, 그냥 코인으로
+router.post('/withdraw', upload.none(), coinController.withdrawCoin);
 
 module.exports = router;

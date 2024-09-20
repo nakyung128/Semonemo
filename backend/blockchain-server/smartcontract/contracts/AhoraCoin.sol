@@ -6,6 +6,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 contract AhoraCoin is ERC20, Ownable, ReentrancyGuard {
+    // 초기 발급 코인
     uint256 private constant INITIAL_SUPPLY = 1000000 * 10**18; // 백만 토큰
 
     // main contract 주소 설정 함수
@@ -46,7 +47,7 @@ contract AhoraCoin is ERC20, Ownable, ReentrancyGuard {
         return true;
     }
 
-    // 특정 유저 코인 시스템으로 이동
+    // 특정 유저 코인 이동 (메인 컨트랙트에서만 호출가능)
     function transferUserToSystem(address _from, address _to, uint256 _amount) public onlyMainContract nonReentrant returns (bool) {
       require(balanceOf(_from) >= _amount, "Not enough balance");
       _transfer(_from, _to, _amount);
