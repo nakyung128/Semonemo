@@ -22,4 +22,11 @@ public class UserServiceImpl implements UserService {
 		return userRepository.findByAddress(address)
 			.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND_ERROR));
 	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public Users findById(long userId) {
+		return userRepository.findById(userId)
+			.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND_ERROR));
+	}
 }

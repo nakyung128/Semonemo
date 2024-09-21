@@ -21,7 +21,8 @@ public interface AuthApi {
 
 	@Operation(summary = "사용자 로그인 API", description = "사용자의 로그인을 위한 API")
 	@ApiResponses(value = {
-		@ApiResponse(responseCode = "200", description = "로그인 성공"),
+		@ApiResponse(responseCode = "200", description = "로그인 성공",
+			content = @Content(schema = @Schema(implementation = UserLoginResponseDTO.class))),
 		@ApiResponse(responseCode = "401", description = "로그인 실패",
 			content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
 		@ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없음",
@@ -43,7 +44,8 @@ public interface AuthApi {
 
 	@Operation(summary = "사용자 가입 여부 확인 API", description = "지갑주소의 가입여부 확인을 위한 API")
 	@ApiResponses(value = {
-		@ApiResponse(responseCode = "200", description = "가입 여부 확인 성공"),
+		@ApiResponse(responseCode = "200", description = "가입 여부 확인 성공",
+			content = @Content(schema = @Schema(implementation = Boolean.class))),
 		@ApiResponse(responseCode = "400", description = "가입 여부 확인 실패",
 			content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
 		@ApiResponse(responseCode = "500", description = "서버 내부 오류",
@@ -53,7 +55,8 @@ public interface AuthApi {
 
 	@Operation(summary = "닉네임 중복 확인 API", description = "닉네임의 중복 확인을 위한 API")
 	@ApiResponses(value = {
-		@ApiResponse(responseCode = "200", description = "닉네임 중복 확인 성공"),
+		@ApiResponse(responseCode = "200", description = "닉네임 중복 확인 성공",
+			content = @Content(schema = @Schema(implementation = Boolean.class))),
 		@ApiResponse(responseCode = "400", description = "닉네임 중복 확인 실패",
 			content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
 		@ApiResponse(responseCode = "500", description = "서버 내부 오류",
