@@ -21,6 +21,7 @@ public record UserRegisterRequestDTO(
 
 	@Schema(hidden = true)
 	public boolean isValid() {
-		return address != null && password != null && nickname != null;
+		return address != null && password != null && nickname != null &&
+			!address.isBlank() && !password.isBlank() && !nickname.isBlank();
 	}
 }
