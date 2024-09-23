@@ -10,6 +10,9 @@ public final class SecurityConstants {
 		"/api-docs/**",
 		"/swagger-ui/**",
 		"/api/auth/**",
+		"/api/asset/**",
+		"/api/search/**"
+
 	};
 
 	private SecurityConstants() {}

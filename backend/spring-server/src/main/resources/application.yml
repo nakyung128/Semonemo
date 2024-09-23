@@ -12,9 +12,9 @@ springdoc:
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/{Schema}?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
-    username: { username }
-    password: { password }
+    url: jdbc:mysql://localhost:3306/tt?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    username: root
+    password: root
   jpa:
     properties:
       hibernate.format_sql: true
@@ -26,7 +26,10 @@ cloud:
     stack.auto: false
     region.static: us-east-1
     credentials:
-      accessKey: { accessKey }
-      secretKey: { secretKey }
+      accessKey: AKIA5ZEGUVDFO4VNKFUR
+      secretKey: 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
 
-
+jwt:
+  secret: MDwwDQYJKoZIhvcNAQEBBQADKwAwKAIhAI9Z5wvMwVe9S4PwNW+spFUuxqfOeThS9udoMC9F8z/zAgMBAAE=
+  access-token-expiration: 7200000 # 2h
+  refresh-token-expiration: 604800000 # 7d
