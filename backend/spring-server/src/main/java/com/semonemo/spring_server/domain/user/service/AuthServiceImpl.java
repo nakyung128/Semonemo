@@ -40,6 +40,10 @@ public class AuthServiceImpl implements AuthService {
 			throw new CustomException(ErrorCode.INVALID_USER_DATA_ERROR);
 		}
 
+		if(existsByAddress(requestDTO.address())) {
+			throw new CustomException(ErrorCode.EXISTS_ADDRESS_ERROR);
+		}
+
 		Users user = requestDTO.toEntity();
 		String encodedPassword = passwordEncoder.encode(user.getPassword());
 		user.setPassword(encodedPassword);
