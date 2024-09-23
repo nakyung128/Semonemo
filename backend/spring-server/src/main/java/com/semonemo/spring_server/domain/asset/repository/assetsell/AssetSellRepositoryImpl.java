@@ -17,6 +17,7 @@ public class AssetSellRepositoryImpl implements AssetSellRepositoryCustom {
 
 	@Override
 	public List<AssetSell> findTopN(Long nowId, int size) {
+
 		return queryFactory
 			.selectFrom(assetSell)
 			.orderBy(assetSell.assetSellId.desc())
