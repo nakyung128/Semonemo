@@ -1,4 +1,4 @@
-const { web3, coinContract, systemContract, account, testAccount } = require('../utils/web3Helper');
+const { web3, coinContract, systemContract, account } = require('../utils/web3Helper');
 const { handleError } = require('../utils/errorHandler');
 
 const { BigNumber } = require('bignumber.js');
@@ -219,7 +219,7 @@ exports.depositCoin = async (req, res) => {
   }
 };
 
-// 선입금 코인, 그냥 코인으로
+// 선입금 코인, 그냥 코인으로 전환
 exports.withdrawCoin = async (req, res) => {
   try {
     const address = req.body.address;

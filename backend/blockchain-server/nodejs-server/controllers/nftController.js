@@ -1,8 +1,6 @@
 const { uploadToIPFS } = require('../utils/ipfsHelper');
-const { web3, NFTContract, account } = require('../utils/web3Helper');
+const { web3, NFTContract } = require('../utils/web3Helper');
 const { handleError } = require('../utils/errorHandler');
-
-const { BigNumber } = require('bignumber.js');
 
 // tokenId가 담긴 array 받아서 NFT 정보 조회
 exports.getNFTInfo = async (req, res) => {

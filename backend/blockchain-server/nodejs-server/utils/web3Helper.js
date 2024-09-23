@@ -15,14 +15,6 @@ const systemContractABI = require('../contracts/IntegratedNFTSystem.json');
 const systemContractAddress = process.env.SYSTEM_CONTRACT_ADDRESS;
 const systemContract = new web3.eth.Contract(systemContractABI.abi, systemContractAddress);
 
-// const marketContractABI = require('../contracts/NFTMarket.json');
-// const marketContractAddress = process.env.MARKET_CONTRACT_ADDRESS;
-// const marketContract = new web3.eth.Contract(marketContractABI.abi, marketContractAddress);
-
-// const auctionContractABI = require('../contracts/NFTAuction.json');
-// const auctionContractAddress = process.env.AUCTION_CONTRACT_ADDRESS;
-// const auctionContract = new web3.eth.Contract(auctionContractABI.abi, auctionContractAddress);
-
 const privateKey = process.env.ADMIN_PRIVATE_KEY;
 const account = web3.eth.accounts.privateKeyToAccount(privateKey);
 web3.eth.accounts.wallet.add(account);

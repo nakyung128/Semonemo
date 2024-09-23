@@ -12,5 +12,10 @@ router.post('/coin/deposit', upload.none(), testController.depositCoinTest);
 router.post('/coin/withdraw', upload.none(), testController.withdrawCoinTest);
 
 router.post('/auction/start', upload.none(), testController.startAuctionTest)
+router.post('/auction/cancle', upload.none(), testController.cancleAuctionTest);
+
+router.post('/market/create', upload.none(), testController.createMarketTest);
+router.post('/market/cancle', upload.none(), testController.cancleMarketTest);
+router.post('/market/buy', upload.none(), testController.buyMarketTest);
 
 module.exports = router;
