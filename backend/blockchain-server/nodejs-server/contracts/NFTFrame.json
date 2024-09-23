@@ -32655,12 +32655,12 @@
     "31221": {
       "events": {},
       "links": {},
-      "address": "0x3E84C2AeD31e2B52ECa30C2e9cF333714Aa8a477",
-      "transactionHash": "0x93cce6a702d5dd9068c718549834aaef8930cc693d8432425d46fadd7e9d8e54"
+      "address": "0x3489daebE55DA5D86E8ba4f73115F7ba5688C8dd",
+      "transactionHash": "0x6db9cc5de20971c12ff07183ad12a707f6d03ae5b5ebe4fbdaa4448e7c4b98c1"
     }
   },
   "schemaVersion": "3.4.16",
-  "updatedAt": "2024-09-20T08:54:01.904Z",
+  "updatedAt": "2024-09-23T01:45:52.041Z",
   "networkType": "ethereum",
   "devdoc": {
     "kind": "dev",

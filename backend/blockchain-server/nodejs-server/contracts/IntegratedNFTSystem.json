@@ -17854,12 +17854,12 @@
     "31221": {
       "events": {},
       "links": {},
-      "address": "0xd76EE90282D00FaAA3a3b53d325F06335d12ea45",
-      "transactionHash": "0x80f5d9effef0fb93fafaf2cb3640e8fcfb129be8a5ca7ea41c0a3d9403856345"
+      "address": "0xfa17F17E22f779ad04C16569c1FEb8B4ddcb6498",
+      "transactionHash": "0xf2643b3a40a3199f26ca20349a0511bd9d7a607ae17d24e44ef1143262c07b81"
     }
   },
   "schemaVersion": "3.4.16",
-  "updatedAt": "2024-09-20T08:54:01.921Z",
+  "updatedAt": "2024-09-23T01:45:52.057Z",
   "networkType": "ethereum",
   "devdoc": {
     "kind": "dev",
