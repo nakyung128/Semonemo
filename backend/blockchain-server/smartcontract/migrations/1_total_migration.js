@@ -1,7 +1,6 @@
 const NFTFrame = artifacts.require("NFTFrame");
 const AhoraCoin = artifacts.require("AhoraCoin");
-const NFTAuction = artifacts.require("NFTAuction");
-const NFTMarket = artifacts.require("NFTMarket");
+const NFTSystem = artifacts.require("IntegratedNFTSystem");
 
 module.exports = async function(deployer, network, accounts) {
   // Deploy NFTFrame
@@ -12,16 +11,11 @@ module.exports = async function(deployer, network, accounts) {
   await deployer.deploy(AhoraCoin);
   const ahoraCoinInstance = await AhoraCoin.deployed();
 
-  // Deploy NFTAuctionSystem
-  await deployer.deploy(NFTAuction, nftFrameInstance.address, ahoraCoinInstance.address);
-  const nftAuctionSystemInstance = await NFTAuction.deployed();
-
-  // Deploy NFTAuctionSystem
-  await deployer.deploy(NFTMarket, nftFrameInstance.address, ahoraCoinInstance.address);
-  const nftMarketSystemInstance = await NFTMarket.deployed();
+  // Deploy NFTSystem
+  await deployer.deploy(NFTSystem, nftFrameInstance.address, ahoraCoinInstance.address);
+  const nftSystemInstance = await NFTSystem.deployed();
 
   console.log("NFTFrame deployed at:", nftFrameInstance.address);
   console.log("AhoraCoin deployed at:", ahoraCoinInstance.address);
-  console.log("NFTAuctionSystem deployed at:", nftAuctionSystemInstance.address);
-  console.log("NFTMarketSystem deployed at:", nftMarketSystemInstance.address);
+  console.log("NFTSystem deployed at:", nftSystemInstance.address);
 };
