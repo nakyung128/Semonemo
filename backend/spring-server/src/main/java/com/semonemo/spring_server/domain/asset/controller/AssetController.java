@@ -51,9 +51,16 @@ public class AssetController {
 			throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
 		}
 	}
+	//에셋 상세 조히
 	@GetMapping("/detail")
 	public CommonResponse <AssetResponseDto>  getAssetDetail(@RequestParam Long assetId) {
 		AssetResponseDto asset = assetService.getAssetDetail(assetId);
+		return CommonResponse.success(asset,"에셋 상세조회 성공");
+	}
+	//판매 에셋 상세 조히
+	@GetMapping("/sell/detail")
+	public CommonResponse <AssetSellResponseDto>  getAssetSellDetail(@RequestParam Long assetSellId) {
+		AssetSellResponseDto asset = assetService.getAssetSellDetail(assetSellId);
 		return CommonResponse.success(asset,"에셋 상세조회 성공");
 	}
 
@@ -67,6 +74,8 @@ public class AssetController {
 	){
 		return assetService.getAllAsset(id,cursorId,size);
 	}
+
+
 
 
 

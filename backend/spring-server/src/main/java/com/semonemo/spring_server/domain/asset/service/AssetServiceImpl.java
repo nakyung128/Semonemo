@@ -14,6 +14,8 @@ import com.semonemo.spring_server.domain.asset.repository.assetimage.AssetImageR
 import com.semonemo.spring_server.domain.asset.repository.assetsell.AssetSellRepository;
 import com.semonemo.spring_server.domain.elasticsearch.service.ElasticsearchIndexChecker;
 import com.semonemo.spring_server.domain.elasticsearch.service.ElasticsearchSyncService;
+import com.semonemo.spring_server.domain.user.entity.Users;
+import com.semonemo.spring_server.domain.user.service.UserService;
 import com.semonemo.spring_server.global.common.CursorResult;
 
 import jakarta.transaction.Transactional;
@@ -22,15 +24,17 @@ import jakarta.transaction.Transactional;
 public class AssetServiceImpl implements AssetService {
 	private AssetImageRepository assetImageRepository;
 	private AssetSellRepository assetSellRepository;
+	private UserService userService;
 	private final ElasticsearchSyncService syncService;
 	private final ElasticsearchIndexChecker indexChecker;
 
 	public AssetServiceImpl(AssetImageRepository assetImageRepository, ElasticsearchSyncService syncService,
-		AssetSellRepository assetSellRepository, ElasticsearchIndexChecker indexChecker) {
+		AssetSellRepository assetSellRepository, ElasticsearchIndexChecker indexChecker, UserService userService) {
 		this.assetImageRepository = assetImageRepository;
 		this.assetSellRepository = assetSellRepository;
 		this.syncService = syncService;
 		this.indexChecker = indexChecker;
+		this.userService = userService;
 	}
 
 	// @PostConstruct
@@ -48,6 +52,7 @@ public class AssetServiceImpl implements AssetService {
 		assetImageRepository.save(assetImage);
 		syncService.syncSingleAsset(assetImage.getAssetId());
 	}
+
 	@Transactional
 	@Override
 	public CursorResult<AssetSellResponseDto> getAllAsset(Long nowId, Long cursorId, int size) {
@@ -63,21 +68,20 @@ public class AssetServiceImpl implements AssetService {
 		if (assetSells.size() > size) {
 			hasNext = true;
 			assetSells = assetSells.subList(0, size);
-			}
+		}
 
-			for (AssetSell assetSell : assetSells) {
-				AssetSellResponseDto dto = convertToDto(assetSell);
-				dtos.add(dto);
-			}
+		for (AssetSell assetSell : assetSells) {
+			AssetSellResponseDto dto = convertToDto(assetSell.getAssetSellId());
+			dtos.add(dto);
+		}
 
-
-			Long nextCursorId = hasNext ? assetSells.get(assetSells.size() - 1).getAssetSellId() : null;
-			return new CursorResult<>(dtos, nextCursorId, hasNext);
+		Long nextCursorId = hasNext ? assetSells.get(assetSells.size() - 1).getAssetSellId() : null;
+		return new CursorResult<>(dtos, nextCursorId, hasNext);
 	}
 
 	@Override
 	public AssetResponseDto getAssetDetail(Long assetId) {
-		AssetImage assetImage=assetImageRepository.findById(assetId).
+		AssetImage assetImage = assetImageRepository.findById(assetId).
 			orElseThrow(() -> new IllegalArgumentException("Asset id not found"));
 		AssetResponseDto assetResponseDto = new AssetResponseDto(
 			assetImage.getAssetId(),
@@ -87,24 +91,30 @@ public class AssetServiceImpl implements AssetService {
 		return assetResponseDto;
 	}
 
-	private AssetSellResponseDto convertToDto(AssetSell assetSell) {
-		Long assetId = assetSell.getAssetId();
-		if (assetId == null) {
-			throw new IllegalArgumentException("Asset ID cannot be null");
-		}
-		AssetImage assetImage  =assetImageRepository.findById(assetId)
-			.orElseThrow(() -> new RuntimeException("Asset Image not found"));
+	@Override
+	public AssetSellResponseDto getAssetSellDetail(Long assetSellId) {
+		return convertToDto(assetSellId);
+	}
+
+	private AssetSellResponseDto convertToDto(Long assetSellId) {
+		AssetSell assetSell = assetSellRepository.findById(assetSellId)
+			.orElseThrow(() -> new IllegalArgumentException("Asset id not found"));
+
+		AssetImage assetImage = assetImageRepository.findById(assetSell.getAssetId())
+			.orElseThrow(() -> new IllegalArgumentException("Asset id not found"));
+		Users user = userService.findById(assetImage.getCreator());
 		AssetSellResponseDto dto = new AssetSellResponseDto(
 			assetSell.getAssetId(),
+			assetSell.getAssetSellId(),
 			assetImage.getCreator(),
 			assetImage.getImageUrl(),
-			assetSell.getCreatedAt(),
+			assetImage.getCreatedAt(),
 			assetSell.getHits(),
 			assetSell.getLikeCount(),
-			"nick",
+			user.getNickname(),
 			assetSell.getPrice(),
 			false
-			);
+		);
 		return dto;
 	}
 }

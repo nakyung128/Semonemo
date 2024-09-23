@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 
 public record AssetSellResponseDto(
 	Long assetId,
+	Long assetSellId,
 	Long creator,
 	String imageUrl,
 	LocalDateTime createAt,
