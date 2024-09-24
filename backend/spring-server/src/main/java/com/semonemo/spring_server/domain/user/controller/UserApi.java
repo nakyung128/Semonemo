@@ -1,6 +1,7 @@
 package com.semonemo.spring_server.domain.user.controller;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -15,6 +16,7 @@ import com.semonemo.spring_server.global.common.CommonResponse;
 import com.semonemo.spring_server.global.exception.ErrorResponse;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -76,4 +78,75 @@ public interface UserApi {
 			content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
 	})
 	CommonResponse<Void> deleteUser(@AuthenticationPrincipal UserDetails userDetails);
+
+	@Operation(summary = "사용자 팔로우 API", description = "특정 사용자를 팔로우하는 API")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "팔로우 성공"),
+		@ApiResponse(responseCode = "401", description = "팔로우 실패",
+			content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+		@ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없음",
+			content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+		@ApiResponse(responseCode = "500", description = "서버 내부 오류",
+			content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+	})
+	CommonResponse<Void> followUser(
+		@AuthenticationPrincipal UserDetails userDetails,
+		@PathVariable long userId
+	);
+
+	@Operation(summary = "사용자 언팔로우 API", description = "특정 사용자를 언팔로우하는 API")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "언팔로우 성공"),
+		@ApiResponse(responseCode = "401", description = "언팔로우 실패",
+			content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+		@ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없음",
+			content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+		@ApiResponse(responseCode = "500", description = "서버 내부 오류",
+			content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+	})
+	CommonResponse<Void> unfollowUser(
+		@AuthenticationPrincipal UserDetails userDetails,
+		@PathVariable long userId
+	);
+
+	@Operation(summary = "사용자 팔로우 확인 API", description = "특정 사용자 팔로우 여부를 확인하는 API")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "팔로우 확인 성공"),
+		@ApiResponse(responseCode = "401", description = "팔로우 확인 실패",
+			content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+		@ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없음",
+			content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+		@ApiResponse(responseCode = "500", description = "서버 내부 오류",
+			content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+	})
+	CommonResponse<Boolean> checkFollow(
+		@AuthenticationPrincipal UserDetails userDetails,
+		@PathVariable long userId
+	);
+
+	@Operation(summary = "팔로잉 목록 조회 API", description = "특정 사용자의 팔로잉을 조회하는 API")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "팔로잉 조회 성공",
+			content = @Content(array = @ArraySchema(schema = @Schema(implementation = UserInfoResponseDTO.class)))),
+		@ApiResponse(responseCode = "401", description = "팔로잉 조회 실패",
+			content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+		@ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없음",
+			content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+		@ApiResponse(responseCode = "500", description = "서버 내부 오류",
+			content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+	})
+	CommonResponse<List<UserInfoResponseDTO>> getFollowing(long userId);
+
+	@Operation(summary = "팔로워 목록 조회 API", description = "특정 사용자의 팔로워를 조회하는 API")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "팔로워 조회 성공",
+			content = @Content(array = @ArraySchema(schema = @Schema(implementation = UserInfoResponseDTO.class)))),
+		@ApiResponse(responseCode = "401", description = "팔로워 조회 실패",
+			content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+		@ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없음",
+			content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+		@ApiResponse(responseCode = "500", description = "서버 내부 오류",
+			content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+	})
+	CommonResponse<List<UserInfoResponseDTO>> getFollowers(long userId);
 }

@@ -22,6 +22,10 @@ public enum ErrorCode {
 
 	// User
 	USER_NOT_FOUND_ERROR("U001", "사용자를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+	SELF_FOLLOW_ERROR("U002", "자기 자신은 팔로우할 수 없습니다.", HttpStatus.BAD_REQUEST),
+	ALREADY_FOLLOW_ERROR("U003", "이미 팔로우한 사용자입니다.", HttpStatus.BAD_REQUEST),
+	NOT_FOLLOW_ERROR("U004", "팔로우 목록에 없는 사용자입니다.", HttpStatus.NOT_FOUND),
+	CHECK_SELF_FOLLOW_ERROR("U005", "자기 자신은 확인할 수 없습니다.", HttpStatus.BAD_REQUEST),
 
 	// Asset
 	LIKE_NOT_FOUND_ERROR("AS001", "좋아요를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
@@ -34,7 +38,6 @@ public enum ErrorCode {
 	USERS_LOAD_FAIL("A008", "유저 생성 에셋 조회 실패했습니다", HttpStatus.NOT_FOUND),
 	LIKE_FAIL("A009", "좋아요 실패하였습니다", HttpStatus.INTERNAL_SERVER_ERROR),
 	DISLIKE_FAIL("A010", "좋아요 취소 실패하였습니다", HttpStatus.INTERNAL_SERVER_ERROR),
-
 	;
 
 	private final String code;
