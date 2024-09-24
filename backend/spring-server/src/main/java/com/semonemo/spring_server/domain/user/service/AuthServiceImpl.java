@@ -40,7 +40,7 @@ public class AuthServiceImpl implements AuthService {
 			throw new CustomException(ErrorCode.INVALID_USER_DATA_ERROR);
 		}
 
-		if(existsByAddress(requestDTO.address())) {
+		if(existsByAddress(requestDTO.getAddress())) {
 			throw new CustomException(ErrorCode.EXISTS_ADDRESS_ERROR);
 		}
 

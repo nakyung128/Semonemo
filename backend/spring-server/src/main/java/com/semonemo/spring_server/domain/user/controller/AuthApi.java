@@ -1,7 +1,11 @@
 package com.semonemo.spring_server.domain.user.controller;
 
+import java.io.IOException;
+
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.semonemo.spring_server.domain.user.dto.request.UserLoginRequestDTO;
 import com.semonemo.spring_server.domain.user.dto.request.UserRegisterRequestDTO;
@@ -40,7 +44,9 @@ public interface AuthApi {
 		@ApiResponse(responseCode = "500", description = "서버 내부 오류",
 			content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
 	})
-	CommonResponse<Void> registerUser(@RequestBody UserRegisterRequestDTO requestDTO);
+	CommonResponse<Void> registerUser(
+		@RequestPart MultipartFile file,
+		@RequestPart UserRegisterRequestDTO requestDTO) throws IOException;
 
 	@Operation(summary = "사용자 가입 여부 확인 API", description = "지갑주소의 가입여부 확인을 위한 API")
 	@ApiResponses(value = {

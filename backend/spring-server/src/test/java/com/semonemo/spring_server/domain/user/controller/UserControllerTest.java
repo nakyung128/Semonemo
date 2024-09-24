@@ -18,6 +18,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.semonemo.spring_server.config.s3.S3Service;
 import com.semonemo.spring_server.domain.user.entity.Users;
 import com.semonemo.spring_server.domain.user.service.AuthService;
 import com.semonemo.spring_server.domain.user.service.UserService;
@@ -37,6 +38,9 @@ class UserControllerTest {
 
 	@MockBean
 	private JwtProvider jwtProvider;
+
+	@MockBean
+	private S3Service s3Service;
 
 	@Test
 	@WithMockUser(username = "testAddress")

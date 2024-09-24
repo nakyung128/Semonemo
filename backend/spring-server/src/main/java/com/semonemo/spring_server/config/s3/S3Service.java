@@ -31,10 +31,13 @@ public class S3Service {
 
 	// 먼저 MultipartFile을 File로 변환 (이 과정에서 실패 시 예외 발생).
 	// 이후 upload(String fileName, File uploadFile, String extend) 메서드를 호출해 실제 업로드를 진행
-	public String upload(String fileName, MultipartFile multipartFile, String extend) throws IOException {
+	public String upload(MultipartFile multipartFile) throws IOException {
+		String extension = multipartFile.getOriginalFilename()
+			.substring(multipartFile.getOriginalFilename().lastIndexOf("."));
+
 		File uploadFile = convert(multipartFile)
 			.orElseThrow(() -> new IllegalArgumentException("MultipartFile -> File 전환 실패"));
-		return uploadS3(fileName, uploadFile, extend);
+		return uploadS3(multipartFile.getOriginalFilename(), uploadFile, extension);
 	}
 
 	// 파일 이름을 고유하게 생성 (buildFileName 메서드 사용)
