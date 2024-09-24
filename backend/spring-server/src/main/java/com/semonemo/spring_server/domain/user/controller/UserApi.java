@@ -1,9 +1,13 @@
 package com.semonemo.spring_server.domain.user.controller;
 
+import java.io.IOException;
+
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.semonemo.spring_server.domain.user.dto.request.UserUpdateRequestDTO;
 import com.semonemo.spring_server.domain.user.dto.response.UserInfoResponseDTO;
@@ -56,8 +60,10 @@ public interface UserApi {
 		@ApiResponse(responseCode = "500", description = "서버 내부 오류",
 			content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
 	})
-	CommonResponse<Void> updateUser(@RequestBody UserUpdateRequestDTO requestDTO,
-		@AuthenticationPrincipal UserDetails userDetails);
+	CommonResponse<Void> updateUser(
+		@AuthenticationPrincipal UserDetails userDetails,
+		@RequestPart MultipartFile file,
+		@RequestPart UserUpdateRequestDTO requestDTO) throws IOException;
 
 	@Operation(summary = "사용자 탈퇴 API", description = "사용자의 정보를 삭제하는(회원 탈퇴) API")
 	@ApiResponses(value = {
