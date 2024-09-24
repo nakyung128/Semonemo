@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -123,7 +124,50 @@ public class AssetController {
 		}
 	}
 
+	@PostMapping("/like/{assetSellId}")
+	public CommonResponse<?> like(
+		@AuthenticationPrincipal UserDetails userDetails,
+		@PathVariable Long assetSellId
+	){
+		try {
+			Users users = userService.findByAddress(userDetails.getUsername());
+			if(assetService.checkLike(users.getId(),assetSellId)){
+				System.out.println("이미 있어!");
+				throw new CustomException(ErrorCode.LIKE_Already_exist);
+			}
+			assetService.like(users.getId(),assetSellId);
+			return CommonResponse.success("좋아요 성공");
+		}
+		catch (CustomException e){
+			throw  e;
+		}
+		catch (Exception e){
+			throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
+		}
+	}
 
+	@DeleteMapping("/dislike/{assetSellId}")
+	public CommonResponse<?> dislike(
+		@AuthenticationPrincipal UserDetails userDetails,
+		@PathVariable Long assetSellId
+	){
+		try {
+			Users users = userService.findByAddress(userDetails.getUsername());
+			if(!assetService.checkLike(users.getId(),assetSellId)){
+				System.out.println("없어");
+				throw new CustomException(ErrorCode.LIKE_NOT_FOUND_ERROR);
+			}
+			assetService.dislike(users.getId(),assetSellId);
+
+			return CommonResponse.success("좋아요 취소 성공");
+		}
+		catch (CustomException e){
+			throw  e;
+		}
+		catch (Exception e){
+			throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
+		}
+	}
 
 
 }

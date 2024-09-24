@@ -42,4 +42,15 @@ public class AssetSellRepositoryImpl implements AssetSellRepositoryCustom {
 			.where(assetSell.assetId.eq(assetId))
 			.fetchOne();
 	}
+
+	@Override
+	public void updateCount(int count, Long assetSellId) {
+		System.out.println(count+" "+assetSellId);
+		 queryFactory
+			.update(assetSell)
+			.where(assetSell.assetSellId.eq(assetSellId))
+			.set(assetSell.likeCount,assetSell.likeCount.add(count))
+			.execute();
+	}
+
 }

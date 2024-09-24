@@ -6,6 +6,9 @@ import org.springframework.stereotype.Repository;
 import com.semonemo.spring_server.domain.asset.model.AssetLike;
 
 @Repository
-public interface LikeRepository extends JpaRepository<AssetLike, Long>, LikeRepositoryCustom {
+public interface AssetLikeRepository extends JpaRepository<AssetLike, Long>, AssetLikeRepositoryCustom {
 
+	AssetLike findByUserIdAndAssetSellId(Long nowid, Long assetSellId);
+
+	boolean existsByUserIdAndAssetSellId(Long nowid, Long assetSellId);
 }

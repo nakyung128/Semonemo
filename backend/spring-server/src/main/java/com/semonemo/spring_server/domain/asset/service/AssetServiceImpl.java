@@ -3,15 +3,18 @@ package com.semonemo.spring_server.domain.asset.service;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import com.semonemo.spring_server.domain.asset.dto.AssetRequestDto;
 import com.semonemo.spring_server.domain.asset.dto.AssetResponseDto;
 import com.semonemo.spring_server.domain.asset.dto.AssetSellResponseDto;
 import com.semonemo.spring_server.domain.asset.model.AssetImage;
+import com.semonemo.spring_server.domain.asset.model.AssetLike;
 import com.semonemo.spring_server.domain.asset.model.AssetSell;
 import com.semonemo.spring_server.domain.asset.repository.assetimage.AssetImageRepository;
 import com.semonemo.spring_server.domain.asset.repository.assetsell.AssetSellRepository;
+import com.semonemo.spring_server.domain.asset.repository.like.AssetLikeRepository;
 import com.semonemo.spring_server.domain.elasticsearch.service.ElasticsearchIndexChecker;
 import com.semonemo.spring_server.domain.elasticsearch.service.ElasticsearchSyncService;
 import com.semonemo.spring_server.domain.user.entity.Users;
@@ -28,6 +31,7 @@ public class AssetServiceImpl implements AssetService {
 
 	private final AssetImageRepository assetImageRepository;
 	private final AssetSellRepository assetSellRepository;
+	private final AssetLikeRepository assetLikeRepository;
 	private final UserRepository userRepository;
 	private final ElasticsearchSyncService syncService;
 	private final ElasticsearchIndexChecker indexChecker;
@@ -117,6 +121,35 @@ public class AssetServiceImpl implements AssetService {
 		return new CursorResult<>(dtos,nextCursorId,hasNext);
 	}
 
+	@Transactional
+	@Override
+	public void like(Long nowid, Long assetSellId) {
+		AssetLike like =  AssetLike.builder()
+			.assetSellId(assetSellId)
+			.userId(nowid)
+			.build();
+		assetLikeRepository.save(like);
+		assetSellRepository.updateCount(1,assetSellId);
+
+	}
+	@Transactional
+	@Override
+	public void dislike(Long nowid, Long assetSellId) {
+		AssetLike like = assetLikeRepository.findByUserIdAndAssetSellId(nowid,assetSellId);
+		assetLikeRepository.delete(like);
+		AssetSell assetSell= assetSellRepository.findById(assetSellId)
+			.orElseThrow(() -> new RuntimeException("Asset Sell Not Found"));
+		if(assetSell.getLikeCount()>0){
+		assetSellRepository.updateCount(-1,assetSellId);
+		}
+	}
+
+	@Transactional
+	@Override
+	public boolean checkLike(Long nowid,Long assetSellId ) {
+		return assetLikeRepository.existsByUserIdAndAssetSellId(nowid, assetSellId);
+	}
+
 	@Override
 	public AssetResponseDto getAssetDetail(Long assetId) {
 		AssetImage assetImage = assetImageRepository.findById(assetId).
@@ -134,6 +167,8 @@ public class AssetServiceImpl implements AssetService {
 	public AssetSellResponseDto getAssetSellDetail(Long assetSellId) {
 		return convertToDto(assetSellId);
 	}
+
+
 
 	private AssetResponseDto convertToAssetDto(Long assetId) {
 		AssetImage assetImage = assetImageRepository.findById(assetId)

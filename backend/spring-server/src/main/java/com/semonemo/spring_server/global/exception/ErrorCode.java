@@ -22,7 +22,14 @@ public enum ErrorCode {
 
 	// User
 	USER_NOT_FOUND_ERROR("U001", "사용자를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+
+
+	// Asset
+	LIKE_NOT_FOUND_ERROR("AS001", "좋아요를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+	LIKE_Already_exist("AS002", "이미 좋아요 눌렀습니다.", HttpStatus.ALREADY_REPORTED),
 	;
+
+
 
 	private final String code;
 	private final String message;

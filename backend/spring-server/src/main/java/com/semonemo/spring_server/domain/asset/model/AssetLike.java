@@ -9,20 +9,24 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
+@Builder(toBuilder = true)
 @Entity(name = "asset_like")
 public class AssetLike {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "asset_like_id")
 	private Long likeId;
-	@Column(name = "asset_id")
-	private Long assetId;
+	@Column(name = "asset_sell_id")
+	private Long assetSellId;
 	@Column(name = "user_id")
 	private Long userId;
 	@Column(name = "created_at")

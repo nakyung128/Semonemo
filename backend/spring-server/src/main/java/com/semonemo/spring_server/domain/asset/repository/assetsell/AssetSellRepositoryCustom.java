@@ -10,4 +10,6 @@ public interface AssetSellRepositoryCustom {
 	List<AssetSell> findNextN(Long nowId, Long cursorId, int i);
 
 	AssetSell findByAssetId(Long assetId);
+
+	void updateCount(int count, Long assetSellId);
 }

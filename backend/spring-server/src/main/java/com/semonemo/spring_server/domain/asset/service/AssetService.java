@@ -1,5 +1,7 @@
 package com.semonemo.spring_server.domain.asset.service;
 
+import org.springframework.security.core.userdetails.UserDetails;
+
 import com.semonemo.spring_server.domain.asset.dto.AssetRequestDto;
 import com.semonemo.spring_server.domain.asset.dto.AssetResponseDto;
 import com.semonemo.spring_server.domain.asset.dto.AssetSellResponseDto;
@@ -18,4 +20,10 @@ public interface AssetService {
 	CursorResult<AssetResponseDto> getMyAsset(Long nowid, Long cursorId, int size);
 
 	CursorResult<AssetResponseDto> getUserAsset(Long nowid, Long userId, Long cursorId, int size);
+
+	void like(Long nowid, Long assetSellId);
+
+	void dislike(Long nowid, Long assetSellId);
+
+	boolean checkLike(Long userId,Long assetSellId);
 }
