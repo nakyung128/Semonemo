@@ -12,13 +12,15 @@
 * 픽셀 화풍  
     All in one Pixel Model : https://civitai.com/models/34/all-in-one-pixel-model 
 
-* 동양 실사 화풍  
+* 사람 실사 화풍  
     majicMIX realistic : https://civitai.com/models/43331/majicmix-realistic
     
-* 서양 실사 화풍  
-    Realistic Vision : https://civitai.com/models/4201/realistic-vision-v60-b1
+* 기타 실사 화풍  
+    DreamShaper : https://civitai.com/models/4384/dreamshaper?modelVersionId=128713
 
 ## negative embeddings
+* BadDream + UnrealisticDream : https://civitai.com/models/72437/baddream-unrealisticdream-negative-embeddings
+
 * EasyNegative : https://huggingface.co/embed/EasyNegative/tree/main
 
 * Deep Negative : https://civitai.com/models/4629/deep-negative-v1x
