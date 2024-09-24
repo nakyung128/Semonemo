@@ -36,7 +36,7 @@ public class UserServiceImpl implements UserService {
 	public void updateUser(String address, UserUpdateRequestDTO requestDTO) {
 		Users user = userRepository.findByAddress(address)
 			.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND_ERROR));
-		user.modify(requestDTO.nickname(), requestDTO.profileImage());
+		user.modify(requestDTO.getNickname(), requestDTO.getProfileImage());
 	}
 
 	@Override
