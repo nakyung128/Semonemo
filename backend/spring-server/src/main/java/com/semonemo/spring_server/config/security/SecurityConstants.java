@@ -7,8 +7,8 @@ public final class SecurityConstants {
 	public static final String[] CORS_ALLOWED_HEADERS = {"*"};
 	public static final String[] CORS_EXPOSE_HEADER = {"Authorization"};
 	public static final String[] PUBLIC_ENDPOINTS = {
-		"/api-docs/**",
-		"/swagger-ui/**",
+		"/api/api-docs/**",
+		"/api/swagger-ui/**",
 		"/api/auth/**",
 		"/api/asset/**",
 		"/api/search/**"

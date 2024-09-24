@@ -1,6 +1,41 @@
 const { uploadToIPFS } = require('../utils/ipfsHelper');
-const { web3, NFTContract, account } = require('../utils/web3Helper');
+const { web3, NFTContract } = require('../utils/web3Helper');
+const { handleError } = require('../utils/errorHandler');
 
+// tokenId가 담긴 array 받아서 NFT 정보 조회
+exports.getNFTInfo = async (req, res) => {
+  try {
+    const tokenIds = req.query.tokenIds ? req.query.tokenIds.split(',') : [];
+
+    if (tokenIds.length === 0) {
+      return res.status(400).json({ error: "No token IDs provided" });
+    }
+
+    // 컨트랙트의 getNFTsByIds 함수를 호출합니다.
+    const result = await NFTContract.methods.getNFTsByIds(tokenIds).call();
+
+    const nfts = result.map(nft => ({
+      tokenId: nft.tokenId.toString(),
+      creator: nft.creator,
+      currentOwner: nft.currentOwner,
+      tokenURI: nft.tokenURI
+    }));
+    
+    res.json({
+      code: "S000",
+      data: nfts,
+      message: "Load data succeeded.",
+    });
+  } catch (error) {
+    const errorLog = handleError(error);
+    res.status(500).json({ 
+      errorCode: errorLog.code,
+      message: errorLog.message
+    });
+  }
+};
+
+// NFT 발행
 exports.mintNFT = async (req, res) => {
   try {
     if (!req.file) {
@@ -14,9 +49,12 @@ exports.mintNFT = async (req, res) => {
       return res.status(400).json({ error: 'Invalid frameDto JSON' });
     }
 
-    const { title, description } = frameDto;
-    if (!title || !description) {
-      return res.status(400).json({ error: 'Title and description are required in frameDto' });
+    const title = frameDto.title;
+    const description = frameDto.description;
+    const address = frameDto.address;
+    
+    if (!title || !description || !address) {
+      return res.status(400).json({ error: 'Title and description and address are required in frameDto' });
     }
 
     const imageUrl = await uploadToIPFS(req.file.buffer);
@@ -31,52 +69,30 @@ exports.mintNFT = async (req, res) => {
     const tokenURI = await uploadToIPFS(JSON.stringify(metadata));
 
     const gasPrice = await web3.eth.getGasPrice();
-    const gasEstimate = await NFTContract.methods.mintNFT(tokenURI).estimateGas({ from: account.address });
+    const gasEstimate = await NFTContract.methods.mintNFT(tokenURI).estimateGas({ from: address });
+    const nonce = await web3.eth.getTransactionCount(address, 'pending');
 
     const tx = {
-      from: account.address,
+      nonce: nonce.toString(),
+      from: address,
       to: NFTContract.options.address,
-      gas: gasEstimate,
-      gasPrice: gasPrice,
+      gas: gasEstimate.toString(),
+      gasPrice: gasPrice.toString(),
       data: NFTContract.methods.mintNFT(tokenURI).encodeABI()
     };
 
-    const signedTx = await web3.eth.accounts.signTransaction(tx, process.env.ADMIN_PRIVATE_KEY);
-    const receipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
-
-    const tokenId = receipt.logs[0].topics[3];
-
     res.json({
-      success: true,
-      tokenId: web3.utils.hexToNumber(tokenId),
-      transactionHash: receipt.transactionHash
+      code: "S000",
+      data: {
+        ...tx
+      },
+      message: "Create transaction succeeded.",
     });
   } catch (error) {
-    console.error('Error minting NFT:', error);
-    res.status(500).json({ error: 'Failed to mint NFT' });
-  }
-};
-
-exports.getActiveNFTs = async (req, res) => {
-  try {
-    const startIndex = parseInt(req.query.startIndex) || 0;
-    const count = parseInt(req.query.count) || 10;
-
-    const result = await NFTContract.methods.getActiveNFTs(startIndex, count).call();
-
-    const nfts = result.nfts.map(nft => ({
-      tokenId: nft.tokenId.toString(),
-      creator: nft.creator,
-      currentOwner: nft.currentOwner,
-      tokenURI: nft.tokenURI
-    }));
-    
-    res.json({
-      nfts: nfts,
-      nextIndex: result.nextIndex.toString()
+    const errorLog = handleError(error);
+    res.status(500).json({ 
+      errorCode: errorLog.code,
+      message: errorLog.message
     });
-  } catch (error) {
-    console.error('Error fetching active NFTs:', error);
-    res.status(500).json({ error: 'Failed to fetch active NFTs' });
   }
 };
