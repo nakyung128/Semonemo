@@ -1,15 +1,19 @@
 package com.semonemo.spring_server.domain.user.entity;
 
+import java.util.Set;
+
 import com.semonemo.spring_server.global.common.BaseTimeEntity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -18,6 +22,7 @@ import lombok.Setter;
 @Table(name = "users")
 @Getter
 @Builder
+@EqualsAndHashCode(callSuper = false)
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Users extends BaseTimeEntity {
@@ -30,6 +35,12 @@ public class Users extends BaseTimeEntity {
 	private String password;
 	private String nickname;
 	private String profileImage;
+
+	@OneToMany(mappedBy = "fromUser")
+	private Set<Follow> following;
+
+	@OneToMany(mappedBy = "toUser")
+	private Set<Follow> followers;
 
 	public void modify(String nickname, String profileImage) {
 		this.nickname = nickname;

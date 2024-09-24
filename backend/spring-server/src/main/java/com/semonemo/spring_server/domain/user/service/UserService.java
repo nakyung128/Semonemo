@@ -12,4 +12,8 @@ public interface UserService {
 	void updateUser(String address, UserUpdateRequestDTO requestDTO);
 
 	void deleteUser(String address);
+
+	void followUser(String fromUserAddress, long toUserId);
+
+	void unfollowUser(String fromUserAddress, long toUserId);
 }

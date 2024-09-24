@@ -67,4 +67,24 @@ public class UserController implements UserApi {
 		userService.deleteUser(userDetails.getUsername());
 		return CommonResponse.success("사용자 탈퇴에 성공했습니다.");
 	}
+
+	@Override
+	@PostMapping("/{userId}/follow")
+	public CommonResponse<Void> followUser(
+		@AuthenticationPrincipal UserDetails userDetails,
+		@PathVariable long userId
+	) {
+		userService.followUser(userDetails.getUsername(), userId);
+		return CommonResponse.success("팔로우에 성공했습니다.");
+	}
+
+	@Override
+	@DeleteMapping("/{userId}/follow")
+	public CommonResponse<Void> unfollowUser(
+		@AuthenticationPrincipal UserDetails userDetails,
+		@PathVariable long userId
+	) {
+		userService.unfollowUser(userDetails.getUsername(), userId);
+		return CommonResponse.success("언팔로우에 성공했습니다.");
+	}
 }

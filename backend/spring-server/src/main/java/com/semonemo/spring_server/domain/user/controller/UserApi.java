@@ -76,4 +76,34 @@ public interface UserApi {
 			content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
 	})
 	CommonResponse<Void> deleteUser(@AuthenticationPrincipal UserDetails userDetails);
+
+	@Operation(summary = "사용자 팔로우 API", description = "특정 사용자를 팔로우하는 API")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "팔로우 성공"),
+		@ApiResponse(responseCode = "401", description = "팔로우 실패",
+			content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+		@ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없음",
+			content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+		@ApiResponse(responseCode = "500", description = "서버 내부 오류",
+			content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+	})
+	CommonResponse<Void> followUser(
+		@AuthenticationPrincipal UserDetails userDetails,
+		@PathVariable long userId
+	);
+
+	@Operation(summary = "사용자 언팔로우 API", description = "특정 사용자를 언팔로우하는 API")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "언팔로우 성공"),
+		@ApiResponse(responseCode = "401", description = "언팔로우 실패",
+			content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+		@ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없음",
+			content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+		@ApiResponse(responseCode = "500", description = "서버 내부 오류",
+			content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+	})
+	CommonResponse<Void> unfollowUser(
+		@AuthenticationPrincipal UserDetails userDetails,
+		@PathVariable long userId
+	);
 }
