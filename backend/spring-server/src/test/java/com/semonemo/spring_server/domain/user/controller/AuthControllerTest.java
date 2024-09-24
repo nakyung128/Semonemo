@@ -11,9 +11,11 @@ import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfi
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.semonemo.spring_server.config.s3.S3Service;
 import com.semonemo.spring_server.domain.user.dto.request.UserLoginRequestDTO;
 import com.semonemo.spring_server.domain.user.dto.request.UserRegisterRequestDTO;
 import com.semonemo.spring_server.domain.user.dto.response.UserLoginResponseDTO;
@@ -39,6 +41,9 @@ class AuthControllerTest {
 
 	@MockBean
 	private AuthService authService;
+
+	@MockBean
+	private S3Service s3Service;
 
 	@Test
 	@DisplayName("로그인 API 테스트")
@@ -67,17 +72,31 @@ class AuthControllerTest {
 	@DisplayName("회원 가입 API 테스트")
 	void test_register() throws Exception {
 		// Given
-		UserRegisterRequestDTO requestDTO = new UserRegisterRequestDTO(
-			"testAddress",
-			"testPassword",
-			"testNickname",
-			"testProfile"
-		);
+		UserRegisterRequestDTO requestDTO = UserRegisterRequestDTO.builder()
+			.address("testAddress")
+			.password("testPassword")
+			.nickname("testNickname")
+			.build();
 
 		// When & Then
-		mockMvc.perform(post("/api/auth/register")
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsString(requestDTO)))
+		MockMultipartFile file = new MockMultipartFile(
+			"image",
+			"test.jpg",
+			MediaType.IMAGE_JPEG_VALUE,
+			"test image content".getBytes()
+		);
+
+		String requestDTOJson = objectMapper.writeValueAsString(requestDTO);
+		MockMultipartFile jsonFile = new MockMultipartFile(
+			"data",
+			"",
+			"application/json",
+			requestDTOJson.getBytes()
+		);
+
+		mockMvc.perform(multipart("/api/auth/register")
+				.file(file)
+				.file(jsonFile))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.message").value("회원가입에 성공했습니다."));
 

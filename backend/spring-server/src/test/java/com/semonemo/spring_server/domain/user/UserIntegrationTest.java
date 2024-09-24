@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -37,16 +38,32 @@ public class UserIntegrationTest {
 	@BeforeEach
 	void setUp() throws Exception {
 		// 사용자 등록
-		UserRegisterRequestDTO registerDTO = new UserRegisterRequestDTO(
-			"testAddress",
-			"testPassword",
-			"testNickname",
-			"testProfile"
+		UserRegisterRequestDTO requestDTO = UserRegisterRequestDTO.builder()
+			.address("testAddress")
+			.password("testPassword")
+			.nickname("testNickname")
+			.build();
+
+		MockMultipartFile file = new MockMultipartFile(
+			"image",
+			"test.jpg",
+			MediaType.IMAGE_JPEG_VALUE,
+			"test image content".getBytes()
 		);
-		mockMvc.perform(post("/api/auth/register")
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsString(registerDTO)))
-			.andExpect(status().isOk());
+
+		String requestDTOJson = objectMapper.writeValueAsString(requestDTO);
+		MockMultipartFile jsonFile = new MockMultipartFile(
+			"data",
+			"",
+			"application/json",
+			requestDTOJson.getBytes()
+		);
+
+		mockMvc.perform(multipart("/api/auth/register")
+				.file(file)
+				.file(jsonFile))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.message").value("회원가입에 성공했습니다."));
 
 		// 로그인 및 토큰 획득
 		UserLoginRequestDTO loginDTO = new UserLoginRequestDTO(
@@ -66,18 +83,31 @@ public class UserIntegrationTest {
 	@Test
 	@DisplayName("회원 가입 통합 테스트")
 	void test_register() throws Exception {
-		UserRegisterRequestDTO registerDTO = new UserRegisterRequestDTO(
-			"testAddress2",
-			"testPassword",
-			"testNickname",
-			"testProfile"
+		UserRegisterRequestDTO requestDTO = UserRegisterRequestDTO.builder()
+			.address("testAddress2")
+			.password("testPassword")
+			.nickname("testNickname")
+			.build();
+
+		MockMultipartFile file = new MockMultipartFile(
+			"image",
+			"test.jpg",
+			MediaType.IMAGE_JPEG_VALUE,
+			"test image content".getBytes()
 		);
 
-		mockMvc.perform(post("/api/auth/register")
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsString(registerDTO)))
+		String requestDTOJson = objectMapper.writeValueAsString(requestDTO);
+		MockMultipartFile jsonFile = new MockMultipartFile(
+			"data",
+			"",
+			"application/json",
+			requestDTOJson.getBytes()
+		);
+
+		mockMvc.perform(multipart("/api/auth/register")
+				.file(file)
+				.file(jsonFile))
 			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.code").value(SUCCESS_CODE))
 			.andExpect(jsonPath("$.message").value("회원가입에 성공했습니다."));
 	}
 

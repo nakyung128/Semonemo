@@ -46,12 +46,11 @@ class AuthServiceTest {
 	@DisplayName("회원가입 성공 테스트")
 	void testRegisterUser_Success() {
 		// Given
-		UserRegisterRequestDTO requestDTO = new UserRegisterRequestDTO(
-			"testAddress",
-			"testPassword",
-			"testNickname",
-			"testProfileImage"
-		);
+		UserRegisterRequestDTO requestDTO = UserRegisterRequestDTO.builder()
+			.address("testAddress")
+			.password("testPassword")
+			.nickname("testNickname")
+			.build();
 		Users user = requestDTO.toEntity();
 
 		// Mock 개체 동작 정의
@@ -70,12 +69,11 @@ class AuthServiceTest {
 	@DisplayName("회원가입 실패 테스트 - 이미 존재하는 주소")
 	void testRegisterUser_Fail_ExistsByAddress() {
 		// Given
-		UserRegisterRequestDTO requestDTO = new UserRegisterRequestDTO(
-			"testAddress",
-			"testPassword",
-			"testNickname",
-			"testProfileImage"
-		);
+		UserRegisterRequestDTO requestDTO = UserRegisterRequestDTO.builder()
+			.address("testAddress")
+			.password("testPassword")
+			.nickname("testNickname")
+			.build();
 
 		// Mock 개체 동작 정의
 		when(userRepository.existsByAddress(anyString())).thenReturn(true);
@@ -92,7 +90,11 @@ class AuthServiceTest {
 	@DisplayName("회원가입 실패 테스트 - 유효하지 않은 값이 입력되었을 때")
 	void testRegisterUser_InvalidData() {
 		// Given
-		UserRegisterRequestDTO requestDTO = new UserRegisterRequestDTO("", "", "", "");
+		UserRegisterRequestDTO requestDTO = UserRegisterRequestDTO.builder()
+			.address("")
+			.password("")
+			.nickname("")
+			.build();
 
 		// When & Then
 		assertEquals(ErrorCode.INVALID_USER_DATA_ERROR,
