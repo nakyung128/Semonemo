@@ -10,4 +10,6 @@ public interface UserService {
 	Users findById(long userId);
 
 	void updateUser(String address, UserUpdateRequestDTO requestDTO);
+
+	void deleteUser(String address);
 }

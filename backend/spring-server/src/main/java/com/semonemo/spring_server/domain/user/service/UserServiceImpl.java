@@ -38,4 +38,12 @@ public class UserServiceImpl implements UserService {
 			.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND_ERROR));
 		user.modify(requestDTO.nickname(), requestDTO.profileImage());
 	}
+
+	@Override
+	@Transactional
+	public void deleteUser(String address) {
+		Users user = userRepository.findByAddress(address)
+			.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND_ERROR));
+		userRepository.delete(user);
+	}
 }

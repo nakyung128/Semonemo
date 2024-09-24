@@ -3,6 +3,7 @@ package com.semonemo.spring_server.domain.user.controller;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import com.semonemo.spring_server.domain.user.dto.request.UserUpdateRequestDTO;
 import com.semonemo.spring_server.domain.user.dto.response.UserInfoResponseDTO;
@@ -57,4 +58,16 @@ public interface UserApi {
 	})
 	CommonResponse<Void> updateUser(@RequestBody UserUpdateRequestDTO requestDTO,
 		@AuthenticationPrincipal UserDetails userDetails);
+
+	@Operation(summary = "사용자 탈퇴 API", description = "사용자의 정보를 삭제하는(회원 탈퇴) API")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "삭제 성공"),
+		@ApiResponse(responseCode = "401", description = "삭제 실패",
+			content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+		@ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없음",
+			content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+		@ApiResponse(responseCode = "500", description = "서버 내부 오류",
+			content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+	})
+	CommonResponse<Void> deleteUser(@AuthenticationPrincipal UserDetails userDetails);
 }
