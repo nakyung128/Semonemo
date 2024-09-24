@@ -7,6 +7,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -41,35 +42,32 @@ public class AssetController {
 	private UserService userService;
 
 	@PostMapping
-	public AssetRequestDto upload(
-		@RequestPart(value = "file", required = true) MultipartFile file)
+	public CommonResponse<?> upload(
+		@AuthenticationPrincipal UserDetails userDetails,
+		@RequestPart(value = "image", required = true) MultipartFile file)
 	{
 		try {
-			System.out.println("origin file "+file.toString());
-			String extension = file.getOriginalFilename()
-					.substring(file.getOriginalFilename().lastIndexOf("."));
-			String fileUrl = s3Service.upload(file.getOriginalFilename(), file, extension);
-			System.out.println("controller"+" "+fileUrl);
+			Users users = userService.findByAddress(userDetails.getUsername());
+			String fileUrl = s3Service.upload(file);
 			AssetRequestDto assetRequestDto = new AssetRequestDto();
-			assetRequestDto.setCreator(1L);
+			assetRequestDto.setCreator(users.getId());
 			assetRequestDto.setImageUrl(fileUrl);
 			assetService.saveImage(assetRequestDto);
-			return assetRequestDto;
+			return CommonResponse.success(assetRequestDto,"업로드 성공");
 		}
-
 		catch (Exception e) {
 			throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
 		}
 	}
 	//에셋 상세 조히
-	@GetMapping("/detail")
-	public CommonResponse <AssetResponseDto>  getAssetDetail(@RequestParam Long assetId) {
+	@GetMapping("/detail/{assetId}")
+	public CommonResponse <AssetResponseDto>  getAssetDetail(@PathVariable Long assetId) {
 		AssetResponseDto asset = assetService.getAssetDetail(assetId);
 		return CommonResponse.success(asset,"에셋 상세조회 성공");
 	}
 	//판매 에셋 상세 조히
-	@GetMapping("/sell/detail")
-	public CommonResponse <AssetSellResponseDto>  getAssetSellDetail(@RequestParam Long assetSellId) {
+	@GetMapping("/sell/detail/{assetSellId}")
+	public CommonResponse <AssetSellResponseDto>  getAssetSellDetail(@PathVariable Long assetSellId) {
 		AssetSellResponseDto asset = assetService.getAssetSellDetail(assetSellId);
 		return CommonResponse.success(asset,"에셋 상세조회 성공");
 	}
@@ -79,7 +77,7 @@ public class AssetController {
 	public CommonResponse<CursorResult<AssetSellResponseDto>> getAllAsset(
 		@AuthenticationPrincipal UserDetails userDetails,
 		@RequestParam(required = false) Long cursorId,
-		@RequestParam(defaultValue = "40") int size
+		@RequestParam(defaultValue = "2") int size
 
 	){
 		try {
@@ -97,7 +95,7 @@ public class AssetController {
 	public CommonResponse<?> getMyAsset(
 		@AuthenticationPrincipal UserDetails userDetails,
 		@RequestParam(required = false) Long cursorId,
-		@RequestParam(defaultValue = "40") int size
+		@RequestParam(defaultValue = "2") int size
 	){
 		try {
 			Users users = userService.findByAddress(userDetails.getUsername());
@@ -109,18 +107,22 @@ public class AssetController {
 		}
 
 	}
+	@GetMapping("/creator")
+	public CommonResponse<?> getCreator(
+		@AuthenticationPrincipal UserDetails userDetails,
+		@RequestParam Long userId ,
+		@RequestParam(required = false) Long cursorId,
+		@RequestParam(defaultValue = "2") int size)
+	{
+		try {
+			Users users = userService.findByAddress(userDetails.getUsername());
+			CursorResult<AssetResponseDto> result = assetService.getUserAsset(users.getId(),userId,cursorId,size);
+			return CommonResponse.success(result,"유저생성 에셋 불러오기 성공");
+		} catch (Exception e){
+			throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
+		}
+	}
 
-
-	//유저가 단 댓글 목록 조회
-	// @GetMapping("/comment/user")
-	// public ApiResponse<?> getUserComment(@RequestParam Long commentWriterId) {
-	// 	try {
-	// 		List<CommentResponseDto> commentResponseDtos = boardService.getUserComment(commentWriterId);
-	// 		return ApiResponse.createSuccess(commentResponseDtos, "댓글 유저별 조회에 성공하였습니다");
-	// 	} catch (Exception e) {
-	// 		return ApiResponse.createError(ErrorCode.USER_NOT_FOUND);
-	// 	}
-	// }
 
 
 

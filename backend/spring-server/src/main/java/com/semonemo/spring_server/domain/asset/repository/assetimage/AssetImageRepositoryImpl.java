@@ -52,4 +52,25 @@ public class AssetImageRepositoryImpl implements AssetImageRepositoryCustom {
 			.limit(size)
 			.fetch();
 	}
+
+	@Override
+	public List<AssetImage> findByCreatorTopN(Long nowid,Long userid, int size) {
+		return queryFactory
+			.selectFrom(assetImage)
+			.where(assetImage.creator.eq(userid))
+			.orderBy(assetImage.assetId.desc())
+			.limit(size)
+			.fetch();
+	}
+
+	@Override
+	public List<AssetImage> findByCreatorIdNextN(Long nowid,Long userid, Long cursorId, int size) {
+		return queryFactory
+			.selectFrom(assetImage)
+			.where(assetImage.assetId.lt(cursorId)
+					.and(assetImage.creator.eq(userid)))
+			.orderBy(assetImage.creator.desc())
+			.limit(size)
+			.fetch();
+	}
 }

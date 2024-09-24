@@ -16,4 +16,6 @@ public interface AssetService {
 	AssetSellResponseDto getAssetSellDetail(Long assetSellId);
 
 	CursorResult<AssetResponseDto> getMyAsset(Long nowid, Long cursorId, int size);
+
+	CursorResult<AssetResponseDto> getUserAsset(Long nowid, Long userId, Long cursorId, int size);
 }

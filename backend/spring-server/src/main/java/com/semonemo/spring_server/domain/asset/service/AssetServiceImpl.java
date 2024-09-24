@@ -44,7 +44,7 @@ public class AssetServiceImpl implements AssetService {
 			.imageUrl(assetRequestDto.getImageUrl())
 			.build();
 		assetImageRepository.save(assetImage);
-		syncService.syncSingleAsset(assetImage.getAssetId());
+		// syncService.syncSingleAsset(assetImage.getAssetId());
 	}
 
 	@Transactional
@@ -92,6 +92,29 @@ public class AssetServiceImpl implements AssetService {
 		}
 		Long nextCursorId = hasNext ? assetImages.get(assetImages.size() - 1).getAssetId() : null;
 		return new CursorResult<>(dtos, nextCursorId, hasNext);
+	}
+
+	@Override
+	public CursorResult<AssetResponseDto> getUserAsset(Long nowid, Long userId, Long cursorId, int size) {
+		List<AssetImage> assetImages;
+		if(cursorId == null) {
+			assetImages = assetImageRepository.findByCreatorTopN(nowid,userId,size + 1);
+		}
+		else {
+			assetImages = assetImageRepository.findByCreatorIdNextN(nowid,userId, cursorId, size + 1);
+		}
+		List<AssetResponseDto> dtos = new ArrayList<>();
+		boolean hasNext = false;
+		if (assetImages.size() > size) {
+			hasNext = true;
+			assetImages = assetImages.subList(0, size);
+		}
+		for (AssetImage assetImage : assetImages) {
+			AssetResponseDto dto = convertToAssetDto(assetImage.getAssetId());
+			dtos.add(dto);
+		}
+		Long nextCursorId = hasNext ? assetImages.get(assetImages.size() - 1).getAssetId() : null;
+		return new CursorResult<>(dtos,nextCursorId,hasNext);
 	}
 
 	@Override
