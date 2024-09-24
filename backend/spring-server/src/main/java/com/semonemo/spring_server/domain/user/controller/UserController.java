@@ -4,6 +4,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -35,5 +37,13 @@ public class UserController implements UserApi {
 		Users user = userService.findById(userId);
 		UserInfoResponseDTO responseDTO = UserInfoResponseDTO.fromEntity(user);
 		return CommonResponse.success(responseDTO, "사용자 정보 조회에 성공했습니다.");
+	}
+
+	@Override
+	@PutMapping
+	public CommonResponse<Void> updateUser(@RequestBody UserUpdateRequestDTO requestDTO,
+		@AuthenticationPrincipal UserDetails userDetails) {
+		userService.updateUser(userDetails.getUsername(), requestDTO);
+		return CommonResponse.success("사용자 정보 수정에 성공했습니다.");
 	}
 }

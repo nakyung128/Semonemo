@@ -4,6 +4,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.PathVariable;
 
+import com.semonemo.spring_server.domain.user.dto.request.UserUpdateRequestDTO;
 import com.semonemo.spring_server.domain.user.dto.response.UserInfoResponseDTO;
 import com.semonemo.spring_server.global.common.CommonResponse;
 import com.semonemo.spring_server.global.exception.ErrorResponse;
@@ -43,4 +44,17 @@ public interface UserApi {
 			content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
 	})
 	CommonResponse<UserInfoResponseDTO> getUserInfo(@PathVariable long userId);
+
+	@Operation(summary = "사용자 정보 수정 API", description = "사용자의 정보를 수정하는 API")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "수정 성공"),
+		@ApiResponse(responseCode = "401", description = "수정 실패",
+			content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+		@ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없음",
+			content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+		@ApiResponse(responseCode = "500", description = "서버 내부 오류",
+			content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+	})
+	CommonResponse<Void> updateUser(@RequestBody UserUpdateRequestDTO requestDTO,
+		@AuthenticationPrincipal UserDetails userDetails);
 }

@@ -30,4 +30,9 @@ public class Users extends BaseTimeEntity {
 	private String password;
 	private String nickname;
 	private String profileImage;
+
+	public void modify(String nickname, String profileImage) {
+		this.nickname = nickname;
+		this.profileImage = profileImage;
+	}
 }
