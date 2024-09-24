@@ -2,6 +2,8 @@ package com.semonemo.spring_server.domain.asset.model;
 
 import java.time.LocalDateTime;
 
+import com.semonemo.spring_server.global.common.BaseTimeEntity;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -18,7 +20,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder(toBuilder = true)
 @Entity(name = "atags")
-public class Atags {
+public class Atags extends BaseTimeEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "atag_id")
@@ -26,12 +28,4 @@ public class Atags {
 
 	@Column(name = "name")
 	private String name;
-
-	@Column(name = "created_at")
-	private LocalDateTime createdAt;
-
-	@PrePersist
-	protected void onCreate() {
-		createdAt = LocalDateTime.now();
-	}
 }

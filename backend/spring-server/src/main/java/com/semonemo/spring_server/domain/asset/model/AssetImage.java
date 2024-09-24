@@ -2,6 +2,8 @@ package com.semonemo.spring_server.domain.asset.model;
 
 import java.time.LocalDateTime;
 
+import com.semonemo.spring_server.global.common.BaseTimeEntity;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -20,7 +22,7 @@ import lombok.ToString;
 @ToString
 @Builder(toBuilder = true)
 @Entity(name = "asset_image")
-public class AssetImage {
+public class AssetImage extends BaseTimeEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,11 +35,4 @@ public class AssetImage {
 	@Column(name = "image_url")
 	private String imageUrl;
 
-	@Column(name = "created_at")
-	private LocalDateTime createdAt;
-
-	@PrePersist
-	protected void onCreate() {
-		createdAt = LocalDateTime.now();
-	}
 }

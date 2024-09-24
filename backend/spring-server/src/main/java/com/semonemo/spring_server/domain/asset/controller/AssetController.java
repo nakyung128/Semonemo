@@ -34,7 +34,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/asset")
 @RequiredArgsConstructor
-public class AssetController {
+public class AssetController implements AssetApi {
 	@Autowired
 	private S3Service s3Service;
 	@Autowired
@@ -45,8 +45,7 @@ public class AssetController {
 	@PostMapping
 	public CommonResponse<?> upload(
 		@AuthenticationPrincipal UserDetails userDetails,
-		@RequestPart(value = "image", required = true) MultipartFile file)
-	{
+		@RequestPart(value = "image", required = true) MultipartFile file) {
 		try {
 			Users users = userService.findByAddress(userDetails.getUsername());
 			String fileUrl = s3Service.upload(file);
@@ -54,23 +53,38 @@ public class AssetController {
 			assetRequestDto.setCreator(users.getId());
 			assetRequestDto.setImageUrl(fileUrl);
 			assetService.saveImage(assetRequestDto);
-			return CommonResponse.success(assetRequestDto,"업로드 성공");
-		}
-		catch (Exception e) {
-			throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
+			return CommonResponse.success(assetRequestDto, "업로드 성공");
+		} catch (Exception e) {
+			throw new CustomException(ErrorCode.ASSET_UPLOAD_FAIL);
 		}
 	}
+
 	//에셋 상세 조히
-	@GetMapping("/detail/{assetId}")
-	public CommonResponse <AssetResponseDto>  getAssetDetail(@PathVariable Long assetId) {
-		AssetResponseDto asset = assetService.getAssetDetail(assetId);
-		return CommonResponse.success(asset,"에셋 상세조회 성공");
+	@GetMapping("/{assetId}/detail")
+	public CommonResponse<AssetResponseDto> getAssetDetail(
+		@AuthenticationPrincipal UserDetails userDetails,
+		@PathVariable Long assetId) {
+		try {
+		Users users = userService.findByAddress(userDetails.getUsername());
+		AssetResponseDto asset = assetService.getAssetDetail(users.getId(),assetId);
+		return CommonResponse.success(asset, "에셋 상세조회 성공");
+		} catch (Exception e) {
+			throw new CustomException(ErrorCode.ASSET_DETAIL_FAIL);
+		}
 	}
+
 	//판매 에셋 상세 조히
-	@GetMapping("/sell/detail/{assetSellId}")
-	public CommonResponse <AssetSellResponseDto>  getAssetSellDetail(@PathVariable Long assetSellId) {
-		AssetSellResponseDto asset = assetService.getAssetSellDetail(assetSellId);
-		return CommonResponse.success(asset,"에셋 상세조회 성공");
+	@GetMapping("/sell/{assetSellId}/detail")
+	public CommonResponse<AssetSellResponseDto> getAssetSellDetail(
+		@AuthenticationPrincipal UserDetails userDetails,
+		@PathVariable Long assetSellId) {
+		try{
+		Users users = userService.findByAddress(userDetails.getUsername());
+		AssetSellResponseDto asset = assetService.getAssetSellDetail(users.getId(), assetSellId);
+		return CommonResponse.success(asset, "에셋 상세조회 성공");
+		}catch (Exception e) {
+			throw new CustomException(ErrorCode.SELL_DETAIL_FAIL);
+		}
 	}
 
 	//판매중인 모든 에셋
@@ -78,16 +92,15 @@ public class AssetController {
 	public CommonResponse<CursorResult<AssetSellResponseDto>> getAllAsset(
 		@AuthenticationPrincipal UserDetails userDetails,
 		@RequestParam(required = false) Long cursorId,
-		@RequestParam(defaultValue = "2") int size
+		@RequestParam(defaultValue = "40") int size
 
-	){
+	) {
 		try {
 			Users users = userService.findByAddress(userDetails.getUsername());
-		CursorResult<AssetSellResponseDto> result = assetService.getAllAsset(users.getId(), cursorId, size);
-		return CommonResponse.success(result,"전체조회 성공");
-		}
-		catch (Exception e) {
-			throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
+			CursorResult<AssetSellResponseDto> result = assetService.getAllAsset(users.getId(), cursorId, size);
+			return CommonResponse.success(result, "전체조회 성공");
+		} catch (Exception e) {
+			throw new CustomException(ErrorCode.ASSET_LOAD_FAIL);
 		}
 	}
 
@@ -96,78 +109,70 @@ public class AssetController {
 	public CommonResponse<?> getMyAsset(
 		@AuthenticationPrincipal UserDetails userDetails,
 		@RequestParam(required = false) Long cursorId,
-		@RequestParam(defaultValue = "2") int size
-	){
+		@RequestParam(defaultValue = "40") int size
+	) {
 		try {
 			Users users = userService.findByAddress(userDetails.getUsername());
-			CursorResult<AssetResponseDto> result = assetService.getMyAsset(users.getId(),cursorId,size);
-			return CommonResponse.success(result,"보유한 에셋 가져오기 성공");
-		}
-		catch (Exception e){
-			throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
+			CursorResult<AssetResponseDto> result = assetService.getMyAsset(users.getId(), cursorId, size);
+			return CommonResponse.success(result, "보유한 에셋 가져오기 성공");
+		} catch (Exception e) {
+			throw new CustomException(ErrorCode.MINE_LOAD_FAIL);
 		}
 
 	}
+
 	@GetMapping("/creator")
 	public CommonResponse<?> getCreator(
 		@AuthenticationPrincipal UserDetails userDetails,
-		@RequestParam Long userId ,
+		@RequestParam Long userId,
 		@RequestParam(required = false) Long cursorId,
-		@RequestParam(defaultValue = "2") int size)
-	{
+		@RequestParam(defaultValue = "40") int size) {
 		try {
 			Users users = userService.findByAddress(userDetails.getUsername());
-			CursorResult<AssetResponseDto> result = assetService.getUserAsset(users.getId(),userId,cursorId,size);
-			return CommonResponse.success(result,"유저생성 에셋 불러오기 성공");
-		} catch (Exception e){
-			throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
+			CursorResult<AssetResponseDto> result = assetService.getUserAsset(users.getId(), userId, cursorId, size);
+			return CommonResponse.success(result, "유저생성 에셋 불러오기 성공");
+		} catch (Exception e) {
+			throw new CustomException(ErrorCode.USERS_LOAD_FAIL);
 		}
 	}
 
-	@PostMapping("/like/{assetSellId}")
+	@PostMapping("/{assetSellId}/like")
 	public CommonResponse<?> like(
 		@AuthenticationPrincipal UserDetails userDetails,
 		@PathVariable Long assetSellId
-	){
+	) {
 		try {
 			Users users = userService.findByAddress(userDetails.getUsername());
-			if(assetService.checkLike(users.getId(),assetSellId)){
-				System.out.println("이미 있어!");
+			if (assetService.checkLike(users.getId(), assetSellId)) {
 				throw new CustomException(ErrorCode.LIKE_Already_exist);
 			}
-			assetService.like(users.getId(),assetSellId);
+			assetService.like(users.getId(), assetSellId);
 			return CommonResponse.success("좋아요 성공");
-		}
-		catch (CustomException e){
-			throw  e;
-		}
-		catch (Exception e){
-			throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
+		} catch (CustomException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new CustomException(ErrorCode.LIKE_FAIL);
 		}
 	}
 
-	@DeleteMapping("/dislike/{assetSellId}")
+	@DeleteMapping("/{assetSellId}/like")
 	public CommonResponse<?> dislike(
 		@AuthenticationPrincipal UserDetails userDetails,
 		@PathVariable Long assetSellId
-	){
+	) {
 		try {
 			Users users = userService.findByAddress(userDetails.getUsername());
-			if(!assetService.checkLike(users.getId(),assetSellId)){
-				System.out.println("없어");
+			if (!assetService.checkLike(users.getId(), assetSellId)) {
 				throw new CustomException(ErrorCode.LIKE_NOT_FOUND_ERROR);
 			}
-			assetService.dislike(users.getId(),assetSellId);
+			assetService.dislike(users.getId(), assetSellId);
 
 			return CommonResponse.success("좋아요 취소 성공");
-		}
-		catch (CustomException e){
-			throw  e;
-		}
-		catch (Exception e){
-			throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
+		} catch (CustomException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new CustomException(ErrorCode.DISLIKE_FAIL);
 		}
 	}
-
 
 }

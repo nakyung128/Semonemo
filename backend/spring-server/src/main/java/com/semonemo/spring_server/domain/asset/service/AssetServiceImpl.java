@@ -22,6 +22,7 @@ import com.semonemo.spring_server.domain.user.repository.UserRepository;
 import com.semonemo.spring_server.domain.user.service.UserService;
 import com.semonemo.spring_server.global.common.CursorResult;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
@@ -68,7 +69,7 @@ public class AssetServiceImpl implements AssetService {
 		}
 
 		for (AssetSell assetSell : assetSells) {
-			AssetSellResponseDto dto = convertToDto(assetSell.getAssetSellId());
+			AssetSellResponseDto dto = convertToDto(nowId,assetSell.getAssetSellId());
 			dtos.add(dto);
 		}
 		Long nextCursorId = hasNext ? assetSells.get(assetSells.size() - 1).getAssetSellId() : null;
@@ -91,7 +92,7 @@ public class AssetServiceImpl implements AssetService {
 		}
 
 		for (AssetImage assetImage : assetImages) {
-			AssetResponseDto dto = convertToAssetDto(assetImage.getAssetId());
+			AssetResponseDto dto = convertToAssetDto(nowId,assetImage.getAssetId());
 			dtos.add(dto);
 		}
 		Long nextCursorId = hasNext ? assetImages.get(assetImages.size() - 1).getAssetId() : null;
@@ -101,11 +102,10 @@ public class AssetServiceImpl implements AssetService {
 	@Override
 	public CursorResult<AssetResponseDto> getUserAsset(Long nowid, Long userId, Long cursorId, int size) {
 		List<AssetImage> assetImages;
-		if(cursorId == null) {
-			assetImages = assetImageRepository.findByCreatorTopN(nowid,userId,size + 1);
-		}
-		else {
-			assetImages = assetImageRepository.findByCreatorIdNextN(nowid,userId, cursorId, size + 1);
+		if (cursorId == null) {
+			assetImages = assetImageRepository.findByCreatorTopN(nowid, userId, size + 1);
+		} else {
+			assetImages = assetImageRepository.findByCreatorIdNextN(nowid, userId, cursorId, size + 1);
 		}
 		List<AssetResponseDto> dtos = new ArrayList<>();
 		boolean hasNext = false;
@@ -114,80 +114,74 @@ public class AssetServiceImpl implements AssetService {
 			assetImages = assetImages.subList(0, size);
 		}
 		for (AssetImage assetImage : assetImages) {
-			AssetResponseDto dto = convertToAssetDto(assetImage.getAssetId());
+			AssetResponseDto dto = convertToAssetDto(nowid,assetImage.getAssetId());
 			dtos.add(dto);
 		}
 		Long nextCursorId = hasNext ? assetImages.get(assetImages.size() - 1).getAssetId() : null;
-		return new CursorResult<>(dtos,nextCursorId,hasNext);
+		return new CursorResult<>(dtos, nextCursorId, hasNext);
 	}
 
 	@Transactional
 	@Override
 	public void like(Long nowid, Long assetSellId) {
-		AssetLike like =  AssetLike.builder()
+		AssetLike like = AssetLike.builder()
 			.assetSellId(assetSellId)
 			.userId(nowid)
 			.build();
 		assetLikeRepository.save(like);
-		assetSellRepository.updateCount(1,assetSellId);
+		assetSellRepository.updateCount(1, assetSellId);
 
 	}
+
 	@Transactional
 	@Override
 	public void dislike(Long nowid, Long assetSellId) {
-		AssetLike like = assetLikeRepository.findByUserIdAndAssetSellId(nowid,assetSellId);
+		AssetLike like = assetLikeRepository.findByUserIdAndAssetSellId(nowid, assetSellId);
 		assetLikeRepository.delete(like);
-		AssetSell assetSell= assetSellRepository.findById(assetSellId)
+		AssetSell assetSell = assetSellRepository.findById(assetSellId)
 			.orElseThrow(() -> new RuntimeException("Asset Sell Not Found"));
-		if(assetSell.getLikeCount()>0){
-		assetSellRepository.updateCount(-1,assetSellId);
+		if (assetSell.getLikeCount() > 0) {
+			assetSellRepository.updateCount(-1, assetSellId);
 		}
 	}
 
 	@Transactional
 	@Override
-	public boolean checkLike(Long nowid,Long assetSellId ) {
+	public boolean checkLike(Long nowid, Long assetSellId) {
 		return assetLikeRepository.existsByUserIdAndAssetSellId(nowid, assetSellId);
 	}
 
 	@Override
-	public AssetResponseDto getAssetDetail(Long assetId) {
-		AssetImage assetImage = assetImageRepository.findById(assetId).
-			orElseThrow(() -> new IllegalArgumentException("Asset id not found"));
-		AssetResponseDto assetResponseDto = new AssetResponseDto(
-			assetImage.getAssetId(),
-			assetImage.getCreator(),
-			assetImage.getImageUrl()
-		);
-		return assetResponseDto;
+	public AssetResponseDto getAssetDetail(Long nowid,Long assetId) {
+		return convertToAssetDto(nowid,assetId);
 	}
-
 
 	@Override
-	public AssetSellResponseDto getAssetSellDetail(Long assetSellId) {
-		return convertToDto(assetSellId);
+	public AssetSellResponseDto getAssetSellDetail(Long nowid, Long assetSellId) {
+		return convertToDto(nowid,assetSellId);
 	}
 
-
-
-	private AssetResponseDto convertToAssetDto(Long assetId) {
+	private AssetResponseDto convertToAssetDto(Long nowid,Long assetId) {
 		AssetImage assetImage = assetImageRepository.findById(assetId)
 			.orElseThrow(() -> new IllegalArgumentException("Asset id not found"));
+		boolean isLiked = assetLikeRepository.existsByUserIdAndAssetSellId(nowid,assetId);
 		AssetResponseDto assetResponseDto = new AssetResponseDto(
 			assetImage.getAssetId(),
 			assetImage.getCreator(),
-			assetImage.getImageUrl()
+			assetImage.getImageUrl(),
+			isLiked
 		);
 		return assetResponseDto;
 	}
 
-	private AssetSellResponseDto convertToDto(Long assetSellId) {
+	private AssetSellResponseDto convertToDto(Long nowid, Long assetSellId) {
 		AssetSell assetSell = assetSellRepository.findById(assetSellId)
 			.orElseThrow(() -> new IllegalArgumentException("Asset id not found"));
 
 		AssetImage assetImage = assetImageRepository.findById(assetSell.getAssetId())
 			.orElseThrow(() -> new IllegalArgumentException("Asset id not found"));
 
+		boolean isLiked = assetLikeRepository.existsByUserIdAndAssetSellId(nowid,assetSellId);
 		Users user = userRepository.findById(assetImage.getCreator())
 			.orElseThrow(() -> new IllegalArgumentException("User id not found"));
 
@@ -201,7 +195,7 @@ public class AssetServiceImpl implements AssetService {
 			assetSell.getLikeCount(),
 			user.getNickname(),
 			assetSell.getPrice(),
-			false
+			isLiked
 		);
 		return dto;
 	}

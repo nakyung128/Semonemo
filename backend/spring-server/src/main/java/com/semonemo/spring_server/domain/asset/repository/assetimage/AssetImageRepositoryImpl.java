@@ -10,13 +10,13 @@ import com.semonemo.spring_server.domain.asset.model.QAssetPurchase;
 
 public class AssetImageRepositoryImpl implements AssetImageRepositoryCustom {
 	private final JPAQueryFactory queryFactory;
+
 	public AssetImageRepositoryImpl(JPAQueryFactory queryFactory) {
 		this.queryFactory = queryFactory;
 	}
 
 	QAssetImage assetImage = QAssetImage.assetImage;
 	QAssetPurchase assetPurchase = QAssetPurchase.assetPurchase;
-
 
 	@Override
 	public List<AssetImage> findByUserIdTopN(Long nowId, int size) {
@@ -54,7 +54,7 @@ public class AssetImageRepositoryImpl implements AssetImageRepositoryCustom {
 	}
 
 	@Override
-	public List<AssetImage> findByCreatorTopN(Long nowid,Long userid, int size) {
+	public List<AssetImage> findByCreatorTopN(Long nowid, Long userid, int size) {
 		return queryFactory
 			.selectFrom(assetImage)
 			.where(assetImage.creator.eq(userid))
@@ -64,12 +64,12 @@ public class AssetImageRepositoryImpl implements AssetImageRepositoryCustom {
 	}
 
 	@Override
-	public List<AssetImage> findByCreatorIdNextN(Long nowid,Long userid, Long cursorId, int size) {
+	public List<AssetImage> findByCreatorIdNextN(Long nowid, Long userid, Long cursorId, int size) {
 		return queryFactory
 			.selectFrom(assetImage)
 			.where(assetImage.assetId.lt(cursorId)
-					.and(assetImage.creator.eq(userid)))
-			.orderBy(assetImage.creator.desc())
+				.and(assetImage.creator.eq(userid)))
+			.orderBy(assetImage.assetId.desc())
 			.limit(size)
 			.fetch();
 	}

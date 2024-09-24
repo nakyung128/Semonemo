@@ -13,9 +13,9 @@ public interface AssetService {
 
 	CursorResult<AssetSellResponseDto> getAllAsset(Long nowid, Long cursorId, int size);
 
-	AssetResponseDto getAssetDetail(Long assetId);
+	AssetResponseDto getAssetDetail(Long nowid, Long assetId);
 
-	AssetSellResponseDto getAssetSellDetail(Long assetSellId);
+	AssetSellResponseDto getAssetSellDetail(Long nowid, Long assetSellId);
 
 	CursorResult<AssetResponseDto> getMyAsset(Long nowid, Long cursorId, int size);
 
@@ -25,5 +25,5 @@ public interface AssetService {
 
 	void dislike(Long nowid, Long assetSellId);
 
-	boolean checkLike(Long userId,Long assetSellId);
+	boolean checkLike(Long userId, Long assetSellId);
 }

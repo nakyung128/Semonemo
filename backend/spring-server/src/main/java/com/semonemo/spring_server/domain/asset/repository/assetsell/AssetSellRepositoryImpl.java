@@ -45,11 +45,10 @@ public class AssetSellRepositoryImpl implements AssetSellRepositoryCustom {
 
 	@Override
 	public void updateCount(int count, Long assetSellId) {
-		System.out.println(count+" "+assetSellId);
-		 queryFactory
+		queryFactory
 			.update(assetSell)
 			.where(assetSell.assetSellId.eq(assetSellId))
-			.set(assetSell.likeCount,assetSell.likeCount.add(count))
+			.set(assetSell.likeCount, assetSell.likeCount.add(count))
 			.execute();
 	}
 
