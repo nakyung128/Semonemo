@@ -72,6 +72,29 @@ public class AssetServiceImpl implements AssetService {
 	}
 
 	@Override
+	public CursorResult<AssetResponseDto> getMyAsset(Long nowId, Long cursorId, int size) {
+		List<AssetImage> assetImages;
+		if (cursorId == null) {
+			assetImages = assetImageRepository.findByUserIdTopN(nowId, size + 1);
+		} else {
+			assetImages = assetImageRepository.findByUserIdNextN(nowId, cursorId, size + 1);
+		}
+		List<AssetResponseDto> dtos = new ArrayList<>();
+		boolean hasNext = false;
+		if (assetImages.size() > size) {
+			hasNext = true;
+			assetImages = assetImages.subList(0, size);
+		}
+
+		for (AssetImage assetImage : assetImages) {
+			AssetResponseDto dto = convertToAssetDto(assetImage.getAssetId());
+			dtos.add(dto);
+		}
+		Long nextCursorId = hasNext ? assetImages.get(assetImages.size() - 1).getAssetId() : null;
+		return new CursorResult<>(dtos, nextCursorId, hasNext);
+	}
+
+	@Override
 	public AssetResponseDto getAssetDetail(Long assetId) {
 		AssetImage assetImage = assetImageRepository.findById(assetId).
 			orElseThrow(() -> new IllegalArgumentException("Asset id not found"));
@@ -83,15 +106,21 @@ public class AssetServiceImpl implements AssetService {
 		return assetResponseDto;
 	}
 
+
 	@Override
 	public AssetSellResponseDto getAssetSellDetail(Long assetSellId) {
 		return convertToDto(assetSellId);
 	}
 
-	@Override
-	public CursorResult<AssetImage> getMyAsset(Long nowid, Long cursorId, int size) {
-
-		return null;
+	private AssetResponseDto convertToAssetDto(Long assetId) {
+		AssetImage assetImage = assetImageRepository.findById(assetId)
+			.orElseThrow(() -> new IllegalArgumentException("Asset id not found"));
+		AssetResponseDto assetResponseDto = new AssetResponseDto(
+			assetImage.getAssetId(),
+			assetImage.getCreator(),
+			assetImage.getImageUrl()
+		);
+		return assetResponseDto;
 	}
 
 	private AssetSellResponseDto convertToDto(Long assetSellId) {

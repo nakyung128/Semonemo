@@ -101,7 +101,7 @@ public class AssetController {
 	){
 		try {
 			Users users = userService.findByAddress(userDetails.getUsername());
-			CursorResult<AssetImage> result = assetService.getMyAsset(users.getId(),cursorId,size);
+			CursorResult<AssetResponseDto> result = assetService.getMyAsset(users.getId(),cursorId,size);
 			return CommonResponse.success(result,"보유한 에셋 가져오기 성공");
 		}
 		catch (Exception e){

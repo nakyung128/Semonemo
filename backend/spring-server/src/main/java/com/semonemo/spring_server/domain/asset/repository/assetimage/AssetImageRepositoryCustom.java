@@ -6,7 +6,7 @@ import com.querydsl.jpa.JPAExpressions;
 import com.semonemo.spring_server.domain.asset.model.AssetImage;
 
 public interface AssetImageRepositoryCustom {
-	// public List<AssetImage> findByUserIdTopN(Long nowId, Long userId, int limit);
-	//
-	// public List<AssetImage> findByUserIdNextN(Long nowId, Long userId, Long cursorId, int limit);
+	public List<AssetImage> findByUserIdTopN(Long nowId, int size);
+
+	public List<AssetImage> findByUserIdNextN(Long nowId, Long cursorId, int size);
 }

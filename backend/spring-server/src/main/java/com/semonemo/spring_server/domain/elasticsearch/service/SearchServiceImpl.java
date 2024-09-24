@@ -7,6 +7,8 @@ import com.semonemo.spring_server.domain.elasticsearch.document.AssetSellDocumen
 import com.semonemo.spring_server.domain.elasticsearch.repository.AssetElasticsearchRepository;
 import com.semonemo.spring_server.global.common.CursorResult;
 
+import jakarta.annotation.PostConstruct;
+
 @Service
 public class SearchServiceImpl implements SearchService {
 	private AssetElasticsearchRepository assetElasticsearchRepository;
