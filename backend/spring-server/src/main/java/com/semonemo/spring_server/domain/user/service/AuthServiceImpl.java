@@ -1,5 +1,6 @@
 package com.semonemo.spring_server.domain.user.service;
 
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 import org.springframework.security.authentication.AuthenticationManager;
@@ -12,7 +13,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.semonemo.spring_server.domain.user.dto.request.UserRegisterRequestDTO;
 import com.semonemo.spring_server.domain.user.dto.response.UserLoginResponseDTO;
+import com.semonemo.spring_server.domain.user.entity.RefreshToken;
 import com.semonemo.spring_server.domain.user.entity.Users;
+import com.semonemo.spring_server.domain.user.repository.RefreshTokenRepository;
 import com.semonemo.spring_server.domain.user.repository.UserRepository;
 import com.semonemo.spring_server.global.common.JwtProvider;
 import com.semonemo.spring_server.global.exception.CustomException;
@@ -30,6 +33,7 @@ public class AuthServiceImpl implements AuthService {
 
 	private final JwtProvider jwtProvider;
 	private final UserRepository userRepository;
+	private final RefreshTokenRepository refreshTokenRepository;
 	private final PasswordEncoder passwordEncoder;
 	private final AuthenticationManager authenticationManager;
 
@@ -40,7 +44,7 @@ public class AuthServiceImpl implements AuthService {
 			throw new CustomException(ErrorCode.INVALID_USER_DATA_ERROR);
 		}
 
-		if(existsByAddress(requestDTO.getAddress())) {
+		if (existsByAddress(requestDTO.getAddress())) {
 			throw new CustomException(ErrorCode.EXISTS_ADDRESS_ERROR);
 		}
 
@@ -74,10 +78,26 @@ public class AuthServiceImpl implements AuthService {
 	}
 
 	@Override
+	@Transactional
 	public UserLoginResponseDTO generateUserToken(String address) {
 		String accessToken = TOKEN_PREFIX + jwtProvider.generateAccessToken(address);
 		String refreshToken = TOKEN_PREFIX + jwtProvider.generateRefreshToken(address);
+
+		saveRefreshToken(address, refreshToken);
+
 		return new UserLoginResponseDTO(accessToken, refreshToken);
+	}
+
+	@Override
+	@Transactional
+	public UserLoginResponseDTO regenerateToken(String refreshToken) {
+		String token = refreshToken.split(" ")[1].trim();
+		if(!jwtProvider.validateToken(token)) {
+			throw new CustomException(ErrorCode.INVALID_TOKEN_ERROR);
+		}
+
+		String address = jwtProvider.getAddress(token);
+		return generateUserToken(address);
 	}
 
 	private boolean isNicknameValid(String nickname) {
@@ -85,5 +105,26 @@ public class AuthServiceImpl implements AuthService {
 			return false;
 		}
 		return NICKNAME_PATTERN.matcher(nickname).matches();
+	}
+
+	@Transactional
+	protected void saveRefreshToken(String address, String refreshToken) {
+		Users user = userRepository.findByAddress(address)
+			.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND_ERROR));
+
+		Optional<RefreshToken> existingRefreshToken = refreshTokenRepository.findByUser(user);
+
+		if (existingRefreshToken.isPresent()) {
+			// 기존 토큰이 있다면 새 토큰으로 업데이트
+			RefreshToken tokenToUpdate = existingRefreshToken.get();
+			tokenToUpdate.modify(refreshToken);
+		} else {
+			// 기존 토큰이 없다면 새로 생성
+			RefreshToken newRefreshToken = RefreshToken.builder()
+				.refreshToken(refreshToken)
+				.user(user)
+				.build();
+			refreshTokenRepository.save(newRefreshToken);
+		}
 	}
 }

@@ -74,6 +74,11 @@ public class JwtProvider {
 		return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
 	}
 
+	public String getAddress(String token) {
+		Claims claims = getClaims(token);
+		return (String) claims.getSubject();
+	}
+
 	private Claims getClaims(String token) {
 		return Jwts.parser()
 			.verifyWith(secretKey)
