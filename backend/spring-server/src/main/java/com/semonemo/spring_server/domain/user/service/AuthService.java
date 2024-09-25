@@ -14,4 +14,6 @@ public interface AuthService {
 	void login(String address, String password);
 
 	UserLoginResponseDTO generateUserToken(String address);
+
+	UserLoginResponseDTO regenerateToken(String refreshToken);
 }

@@ -2,6 +2,8 @@ package com.semonemo.spring_server.domain.user.controller;
 
 import java.io.IOException;
 
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -69,4 +71,15 @@ public interface AuthApi {
 			content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
 	})
 	CommonResponse<Boolean> checkNicknameExistence(@RequestParam String nickname);
+
+	@Operation(summary = "JWT 토큰 재발급 API", description = "만료된 JWT 토큰 재발급을 위한 API")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "재발급 성공",
+			content = @Content(schema = @Schema(implementation = UserLoginResponseDTO.class))),
+		@ApiResponse(responseCode = "400", description = "재발급 실패",
+			content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+		@ApiResponse(responseCode = "500", description = "서버 내부 오류",
+			content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+	})
+	CommonResponse<UserLoginResponseDTO> regenerateJWTToken(@RequestParam String refreshToken);
 }
