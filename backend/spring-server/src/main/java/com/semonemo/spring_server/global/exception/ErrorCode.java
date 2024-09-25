@@ -26,6 +26,16 @@ public enum ErrorCode {
 	ALREADY_FOLLOW_ERROR("U003", "이미 팔로우한 사용자입니다.", HttpStatus.BAD_REQUEST),
 	NOT_FOLLOW_ERROR("U004", "팔로우 목록에 없는 사용자입니다.", HttpStatus.NOT_FOUND),
 	CHECK_SELF_FOLLOW_ERROR("U005", "자기 자신은 확인할 수 없습니다.", HttpStatus.BAD_REQUEST),
+
+	// NFT
+	NFT_NOT_FOUND_ERROR("N001", "NFT를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+
+	// NFT MARKET
+	NFT_MARKET_NOT_FOUND_ERROR("NM001", "NFT 판매 정보를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+
+	// 기타
+	NODE_SERVER_ERROR("E001", "Block Chain 서버 오류", HttpStatus.INTERNAL_SERVER_ERROR),
+	JSON_PARSING_ERROR("E002", "JSON PARSING 에러", HttpStatus.INTERNAL_SERVER_ERROR),
 	;
 
 	private final String code;

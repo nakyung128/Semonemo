@@ -3,22 +3,30 @@ server:
 
 springdoc:
   api-docs:
-    path: /api-docs
+    path: /api/api-docs
   swagger-ui:
-    path: /swagger-ui
+    path: /api/swagger-ui
     operations-sorter: alpha
     tags-sorter: alpha
 
 spring:
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/{Schema}?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
-    username: { username }
-    password: { password }
+    #    url: jdbc:mysql://43.201.33.160:3306/testdb?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    url: jdbc:mysql://localhost:3306/semonemo?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    username: root
+    password: root
   jpa:
     properties:
       hibernate.format_sql: true
       dialect: org.hibernate.dialect.MySQL8InnoDBDialect
+    hibernate:
+      ddl-auto: create
 cloud:
   aws:
     s3:
@@ -26,7 +34,10 @@ cloud:
     stack.auto: false
     region.static: us-east-1
     credentials:
-      accessKey: { accessKey }
-      secretKey: { secretKey }
+      accessKey: AKIA5ZEGUVDFO4VNKFUR
+      secretKey: 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
 
-
+jwt:
+  secret: MDwwDQYJKoZIhvcNAQEBBQADKwAwKAIhAI9Z5wvMwVe9S4PwNW+spFUuxqfOeThS9udoMC9F8z/zAgMBAAE=
+  access-token-expiration: 7200000 # 2h
+  refresh-token-expiration: 604800000 # 7d
