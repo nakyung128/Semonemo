@@ -36,6 +36,9 @@ public class AssetSellDocument {
 	@Field(type = FieldType.Long)
 	private Long likeCount;
 
+	@Field(type = FieldType.Long)
+	private Long purchaseCount;
+
 	@Field(type = FieldType.Nested)
 	private List<Tag> tags;
 

@@ -3,6 +3,8 @@ package com.semonemo.spring_server.domain.elasticsearch.repository;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
@@ -62,5 +64,52 @@ public class AssetElasticsearchRepositoryImpl implements AssetElasticsearchRepos
 		Long nextCursorId = hasNext ? results.get(results.size() - 1).getAssetSellId() : null;
 
 		return new CursorResult<>(results, nextCursorId, hasNext);
+	}
+
+
+	public Page<AssetSellDocument> keywordAndOrderby(String keyword, String orderBy, int page, int size) {
+		BoolQuery.Builder boolQueryBuilder = new BoolQuery.Builder()
+			.must(new NestedQuery.Builder()
+				.path("tags")
+				.query(new MatchQuery.Builder()
+					.field("tags.name.ngram")
+					.query(keyword)
+					.operator(Operator.And)
+					.build()._toQuery())
+				.build()._toQuery());
+
+		String option = "";
+		switch (orderBy) {
+			case "create":
+				option="created_at";
+				break;
+			case "price":
+				option="price";
+				break;
+			case "like":
+				option="likeCount";
+				break;
+			case "hit":
+				option="hits";
+				break;
+			case "purchase":
+				option="purchaseCount";
+				break;
+		}
+		String finalOption = option;
+		NativeQuery query = NativeQuery.builder()
+			.withQuery(boolQueryBuilder.build()._toQuery())
+			.withSort(sort -> sort.field(f -> f.field(finalOption).order(SortOrder.Desc)))
+			.withPageable(PageRequest.of(page, size))
+			.build();
+
+		SearchHits<AssetSellDocument> searchHits = elasticsearchOperations.search(query, AssetSellDocument.class);
+
+		List<AssetSellDocument> content = searchHits.getSearchHits().stream()
+			.map(SearchHit::getContent)
+			.collect(Collectors.toList());
+
+		long totalHits = searchHits.getTotalHits();
+		return new PageImpl<>(content, PageRequest.of(page, size), totalHits);
 	}
 }

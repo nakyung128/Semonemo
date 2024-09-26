@@ -1,7 +1,10 @@
 package com.semonemo.spring_server.domain.elasticsearch.service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.stereotype.Service;
 
@@ -23,10 +26,10 @@ public class SearchServiceImpl implements SearchService {
 	private  final ElasticsearchSyncService syncService;
 
 
-	// @PostConstruct
-	// public void initializeElasticsearch() {
-	// 	syncService.syncAllData();
-	// }
+	@PostConstruct
+	public void initializeElasticsearch() {
+		syncService.syncAllData();
+	}
 	@Override
 	public CursorResult<AssetSearchResponseDto> searchAsset(Long nowid, String keyword, Long cursorId, int size) {
 		CursorResult<AssetSellDocument> assetSellDocument = assetElasticsearchRepository.findByTagKeyword(keyword, cursorId, size);
@@ -35,6 +38,18 @@ public class SearchServiceImpl implements SearchService {
 			.toList();
 		return new CursorResult<>(dtos,assetSellDocument.getNextCursor(),assetSellDocument.isHasNext());
 	}
+
+	@Override
+	public Page<AssetSearchResponseDto> findOrderBy(Long nowid, String orderBy, String keyword, int page, int size) {
+		Page<AssetSellDocument> assetSellDocuments = assetElasticsearchRepository.keywordAndOrderby( keyword, orderBy, page, size);
+
+		List<AssetSearchResponseDto> assetSellDtos = assetSellDocuments.getContent().stream()
+			.map(document -> convertToDto(nowid, document))
+			.toList();
+
+		return new PageImpl<>(assetSellDtos, assetSellDocuments.getPageable(), assetSellDocuments.getTotalElements());
+	}
+
 	private AssetSearchResponseDto convertToDto (Long nowid,AssetSellDocument document){
 		boolean isLiked = assetLikeRepository.existsByUserIdAndAssetSellId(nowid, document.getAssetSellId());
 
@@ -48,7 +63,8 @@ public class SearchServiceImpl implements SearchService {
 			document.getCreatedAt(),
 			document.getLikeCount(),
 			document.getTags(),
-			isLiked
+			isLiked,
+			document.getPurchaseCount()
 		);
 		return dto;
 	}
@@ -60,4 +76,6 @@ public class SearchServiceImpl implements SearchService {
 			.orElse(null);
 		return assetImageDocument;
 	}
+
+
 }

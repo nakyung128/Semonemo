@@ -72,6 +72,7 @@ public class ElasticsearchSyncService {
         document.setHits(assetSell.getHits());
         document.setCreatedAt(assetSell.getCreatedAt());
         document.setLikeCount(assetSell.getLikeCount());
+        document.setPurchaseCount(assetSell.getPurchaseCount());
 
         List<AssetSellDocument.Tag> documentTags = tags.stream()
             .map(tag -> {

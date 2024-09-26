@@ -1,5 +1,6 @@
 package com.semonemo.spring_server.domain.elasticsearch.controller;
 
+import org.springframework.data.domain.Page;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -35,6 +36,20 @@ public class ElasticsearchController {
 
 		return CommonResponse.success(result, "에셋 키워드 검색 성공");
 	}
+
+	@GetMapping("/asset/sort")
+	public CommonResponse<?> orderBy(
+		@AuthenticationPrincipal UserDetails userDetails,
+		@RequestParam(required = false) String keyword,
+		@RequestParam	String orderBy,
+		@RequestParam(defaultValue = "0") int page ,
+		@RequestParam(defaultValue = "10") int size) {
+		Users users = userService.findByAddress(userDetails.getUsername());
+		Page<AssetSearchResponseDto> result =searchService.findOrderBy(users.getId(), orderBy, keyword,page,size);
+
+		return CommonResponse.success(result, "에셋 키워드 검색 성공");
+	}
+
 	@GetMapping("/all")
 	public AssetSellDocument findById(@RequestParam(required = false) Long id) {
 		return searchService.getAsset(id);
