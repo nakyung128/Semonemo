@@ -1,11 +1,12 @@
 package com.semonemo.spring_server.domain.elasticsearch.service;
 
+import com.semonemo.spring_server.domain.elasticsearch.dto.AssetSearchResponseDto;
 import com.semonemo.spring_server.domain.elasticsearch.document.AssetSellDocument;
 import com.semonemo.spring_server.global.common.CursorResult;
 
 public interface SearchService {
 
-	public CursorResult<AssetSellDocument> searchAsset(Long nowid,String keyword, Long page, int size);
+	CursorResult<AssetSearchResponseDto> searchAsset(Long nowid, String keyword, Long page, int size);
 
-	public AssetSellDocument getAsset(Long id);
+	AssetSellDocument getAsset(Long id);
 }

@@ -1,35 +1,58 @@
 package com.semonemo.spring_server.domain.elasticsearch.service;
 
+import java.util.List;
+
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.stereotype.Service;
 
+import com.semonemo.spring_server.domain.asset.repository.like.AssetLikeRepository;
+import com.semonemo.spring_server.domain.elasticsearch.dto.AssetSearchResponseDto;
 import com.semonemo.spring_server.domain.elasticsearch.document.AssetSellDocument;
 import com.semonemo.spring_server.domain.elasticsearch.repository.AssetElasticsearchRepository;
 import com.semonemo.spring_server.global.common.CursorResult;
 
 import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
 
+@RequiredArgsConstructor
 @Service
 public class SearchServiceImpl implements SearchService {
-	private AssetElasticsearchRepository assetElasticsearchRepository;
+	private final AssetElasticsearchRepository assetElasticsearchRepository;
+	private final AssetLikeRepository assetLikeRepository;
 	private final ElasticsearchOperations elasticsearchOperations;
-	private ElasticsearchSyncService syncService;
+	private  final ElasticsearchSyncService syncService;
 
-	public SearchServiceImpl(AssetElasticsearchRepository assetElasticsearchRepository, ElasticsearchOperations elasticsearchOperations, ElasticsearchSyncService syncService) {
-		this.assetElasticsearchRepository = assetElasticsearchRepository;
-        this.elasticsearchOperations = elasticsearchOperations;
-		this.syncService = syncService;
+
+	@PostConstruct
+	public void initializeElasticsearch() {
+		syncService.syncAllData();
 	}
-
-
-	// @PostConstruct
-	// public void initializeElasticsearch() {
-	// 	syncService.syncAllData();
-	// }
 	@Override
-	public CursorResult<AssetSellDocument> searchAsset(Long nowid, String keyword, Long cursorId, int size) {
-		return assetElasticsearchRepository.findByTagKeyword(keyword, cursorId, size);
+	public CursorResult<AssetSearchResponseDto> searchAsset(Long nowid, String keyword, Long cursorId, int size) {
+		CursorResult<AssetSellDocument> assetSellDocument = assetElasticsearchRepository.findByTagKeyword(keyword, cursorId, size);
+		List<AssetSearchResponseDto> dtos = assetSellDocument.getContent().stream()
+			.map(document -> convertToDto(nowid, document))
+			.toList();
+		return new CursorResult<>(dtos,assetSellDocument.getNextCursor(),assetSellDocument.isHasNext());
 	}
+	private AssetSearchResponseDto convertToDto (Long nowid,AssetSellDocument document){
+		boolean isLiked = assetLikeRepository.existsByUserIdAndAssetSellId(nowid, document.getAssetSellId());
+
+		AssetSearchResponseDto dto = new AssetSearchResponseDto(
+			document.getAssetSellId(),
+			document.getAssetId(),
+			document.getCreator(),
+			document.getImageUrls(),
+			document.getPrice(),
+			document.getHits(),
+			document.getCreatedAt(),
+			document.getLikeCount(),
+			document.getTags(),
+			isLiked
+		);
+		return dto;
+	}
+
 
 	@Override
 	public AssetSellDocument getAsset(Long id) {
@@ -37,23 +60,4 @@ public class SearchServiceImpl implements SearchService {
 			.orElse(null);
 		return assetImageDocument;
 	}
-
-	//	@Override
-//	public Page<AssetImageDocument> searchAsset(String keyword, int page, int size) {
-//		Pageable pageable = PageRequest.of(page, size);
-//		return assetElasticsearchRepository.findByTag(keyword, pageable);
-//	}
-// @Override
-// public Page<AssetImageDocument> searchAsset(String keyword, int page, int size) {
-// 	Pageable pageable = PageRequest.of(page, size);
-//
-// 	if (keyword != null && !keyword.isEmpty()) {
-// 		return assetElasticsearchRepository.findByTag(keyword, pageable);
-// 	} else {
-// 		Query query = new CriteriaQuery(new Criteria());
-// 		query.setPageable(pageable);
-// 		SearchHits<AssetImageDocument> searchHits = elasticsearchOperations.search(query, AssetImageDocument.class);
-// 		return assetElasticsearchRepository.findAll(pageable);
-// 	}
-// }
 }

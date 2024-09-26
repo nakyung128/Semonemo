@@ -50,14 +50,10 @@ public class AssetElasticsearchRepositoryImpl implements AssetElasticsearchRepos
 				.build();
 
 		SearchHits<AssetSellDocument> searchHits = elasticsearchOperations.search(query, AssetSellDocument.class);
-//		System.out.println("Total hits: " + searchHits.getTotalHits());
-//		System.out.println("Query: " + query.getQuery().toString());
 
 		List<AssetSellDocument> results = searchHits.getSearchHits().stream()
 				.map(SearchHit::getContent)
 				.collect(Collectors.toList());
-//		System.out.println("Results size: " + results.size());
-// 		results.forEach(doc -> System.out.println("AssetSellId: " + doc.getAssetSellId()));
 		boolean hasNext = results.size() > size;
 		if (hasNext) {
 			results = results.subList(0, size);

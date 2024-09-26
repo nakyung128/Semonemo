@@ -18,31 +18,25 @@ import com.semonemo.spring_server.domain.asset.repository.atags.ATagsRepository;
 import com.semonemo.spring_server.domain.elasticsearch.document.AssetSellDocument;
 import com.semonemo.spring_server.domain.elasticsearch.repository.AssetElasticsearchRepository;
 
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor
 @Service
 public class ElasticsearchSyncService {
 
-    @Autowired
-    private AssetImageRepository assetImageRepository;
+    private final AssetImageRepository assetImageRepository;
+    private final AssetSellRepository assetSellRepository;
+    private final AssetTagRepository assetTagRepository;
+    private final ATagsRepository atagsRepository;
+    private final AssetElasticsearchRepository assetElasticsearchRepository;
+    private final ElasticsearchIndexChecker indexChecker;
 
-    @Autowired
-    private AssetSellRepository assetSellRepository;
-
-    @Autowired
-    private AssetTagRepository assetTagRepository;
-
-    @Autowired
-    private ATagsRepository atagsRepository;
-
-    @Autowired
-    private AssetElasticsearchRepository assetElasticsearchRepository;
-
-    @Autowired
-    private ElasticsearchIndexChecker indexChecker;
     public void syncAllData() {
-        List<AssetImage> allAssetImages = assetImageRepository.findAll();
-        List<AssetSellDocument> documents = allAssetImages.stream()
-            .map(assetImage -> {
-                AssetSell assetSell= assetSellRepository.findByAssetId(assetImage.getAssetId());
+        List<AssetSell> allAssetSells = assetSellRepository.findAll();
+        List<AssetSellDocument> documents = allAssetSells.stream()
+            .map(assetSell -> {
+                AssetImage assetImage= assetImageRepository.findById(assetSell.getAssetId())
+                    .orElseThrow(() -> new IllegalArgumentException("Asset Image not found"));
                 List<AssetTag> assetTags = assetTagRepository.findByAssetSellId(assetSell.getAssetSellId());
                 List<Atags> tags = assetTags.stream()
                     .map(tag -> atagsRepository.findById(tag.getAtagId()).orElse(null))

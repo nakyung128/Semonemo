@@ -35,12 +35,9 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/asset")
 @RequiredArgsConstructor
 public class AssetController implements AssetApi {
-	@Autowired
-	private S3Service s3Service;
-	@Autowired
-	private AssetService assetService;
-	@Autowired
-	private UserService userService;
+	private final S3Service s3Service;
+	private final AssetService assetService;
+	private final UserService userService;
 
 	@PostMapping
 	public CommonResponse<?> upload(
