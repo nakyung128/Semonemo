@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.semonemo.spring_server.domain.asset.dto.AssetDetailResponseDto;
 import com.semonemo.spring_server.domain.asset.dto.AssetRequestDto;
 import com.semonemo.spring_server.domain.asset.dto.AssetResponseDto;
 import com.semonemo.spring_server.domain.asset.dto.AssetSellResponseDto;
@@ -54,7 +55,7 @@ public interface AssetApi {
 		@ApiResponse(responseCode = "404", description = "에셋을 찾을 수 없음",
 			content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 	})
-	CommonResponse<AssetSellResponseDto> getAssetSellDetail(
+	CommonResponse<AssetDetailResponseDto> getAssetSellDetail(
 		@AuthenticationPrincipal UserDetails userDetails,
 		@PathVariable Long assetSellId);
 
@@ -67,6 +68,7 @@ public interface AssetApi {
 	})
 	CommonResponse<CursorResult<AssetSellResponseDto>> getAllAsset(
 		@AuthenticationPrincipal UserDetails userDetails,
+		@RequestParam(defaultValue = "created") String orderBy,
 		@RequestParam(required = false) Long cursorId,
 		@RequestParam(defaultValue = "40") int size
 	);

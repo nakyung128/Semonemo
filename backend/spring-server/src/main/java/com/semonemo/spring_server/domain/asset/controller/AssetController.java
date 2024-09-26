@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.semonemo.spring_server.config.s3.S3Service;
+import com.semonemo.spring_server.domain.asset.dto.AssetDetailResponseDto;
 import com.semonemo.spring_server.domain.asset.dto.AssetRequestDto;
 import com.semonemo.spring_server.domain.asset.dto.AssetResponseDto;
 import com.semonemo.spring_server.domain.asset.dto.AssetSellResponseDto;
@@ -72,12 +73,12 @@ public class AssetController implements AssetApi {
 
 	//판매 에셋 상세 조히
 	@GetMapping("/sell/{assetSellId}/detail")
-	public CommonResponse<AssetSellResponseDto> getAssetSellDetail(
+	public CommonResponse<AssetDetailResponseDto> getAssetSellDetail(
 		@AuthenticationPrincipal UserDetails userDetails,
 		@PathVariable Long assetSellId) {
 		try{
 		Users users = userService.findByAddress(userDetails.getUsername());
-		AssetSellResponseDto asset = assetService.getAssetSellDetail(users.getId(), assetSellId);
+			AssetDetailResponseDto asset = assetService.getAssetSellDetail(users.getId(), assetSellId);
 		return CommonResponse.success(asset, "에셋 상세조회 성공");
 		}catch (Exception e) {
 			throw new CustomException(ErrorCode.SELL_DETAIL_FAIL);
@@ -88,13 +89,14 @@ public class AssetController implements AssetApi {
 	@GetMapping
 	public CommonResponse<CursorResult<AssetSellResponseDto>> getAllAsset(
 		@AuthenticationPrincipal UserDetails userDetails,
+		@RequestParam(defaultValue = "create") String orderBy,
 		@RequestParam(required = false) Long cursorId,
 		@RequestParam(defaultValue = "40") int size
 
 	) {
 		try {
 			Users users = userService.findByAddress(userDetails.getUsername());
-			CursorResult<AssetSellResponseDto> result = assetService.getAllAsset(users.getId(), cursorId, size);
+			CursorResult<AssetSellResponseDto> result = assetService.getAllAsset(users.getId(),orderBy, cursorId, size);
 			return CommonResponse.success(result, "전체조회 성공");
 		} catch (Exception e) {
 			throw new CustomException(ErrorCode.ASSET_LOAD_FAIL);

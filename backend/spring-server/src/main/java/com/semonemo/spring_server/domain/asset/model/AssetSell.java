@@ -39,9 +39,13 @@ public class AssetSell extends BaseTimeEntity {
 	@Column(name = "like_count")
 	private Long likeCount;
 
+	@Column(name = "purchase_count")
+	private Long purchaseCount;
+
 	@PrePersist
 	protected void onCreate() {
 		hits = 0L;
 		likeCount = 0L;
+		purchaseCount = 0L;
 	}
 }

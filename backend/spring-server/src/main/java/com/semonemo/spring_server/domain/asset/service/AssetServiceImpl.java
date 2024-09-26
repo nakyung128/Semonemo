@@ -2,18 +2,23 @@ package com.semonemo.spring_server.domain.asset.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import com.semonemo.spring_server.domain.asset.dto.AssetDetailResponseDto;
 import com.semonemo.spring_server.domain.asset.dto.AssetRequestDto;
 import com.semonemo.spring_server.domain.asset.dto.AssetResponseDto;
 import com.semonemo.spring_server.domain.asset.dto.AssetSellResponseDto;
 import com.semonemo.spring_server.domain.asset.model.AssetImage;
 import com.semonemo.spring_server.domain.asset.model.AssetLike;
 import com.semonemo.spring_server.domain.asset.model.AssetSell;
+import com.semonemo.spring_server.domain.asset.model.Atags;
 import com.semonemo.spring_server.domain.asset.repository.assetimage.AssetImageRepository;
 import com.semonemo.spring_server.domain.asset.repository.assetsell.AssetSellRepository;
+import com.semonemo.spring_server.domain.asset.repository.assettag.AssetTagRepository;
+import com.semonemo.spring_server.domain.asset.repository.atags.ATagsRepository;
 import com.semonemo.spring_server.domain.asset.repository.like.AssetLikeRepository;
 import com.semonemo.spring_server.domain.elasticsearch.service.ElasticsearchIndexChecker;
 import com.semonemo.spring_server.domain.elasticsearch.service.ElasticsearchSyncService;
@@ -33,6 +38,8 @@ public class AssetServiceImpl implements AssetService {
 	private final AssetImageRepository assetImageRepository;
 	private final AssetSellRepository assetSellRepository;
 	private final AssetLikeRepository assetLikeRepository;
+	private final AssetTagRepository assetTagRepository;
+	private final ATagsRepository aTagsRepository;
 	private final UserRepository userRepository;
 	private final ElasticsearchSyncService syncService;
 	private final ElasticsearchIndexChecker indexChecker;
@@ -49,17 +56,17 @@ public class AssetServiceImpl implements AssetService {
 			.imageUrl(assetRequestDto.getImageUrl())
 			.build();
 		assetImageRepository.save(assetImage);
-		// syncService.syncSingleAsset(assetImage.getAssetId());
+		syncService.syncSingleAsset(assetImage.getId());
 	}
 
 	@Transactional
 	@Override
-	public CursorResult<AssetSellResponseDto> getAllAsset(Long nowId, Long cursorId, int size) {
+	public CursorResult<AssetSellResponseDto> getAllAsset(Long nowId,String orderBy, Long cursorId, int size) {
 		List<AssetSell> assetSells;
 		if (cursorId == null) {
-			assetSells = assetSellRepository.findTopN(nowId, size + 1);
+			assetSells = assetSellRepository.findTopN(nowId,orderBy, size + 1);
 		} else {
-			assetSells = assetSellRepository.findNextN(nowId, cursorId, size + 1);
+			assetSells = assetSellRepository.findNextN(nowId,orderBy, cursorId, size + 1);
 		}
 		List<AssetSellResponseDto> dtos = new ArrayList<>();
 		boolean hasNext = false;
@@ -156,10 +163,47 @@ public class AssetServiceImpl implements AssetService {
 		return convertToAssetDto(nowid,assetId);
 	}
 
+	@Transactional
 	@Override
-	public AssetSellResponseDto getAssetSellDetail(Long nowid, Long assetSellId) {
-		return convertToDto(nowid,assetSellId);
+	public AssetDetailResponseDto getAssetSellDetail(Long nowid, Long assetSellId) {
+		assetSellRepository.plusHits(assetSellId);
+		return convertToDetailDto(nowid,assetSellId);
 	}
+
+	private AssetDetailResponseDto convertToDetailDto(Long nowid, Long assetSellId) {
+		AssetSell assetSell = assetSellRepository.findById(assetSellId)
+			.orElseThrow(() -> new IllegalArgumentException("Asset id not found"));
+
+		AssetImage assetImage = assetImageRepository.findById(assetSell.getAssetId())
+			.orElseThrow(() -> new IllegalArgumentException("Asset id not found"));
+
+		boolean isLiked = assetLikeRepository.existsByUserIdAndAssetSellId(nowid,assetSellId);
+		Users user = userRepository.findById(assetImage.getCreator())
+			.orElseThrow(() -> new IllegalArgumentException("User id not found"));
+		// List<Long> tagId= assetTagRepository.findAllByAssetSellId(assetSellId);
+		// List<Atags> atags = new ArrayList<>();  // null이 아닌 빈 리스트로 초기화
+		// for (Long id : tagId) {
+		// 	aTagsRepository.findById(id).ifPresent(atags::add); // Optional을 사용하여 null 체크 후 추가
+		// }
+		List <String> tags=assetTagRepository.findTagsByAssetSellId(assetSellId);
+		AssetDetailResponseDto dto = new AssetDetailResponseDto(
+			assetSell.getAssetId(),
+			assetSell.getId(),
+			assetImage.getCreator(),
+			assetImage.getImageUrl(),
+			assetImage.getCreatedAt(),
+			assetSell.getHits(),
+			assetSell.getLikeCount(),
+			user.getNickname(),
+			assetSell.getPrice(),
+			isLiked,
+			tags
+
+		);
+
+		return dto;
+	}
+
 
 	private AssetResponseDto convertToAssetDto(Long nowid,Long assetId) {
 		AssetImage assetImage = assetImageRepository.findById(assetId)

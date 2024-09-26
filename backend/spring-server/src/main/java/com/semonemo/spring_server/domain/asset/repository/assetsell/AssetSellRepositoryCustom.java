@@ -5,11 +5,14 @@ import java.util.List;
 import com.semonemo.spring_server.domain.asset.model.AssetSell;
 
 public interface AssetSellRepositoryCustom {
-	List<AssetSell> findTopN(Long nowId, int i);
+	List<AssetSell> findTopN(Long nowId,String orderBy, int size);
 
-	List<AssetSell> findNextN(Long nowId, Long cursorId, int i);
+	List<AssetSell> findNextN(Long nowId,String orderBy, Long cursorId, int size);
 
 	AssetSell findByAssetId(Long assetId);
 
 	void updateCount(int count, Long assetSellId);
+
+	void plusHits(Long assetSellId);
+
 }
