@@ -36,11 +36,15 @@ public class NFTMarket extends BaseTimeEntity {
     private Long price;
 
     @Column(name = "like_count")
-    private Long likeCount;
+    private int likeCount;
 
     @Column(name = "is_sold")
     private Boolean isSold;
 
     @OneToMany(mappedBy = "marketId")
     private Set<NFTMarketLike> likedMarkets;
+
+    public void updateLikeCount(int count) {
+        this.likeCount += count;
+    }
 }

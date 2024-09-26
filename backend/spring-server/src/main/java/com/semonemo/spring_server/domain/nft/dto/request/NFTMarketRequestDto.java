@@ -9,6 +9,7 @@ import lombok.ToString;
 @Setter
 @NoArgsConstructor
 @ToString
-public class NFTRequestDto {
-    private Long tokenId;
+public class NFTMarketRequestDto {
+    private Long nftId;
+    private Long price;
 }

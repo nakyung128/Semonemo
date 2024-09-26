@@ -1,7 +1,11 @@
 package com.semonemo.spring_server.domain.nft.repository.nftmarket;
 
-public interface NFTMarketRepositoryCustom {
-    void updateCount(int count, Long marketId);
+import com.semonemo.spring_server.domain.nft.entity.NFTMarket;
 
-    boolean existsByUserIdAndMarketId(Long userId, Long nftId);
+import java.util.List;
+
+public interface NFTMarketRepositoryCustom {
+    List<NFTMarket> findSellingTopN(int size);
+
+    List<NFTMarket> findSellingNextN(Long cursorId, int size);
 }

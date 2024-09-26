@@ -24,4 +24,13 @@ public class NFTMarketLikeRepositoryImpl implements NFTMarketLikeRepositoryCusto
                 .and(nftMarketLike.marketId.marketId.eq(marketId)))
             .fetchOne();
     }
+
+    @Override
+    public boolean existsByUserIdAndMarketId(Long userId, Long marketId) {
+        return queryFactory
+            .selectFrom(nftMarketLike)
+            .where(nftMarketLike.likedUserId.id.eq(userId)
+                .and(nftMarketLike.marketId.marketId.eq(marketId)))
+            .fetchOne() != null;
+    }
 }

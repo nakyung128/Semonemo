@@ -33,11 +33,18 @@ public class NFTs extends BaseTimeEntity {
     private Users owner;
 
     @Column(name = "token_id", unique = true)
-    private String tokenId;
+    private Long tokenId;
 
     @Column(name = "is_open")
     private Boolean isOpen;
 
+    @Column(name = "is_on_sale")
+    private Boolean isOnSale;
+
     @OneToMany(mappedBy = "nftId")
     private Set<NFTMarket> createdNFTMarkets;
+
+    public void toggleOnSale(boolean onSale) {
+        this.isOnSale = onSale;
+    }
 }

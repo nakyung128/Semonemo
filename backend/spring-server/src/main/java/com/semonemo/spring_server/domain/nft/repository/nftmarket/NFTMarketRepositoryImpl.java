@@ -16,22 +16,25 @@ public class NFTMarketRepositoryImpl implements NFTMarketRepositoryCustom {
     QNFTMarket nftMarket = QNFTMarket.nFTMarket;
 
     @Override
-    public void updateCount(int count, Long marketId) {
-        queryFactory
-            .update(nftMarket)
-            .where(nftMarket.marketId.eq(marketId))
-            .set(nftMarket.likeCount, nftMarket.likeCount.add(count))
-            .execute();
+    public List<NFTMarket> findSellingTopN(int size) {
+        return queryFactory
+            .selectFrom(nftMarket)
+            .where(nftMarket.isSold.isFalse())
+            .orderBy(nftMarket.marketId.desc())
+            .limit(size)
+            .fetch();
     }
 
     @Override
-    public boolean existsByUserIdAndMarketId(Long userId, Long nftId) {
-        NFTMarket fetchOne = queryFactory
+    public List<NFTMarket> findSellingNextN(Long cursorId, int size) {
+        return queryFactory
             .selectFrom(nftMarket)
-            .where(nftMarket.nftId.nftId.eq(nftId)
-                .and(nftMarket.seller.id.eq(userId))
-                .and(nftMarket.isSold.isTrue()))
-            .fetchFirst();
-        return fetchOne != null;
+            .where(
+                nftMarket.marketId.lt(cursorId)
+                .and(nftMarket.isSold.isFalse())
+            )
+            .orderBy(nftMarket.marketId.desc())
+            .limit(size)
+            .fetch();
     }
 }
