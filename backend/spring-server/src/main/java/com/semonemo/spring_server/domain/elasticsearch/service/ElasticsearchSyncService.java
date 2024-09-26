@@ -37,7 +37,7 @@ public class ElasticsearchSyncService {
             .map(assetSell -> {
                 AssetImage assetImage= assetImageRepository.findById(assetSell.getAssetId())
                     .orElseThrow(() -> new IllegalArgumentException("Asset Image not found"));
-                List<AssetTag> assetTags = assetTagRepository.findByAssetSellId(assetSell.getAssetSellId());
+                List<AssetTag> assetTags = assetTagRepository.findByAssetSellId(assetSell.getId());
                 List<Atags> tags = assetTags.stream()
                     .map(tag -> atagsRepository.findById(tag.getAtagId()).orElse(null))
                     .filter(Objects::nonNull)
@@ -53,7 +53,7 @@ public class ElasticsearchSyncService {
         AssetImage assetImage = assetImageRepository.findById(assetId)
             .orElseThrow(() -> new RuntimeException("Asset not found"));
         AssetSell assetSell = assetSellRepository.findByAssetId(assetId);
-        List<AssetTag> assetTags = assetTagRepository.findByAssetSellId(assetSell.getAssetSellId());
+        List<AssetTag> assetTags = assetTagRepository.findByAssetSellId(assetSell.getId());
         List<Atags> tags = assetTags.stream()
             .map(tag -> atagsRepository.findById(tag.getAtagId()).orElse(null))
             .filter(Objects::nonNull)
@@ -64,10 +64,10 @@ public class ElasticsearchSyncService {
     private AssetSellDocument convertToDocument(AssetImage assetImage, AssetSell assetSell, List<Atags> tags) {
         AssetSellDocument document = new AssetSellDocument();
 
-        document.setAssetSellId(assetSell.getAssetSellId());
+        document.setAssetSellId(assetSell.getId());
         document.setCreator(assetImage.getCreator());
         document.setImageUrls(assetImage.getImageUrl());
-        document.setAssetId(assetImage.getAssetId());
+        document.setAssetId(assetImage.getId());
         document.setPrice(assetSell.getPrice());
         document.setHits(assetSell.getHits());
         document.setCreatedAt(assetSell.getCreatedAt());
@@ -76,7 +76,7 @@ public class ElasticsearchSyncService {
         List<AssetSellDocument.Tag> documentTags = tags.stream()
             .map(tag -> {
                 AssetSellDocument.Tag documentTag = new AssetSellDocument.Tag();
-                documentTag.setAtagId(tag.getAtagId());
+                documentTag.setAtagId(tag.getId());
                 documentTag.setName(tag.getName());
                 return documentTag;
             })

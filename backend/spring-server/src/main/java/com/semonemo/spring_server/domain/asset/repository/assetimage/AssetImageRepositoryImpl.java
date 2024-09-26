@@ -22,13 +22,13 @@ public class AssetImageRepositoryImpl implements AssetImageRepositoryCustom {
 	public List<AssetImage> findByUserIdTopN(Long nowId, int size) {
 		return queryFactory
 			.selectFrom(assetImage)
-			.where(assetImage.assetId.in(
+			.where(assetImage.Id.in(
 				JPAExpressions
 					.select(assetPurchase.assetId)
 					.from(assetPurchase)
 					.where(assetPurchase.userId.eq(nowId))
 			).or(assetImage.creator.eq(nowId)))
-			.orderBy(assetImage.assetId.desc())
+			.orderBy(assetImage.Id.desc())
 			.limit(size)
 			.fetch();
 	}
@@ -38,9 +38,9 @@ public class AssetImageRepositoryImpl implements AssetImageRepositoryCustom {
 		return queryFactory
 			.selectFrom(assetImage)
 			.where(
-				assetImage.assetId.lt(cursorId)
+				assetImage.Id.lt(cursorId)
 					.and(
-						assetImage.assetId.in(
+						assetImage.Id.in(
 							JPAExpressions
 								.select(assetPurchase.assetId)
 								.from(assetPurchase)
@@ -48,7 +48,7 @@ public class AssetImageRepositoryImpl implements AssetImageRepositoryCustom {
 						).or(assetImage.creator.eq(nowId))
 					)
 			)
-			.orderBy(assetImage.assetId.desc())
+			.orderBy(assetImage.Id.desc())
 			.limit(size)
 			.fetch();
 	}
@@ -58,7 +58,7 @@ public class AssetImageRepositoryImpl implements AssetImageRepositoryCustom {
 		return queryFactory
 			.selectFrom(assetImage)
 			.where(assetImage.creator.eq(userid))
-			.orderBy(assetImage.assetId.desc())
+			.orderBy(assetImage.Id.desc())
 			.limit(size)
 			.fetch();
 	}
@@ -67,9 +67,9 @@ public class AssetImageRepositoryImpl implements AssetImageRepositoryCustom {
 	public List<AssetImage> findByCreatorIdNextN(Long nowid, Long userid, Long cursorId, int size) {
 		return queryFactory
 			.selectFrom(assetImage)
-			.where(assetImage.assetId.lt(cursorId)
+			.where(assetImage.Id.lt(cursorId)
 				.and(assetImage.creator.eq(userid)))
-			.orderBy(assetImage.assetId.desc())
+			.orderBy(assetImage.Id.desc())
 			.limit(size)
 			.fetch();
 	}

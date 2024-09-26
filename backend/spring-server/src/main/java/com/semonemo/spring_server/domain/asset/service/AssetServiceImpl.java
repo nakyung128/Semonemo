@@ -69,10 +69,10 @@ public class AssetServiceImpl implements AssetService {
 		}
 
 		for (AssetSell assetSell : assetSells) {
-			AssetSellResponseDto dto = convertToDto(nowId,assetSell.getAssetSellId());
+			AssetSellResponseDto dto = convertToDto(nowId,assetSell.getId());
 			dtos.add(dto);
 		}
-		Long nextCursorId = hasNext ? assetSells.get(assetSells.size() - 1).getAssetSellId() : null;
+		Long nextCursorId = hasNext ? assetSells.get(assetSells.size() - 1).getId() : null;
 		return new CursorResult<>(dtos, nextCursorId, hasNext);
 	}
 
@@ -92,10 +92,10 @@ public class AssetServiceImpl implements AssetService {
 		}
 
 		for (AssetImage assetImage : assetImages) {
-			AssetResponseDto dto = convertToAssetDto(nowId,assetImage.getAssetId());
+			AssetResponseDto dto = convertToAssetDto(nowId,assetImage.getId());
 			dtos.add(dto);
 		}
-		Long nextCursorId = hasNext ? assetImages.get(assetImages.size() - 1).getAssetId() : null;
+		Long nextCursorId = hasNext ? assetImages.get(assetImages.size() - 1).getId() : null;
 		return new CursorResult<>(dtos, nextCursorId, hasNext);
 	}
 
@@ -114,10 +114,10 @@ public class AssetServiceImpl implements AssetService {
 			assetImages = assetImages.subList(0, size);
 		}
 		for (AssetImage assetImage : assetImages) {
-			AssetResponseDto dto = convertToAssetDto(nowid,assetImage.getAssetId());
+			AssetResponseDto dto = convertToAssetDto(nowid,assetImage.getId());
 			dtos.add(dto);
 		}
-		Long nextCursorId = hasNext ? assetImages.get(assetImages.size() - 1).getAssetId() : null;
+		Long nextCursorId = hasNext ? assetImages.get(assetImages.size() - 1).getId() : null;
 		return new CursorResult<>(dtos, nextCursorId, hasNext);
 	}
 
@@ -166,7 +166,7 @@ public class AssetServiceImpl implements AssetService {
 			.orElseThrow(() -> new IllegalArgumentException("Asset id not found"));
 		boolean isLiked = assetLikeRepository.existsByUserIdAndAssetSellId(nowid,assetId);
 		AssetResponseDto assetResponseDto = new AssetResponseDto(
-			assetImage.getAssetId(),
+			assetImage.getId(),
 			assetImage.getCreator(),
 			assetImage.getImageUrl(),
 			isLiked
@@ -187,7 +187,7 @@ public class AssetServiceImpl implements AssetService {
 
 		AssetSellResponseDto dto = new AssetSellResponseDto(
 			assetSell.getAssetId(),
-			assetSell.getAssetSellId(),
+			assetSell.getId(),
 			assetImage.getCreator(),
 			assetImage.getImageUrl(),
 			assetImage.getCreatedAt(),

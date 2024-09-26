@@ -26,8 +26,8 @@ public class AssetImage extends BaseTimeEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "asset_id")
-	private Long assetId;
+	@Column(name = "id")
+	private Long Id;
 
 	@Column(name = "creator")
 	private Long creator;

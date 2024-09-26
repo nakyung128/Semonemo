@@ -18,8 +18,8 @@ import lombok.NoArgsConstructor;
 public class AssetTag {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "asset_tag_id")
-	private Long assetTagId;
+	@Column(name = "id")
+	private Long Id;
 
 	@Column(name = "atag_id")
 	private Long atagId;

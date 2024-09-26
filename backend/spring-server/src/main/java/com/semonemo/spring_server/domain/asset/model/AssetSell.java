@@ -1,7 +1,5 @@
 package com.semonemo.spring_server.domain.asset.model;
 
-import java.time.LocalDateTime;
-
 import com.semonemo.spring_server.global.common.BaseTimeEntity;
 
 import jakarta.persistence.Column;
@@ -26,8 +24,8 @@ public class AssetSell extends BaseTimeEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "asset_sell_id")
-	private Long assetSellId;
+	@Column(name = "id")
+	private Long Id;
 
 	@Column(name = "asset_id")
 	private Long assetId;

@@ -20,7 +20,7 @@ public class AssetSellRepositoryImpl implements AssetSellRepositoryCustom {
 
 		return queryFactory
 			.selectFrom(assetSell)
-			.orderBy(assetSell.assetSellId.desc())
+			.orderBy(assetSell.Id.desc())
 			.limit(size)
 			.fetch();
 	}
@@ -29,8 +29,8 @@ public class AssetSellRepositoryImpl implements AssetSellRepositoryCustom {
 	public List<AssetSell> findNextN(Long nowId, Long cursorId, int size) {
 		return queryFactory
 			.selectFrom(assetSell)
-			.where(assetSell.assetSellId.lt(cursorId))
-			.orderBy(assetSell.assetSellId.desc())
+			.where(assetSell.Id.lt(cursorId))
+			.orderBy(assetSell.Id.desc())
 			.limit(size)
 			.fetch();
 	}
@@ -47,7 +47,7 @@ public class AssetSellRepositoryImpl implements AssetSellRepositoryCustom {
 	public void updateCount(int count, Long assetSellId) {
 		queryFactory
 			.update(assetSell)
-			.where(assetSell.assetSellId.eq(assetSellId))
+			.where(assetSell.Id.eq(assetSellId))
 			.set(assetSell.likeCount, assetSell.likeCount.add(count))
 			.execute();
 	}
