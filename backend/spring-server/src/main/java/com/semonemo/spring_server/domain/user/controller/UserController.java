@@ -56,7 +56,7 @@ public class UserController implements UserApi {
 		@RequestPart(value = "image", required = false) MultipartFile file,
 		@RequestPart(value = "data") UserUpdateRequestDTO requestDTO
 	) throws IOException {
-		if (!file.isEmpty()) {
+		if (file != null && !file.isEmpty()) {
 			requestDTO.setProfileImage(s3Service.upload(file));
 		}
 		userService.updateUser(userDetails.getUsername(), requestDTO);
