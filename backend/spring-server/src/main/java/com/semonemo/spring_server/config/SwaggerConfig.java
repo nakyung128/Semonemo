@@ -45,7 +45,7 @@ public class SwaggerConfig {
 	private Schema<?> wrapSchema(Schema<?> originalSchema) {
 		final Schema<?> wrapperSchema = new Schema<>();
 
-		wrapperSchema.addProperty("code", new Schema<>().type("String").example("S200"));
+		wrapperSchema.addProperty("code", new Schema<>().type("String").example("S000"));
 		wrapperSchema.addProperty("data", originalSchema);
 		wrapperSchema.addProperty("message", new Schema<>().type("String").example("성공 메시지"));
 
