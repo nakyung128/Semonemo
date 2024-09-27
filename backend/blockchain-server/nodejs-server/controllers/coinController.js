@@ -14,7 +14,7 @@ exports.remainCoin = async (req, res) => {
 
     const coin = await coinContract.methods.balanceOf(address).call();
     const deposit = await systemContract.methods.getUserBalance(address).call();
-
+ 
     // 토큰의 소수점 자릿수 가져오기 (예: 18)
     const decimals = await coinContract.methods.decimals().call();
 
@@ -148,6 +148,62 @@ exports.transferCoin = async (req, res) => {
       gas: gasEstimate.toString(),
       gasPrice: gasPrice.toString(),
       data: coinContract.methods.transferSenderToUser(toAddress, amountInSmallestUnitTrimmed).encodeABI()
+    };
+
+    res.json({
+      code: "S000",
+      data: tx,
+      message: "Create transaction succeeded.",
+    });
+  } catch (error) {
+    const errorLog = handleError(error);
+    res.status(500).json({ 
+      errorCode: errorLog.code,
+      message: errorLog.message
+    });
+  }
+};
+
+// 선입금 코인 전송
+exports.transferDepositCoin = async (req, res) => {
+  try {
+    const fromAddress = req.body.fromAddress;
+    const toAddress = req.body.toAddress;
+    const amount = req.body.amount;
+
+    if (!fromAddress || !toAddress || !amount) {
+      return res.status(400).json({ error: 'fromAddress and toAddress and amount are required'  });
+    }
+
+    // amount가 유효한 숫자인지 확인 (정수 또는 소수)
+    if (isNaN(parseFloat(amount))) {
+      return res.status(400).json({ error: 'Amount must be a valid number' });
+    }
+
+    // 토큰의 소수점 자릿수 가져오기 (예: 18)
+    const decimals = await coinContract.methods.decimals().call();
+
+    // 금액을 토큰의 최소 단위로 변환 (문자열 연산 사용)
+    const [integerPart, fractionalPart = ''] = amount.split('.');
+    const paddedFractionalPart = fractionalPart.padEnd(Number(decimals), '0');
+    const amountInSmallestUnit = integerPart + paddedFractionalPart;
+
+    // 앞에 붙은 0 제거
+    const amountInSmallestUnitTrimmed = amountInSmallestUnit.replace(/^0+/, '');
+
+    // 가스 가격 및 가스 한도 추정
+    const gasPrice = await web3.eth.getGasPrice();
+    const gasEstimate = await systemContract.methods.transferBalance(toAddress, amountInSmallestUnitTrimmed).estimateGas({ from: fromAddress });
+    const nonce = await web3.eth.getTransactionCount(fromAddress, 'pending');
+
+    // 트랜잭션 객체 생성
+    const tx = {
+      nonce: nonce.toString(),
+      from: fromAddress,
+      to: systemContract.options.address,
+      gas: gasEstimate.toString(),
+      gasPrice: gasPrice.toString(),
+      data: systemContract.methods.transferBalance(toAddress, amountInSmallestUnitTrimmed).encodeABI()
     };
 
     res.json({

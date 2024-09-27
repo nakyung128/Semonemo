@@ -29,6 +29,9 @@ router.post('/buy', checkIP, upload.none(), coinController.buyCoin);
 // 코인 전송
 router.post('/transfer', upload.none(), coinController.transferCoin);
 
+// 선입금 코인 전송
+router.post('/transfer/deposit', upload.none(), coinController.transferDepositCoin);
+
 // 선입금 코인으로 전환
 router.post('/deposit', upload.none(), coinController.depositCoin);
 

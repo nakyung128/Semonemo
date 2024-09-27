@@ -6,6 +6,7 @@ import com.semonemo.spring_server.domain.nft.dto.request.NFTRequestDto;
 import com.semonemo.spring_server.domain.nft.dto.request.NFTServiceRequestDto;
 import com.semonemo.spring_server.domain.nft.dto.response.NFTMarketResponseDto;
 import com.semonemo.spring_server.domain.nft.dto.response.NFTResponseDto;
+import com.semonemo.spring_server.domain.nft.service.NFTServiceImpl;
 import com.semonemo.spring_server.domain.user.entity.Users;
 import com.semonemo.spring_server.domain.nft.service.NFTService;
 import com.semonemo.spring_server.domain.user.service.UserService;
@@ -14,6 +15,8 @@ import com.semonemo.spring_server.global.common.CursorResult;
 import com.semonemo.spring_server.global.exception.CustomException;
 import com.semonemo.spring_server.global.exception.ErrorCode;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -25,6 +28,8 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/nft")
 @RequiredArgsConstructor
 public class NFTController implements NFTApi {
+    private static final Log log = LogFactory.getLog(NFTController.class);
+
     @Autowired
     private UserService userService;
     @Autowired
@@ -61,7 +66,7 @@ public class NFTController implements NFTApi {
             NFTMarketResponseDto nftMarketResponseDto = nftService.sellNFT(nftMarketServiceRequestDto);
             return CommonResponse.success(nftMarketResponseDto, "NFT 판매 등록 성공");
         } catch (Exception e) {
-            throw new CustomException(ErrorCode.MINT_NFT_FAIL);
+            throw new CustomException(ErrorCode.MARKET_CREATE_FAIL);
         }
     }
 

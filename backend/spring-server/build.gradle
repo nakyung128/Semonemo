@@ -41,6 +41,12 @@ dependencies {
 	// WebClient
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
+    // Web3
+    implementation 'org.web3j:core:4.9.7'
+
+    // Json
+    implementation 'org.json:json:20210307'
+
 	compileOnly 'org.projectlombok:lombok'
 	runtimeOnly 'com.mysql:mysql-connector-j'
 	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.3'

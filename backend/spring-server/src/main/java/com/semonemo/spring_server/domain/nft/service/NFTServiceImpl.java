@@ -81,7 +81,12 @@ public class NFTServiceImpl implements NFTService {
 
         NFTs nft = nftRepository.findById(nftMarketServiceRequestDto.getNftId())
             .orElseThrow(() -> new CustomException(ErrorCode.NFT_NOT_FOUND_ERROR));
-        
+
+        // 본인 소유의 NFT만 판매 가능
+        if (!user.getId().equals(nft.getOwner().getId())) {
+            throw new CustomException(ErrorCode.NFT_ALREADY_ON_SALE);
+        }
+
         // 이미 판매중이면 판매등록 안됨
         if (nft.getIsOnSale()) {
             throw new CustomException(ErrorCode.NFT_ALREADY_ON_SALE);
@@ -124,12 +129,15 @@ public class NFTServiceImpl implements NFTService {
             sellingNFTs = sellingNFTs.subList(0, size);
         }
 
-            String tokenIds = sellingNFTs.stream()
-                .map(nft -> nft.getNftId().getTokenId().toString())
-                .collect(Collectors.joining(","));
+        log.info(123);
 
-            List<NFTInfo> result = getNFTInfo(tokenIds);
-            log.info(result);
+        log.info(sellingNFTs);
+        String tokenIds = sellingNFTs.stream()
+            .map(nft -> nft.getNftId().getTokenId().toString())
+            .collect(Collectors.joining(","));
+
+        List<NFTInfo> result = getNFTInfo(tokenIds);
+        log.info(result);
 
         for (NFTMarket sellingNFT : sellingNFTs) {
             NFTMarketResponseDto dto = nftMarketConvertToDto(userId, sellingNFT);

@@ -15,7 +15,7 @@ const systemContractABI = require('../contracts/IntegratedNFTSystem.json');
 const systemContractAddress = process.env.SYSTEM_CONTRACT_ADDRESS;
 const systemContract = new web3.eth.Contract(systemContractABI.abi, systemContractAddress);
 
-const privateKey = process.env.ADMIN_PRIVATE_KEY;
+const privateKey = process.env.ADMIN_PRIVATE_KEY; 
 const account = web3.eth.accounts.privateKeyToAccount(privateKey);
 web3.eth.accounts.wallet.add(account);
 

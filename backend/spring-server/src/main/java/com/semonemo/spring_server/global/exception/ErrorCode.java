@@ -31,10 +31,12 @@ public enum ErrorCode {
 	NFT_NOT_FOUND_ERROR("N001", "NFT를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
 	USER_NFT_NOT_FOUND_ERROR("N002", "유저 NFT 조회를 실패했습니다", HttpStatus.NOT_FOUND),
 	MINT_NFT_FAIL("N003", "NFT 발행에 실패했습니다.", HttpStatus.BAD_REQUEST),
+    OWNER_NOT_MATCH("N004", "본인소유의 NFT가 아닙니다.", HttpStatus.BAD_REQUEST),
 
 	// NFT MARKET
 	NFT_MARKET_NOT_FOUND_ERROR("NM001", "NFT 판매 정보를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
     NFT_ALREADY_ON_SALE("NM002", "이미 판매중인 NFT 입니다.", HttpStatus.BAD_REQUEST),
+    MARKET_CREATE_FAIL("NM003", "NFT 판매 등록에 실패했습니다.", HttpStatus.BAD_REQUEST),
 
 	// 기타
 	NODE_SERVER_ERROR("E001", "Block Chain 서버 오류", HttpStatus.INTERNAL_SERVER_ERROR),
