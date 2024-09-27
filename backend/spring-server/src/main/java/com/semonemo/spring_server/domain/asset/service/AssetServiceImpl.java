@@ -63,9 +63,9 @@ public class AssetServiceImpl implements AssetService {
 	@Transactional
 	@Override
 	public void registSale(Long nowid, AssetSellRequestDto assetSellRequestDto) {
-		System.out.println(assetSellRequestDto);
 		Long assetId= assetSellRequestDto.assetId();
-		System.out.println(assetId);
+		AssetImage assetImage =assetImageRepository.findById(assetId).
+			orElse(null);
 		AssetSell assetSell = AssetSell.builder()
 			.assetId(assetId)
 			.price(assetSellRequestDto.price())

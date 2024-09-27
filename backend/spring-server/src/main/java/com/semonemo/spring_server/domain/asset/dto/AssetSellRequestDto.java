@@ -6,8 +6,6 @@ import com.semonemo.spring_server.domain.asset.model.AssetImage;
 
 public record AssetSellRequestDto(
 	Long assetId,
-	Long creator,
-	String imageUrl,
 	Long price,
 	List<String> tags
 ) {
