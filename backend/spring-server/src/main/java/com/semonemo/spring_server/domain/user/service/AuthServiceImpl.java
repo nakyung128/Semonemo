@@ -39,7 +39,7 @@ public class AuthServiceImpl implements AuthService {
 
 	@Override
 	@Transactional(readOnly = false)
-	public String registerUser(UserRegisterRequestDTO requestDTO) {
+	public void registerUser(UserRegisterRequestDTO requestDTO) {
 		if (!requestDTO.isValid()) {
 			throw new CustomException(ErrorCode.INVALID_USER_DATA_ERROR);
 		}
@@ -52,7 +52,7 @@ public class AuthServiceImpl implements AuthService {
 		String encodedPassword = passwordEncoder.encode(user.getPassword());
 		user.setPassword(encodedPassword);
 
-		return userRepository.save(user).getNickname();
+		userRepository.save(user);
 	}
 
 	@Override
