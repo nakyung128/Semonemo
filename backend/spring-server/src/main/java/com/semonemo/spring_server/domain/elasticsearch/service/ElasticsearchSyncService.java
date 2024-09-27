@@ -48,19 +48,47 @@ public class ElasticsearchSyncService {
             .collect(Collectors.toList());
         assetElasticsearchRepository.saveAll(documents);
     }
-
-    public void syncSingleAsset(Long assetId) {
-        AssetImage assetImage = assetImageRepository.findById(assetId)
-            .orElseThrow(() -> new RuntimeException("Asset not found"));
-        AssetSell assetSell = assetSellRepository.findByAssetId(assetId);
+    //판매 등록시
+    public void syncSellAsset(Long assetSellId) {
+        AssetSell assetSell = assetSellRepository.findById(assetSellId)
+            .orElseThrow(() -> new IllegalArgumentException("Asset Image not found"));
+        AssetImage assetImage= assetImageRepository.findById(assetSell.getAssetId())
+            .orElseThrow(() -> new IllegalArgumentException("Asset Image not found"));
         List<AssetTag> assetTags = assetTagRepository.findByAssetSellId(assetSell.getId());
         List<Atags> tags = assetTags.stream()
             .map(tag -> atagsRepository.findById(tag.getAtagId()).orElse(null))
             .filter(Objects::nonNull)
-            .collect(Collectors.toList());
-        AssetSellDocument document = convertToDocument(assetImage, assetSell, tags);
+            .toList();
+        AssetSellDocument document= convertToDocument(assetImage, assetSell, tags);
         assetElasticsearchRepository.save(document);
     }
+    //좋아요,조회수,구매수 업데이트
+    public void syncData(Long assetSellId,String type){
+        AssetSell assetSell = assetSellRepository.findById(assetSellId)
+            .orElseThrow(() -> new IllegalArgumentException("Asset Image not found"));
+        assetElasticsearchRepository.updateData(assetSellId, type, assetSell);
+    }
+    // //판매물품 클릭시
+    // public void synchit(Long assetSellId){
+    //     AssetSell assetSell = assetSellRepository.findById(assetSellId)
+    //         .orElseThrow(() -> new IllegalArgumentException("Asset Image not found"));
+    //     assetElasticsearchRepository.updateHit(assetSellId,assetSell.getHits());
+    // }
+
+    // public void syncSingleAsset(Long assetId) {
+    //     AssetImage assetImage = assetImageRepository.findById(assetId)
+    //         .orElseThrow(() -> new RuntimeException("Asset not found"));
+    //     AssetSell assetSell = assetSellRepository.findByAssetId(assetId);
+    //     List<AssetTag> assetTags = assetTagRepository.findByAssetSellId(assetSell.getId());
+    //     List<Atags> tags = assetTags.stream()
+    //         .map(tag -> atagsRepository.findById(tag.getAtagId()).orElse(null))
+    //         .filter(Objects::nonNull)
+    //         .collect(Collectors.toList());
+    //     AssetSellDocument document = convertToDocument(assetImage, assetSell, tags);
+    //     assetElasticsearchRepository.save(document);
+    // }
+
+
     private AssetSellDocument convertToDocument(AssetImage assetImage, AssetSell assetSell, List<Atags> tags) {
         AssetSellDocument document = new AssetSellDocument();
 

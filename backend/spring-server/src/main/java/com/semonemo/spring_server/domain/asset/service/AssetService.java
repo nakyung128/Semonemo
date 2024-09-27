@@ -5,6 +5,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import com.semonemo.spring_server.domain.asset.dto.AssetDetailResponseDto;
 import com.semonemo.spring_server.domain.asset.dto.AssetRequestDto;
 import com.semonemo.spring_server.domain.asset.dto.AssetResponseDto;
+import com.semonemo.spring_server.domain.asset.dto.AssetSellRequestDto;
 import com.semonemo.spring_server.domain.asset.dto.AssetSellResponseDto;
 import com.semonemo.spring_server.domain.asset.model.AssetImage;
 import com.semonemo.spring_server.global.common.CursorResult;
@@ -27,4 +28,6 @@ public interface AssetService {
 	void dislike(Long nowid, Long assetSellId);
 
 	boolean checkLike(Long userId, Long assetSellId);
+
+	void registSale(Long nowid, AssetSellRequestDto assetSellRequestDto);
 }

@@ -10,10 +10,12 @@ import org.springframework.stereotype.Service;
 import com.semonemo.spring_server.domain.asset.dto.AssetDetailResponseDto;
 import com.semonemo.spring_server.domain.asset.dto.AssetRequestDto;
 import com.semonemo.spring_server.domain.asset.dto.AssetResponseDto;
+import com.semonemo.spring_server.domain.asset.dto.AssetSellRequestDto;
 import com.semonemo.spring_server.domain.asset.dto.AssetSellResponseDto;
 import com.semonemo.spring_server.domain.asset.model.AssetImage;
 import com.semonemo.spring_server.domain.asset.model.AssetLike;
 import com.semonemo.spring_server.domain.asset.model.AssetSell;
+import com.semonemo.spring_server.domain.asset.model.AssetTag;
 import com.semonemo.spring_server.domain.asset.model.Atags;
 import com.semonemo.spring_server.domain.asset.repository.assetimage.AssetImageRepository;
 import com.semonemo.spring_server.domain.asset.repository.assetsell.AssetSellRepository;
@@ -56,17 +58,60 @@ public class AssetServiceImpl implements AssetService {
 			.imageUrl(assetRequestDto.getImageUrl())
 			.build();
 		assetImageRepository.save(assetImage);
-		syncService.syncSingleAsset(assetImage.getId());
 	}
 
 	@Transactional
 	@Override
-	public CursorResult<AssetSellResponseDto> getAllAsset(Long nowId,String orderBy, Long cursorId, int size) {
+	public void registSale(Long nowid, AssetSellRequestDto assetSellRequestDto) {
+		System.out.println(assetSellRequestDto);
+		Long assetId= assetSellRequestDto.assetId();
+		System.out.println(assetId);
+		AssetSell assetSell = AssetSell.builder()
+			.assetId(assetId)
+			.price(assetSellRequestDto.price())
+			.build();
+		System.out.println(assetSell.toString());
+		assetSellRepository.save(assetSell);
+		List<String> tagsname = assetSellRequestDto.tags();
+		System.out.println(tagsname.toString());
+		for (String tagname : tagsname) {
+			if (aTagsRepository.existsByName(tagname)) {
+				//이미 같은 태그가 존재하면? assettag에 걔로 추가
+				System.out.println(tagname);
+				Long atagId = aTagsRepository.findByName(tagname).getId();
+				System.out.println(atagId);
+				AssetTag assetTag = AssetTag.builder().
+					assetSellId(assetSell.getId()).
+					atagId(atagId).
+					build();
+				System.out.println(assetTag.toString());
+				assetTagRepository.save(assetTag);
+			} else {
+				Atags atags = Atags.builder()
+					.name(tagname)
+					.build();
+				aTagsRepository.save(atags);
+				System.out.println(atags.toString());
+				AssetTag assetTag = AssetTag.builder().
+					assetSellId(assetSell.getId()).
+					atagId(atags.getId()).
+					build();
+				System.out.println(assetTag.toString());
+				assetTagRepository.save(assetTag);
+			}
+		}
+		syncService.syncSellAsset(assetSell.getId());
+
+	}
+
+	@Transactional
+	@Override
+	public CursorResult<AssetSellResponseDto> getAllAsset(Long nowId, String orderBy, Long cursorId, int size) {
 		List<AssetSell> assetSells;
 		if (cursorId == null) {
-			assetSells = assetSellRepository.findTopN(nowId,orderBy, size + 1);
+			assetSells = assetSellRepository.findTopN(nowId, orderBy, size + 1);
 		} else {
-			assetSells = assetSellRepository.findNextN(nowId,orderBy, cursorId, size + 1);
+			assetSells = assetSellRepository.findNextN(nowId, orderBy, cursorId, size + 1);
 		}
 		List<AssetSellResponseDto> dtos = new ArrayList<>();
 		boolean hasNext = false;
@@ -76,7 +121,7 @@ public class AssetServiceImpl implements AssetService {
 		}
 
 		for (AssetSell assetSell : assetSells) {
-			AssetSellResponseDto dto = convertToDto(nowId,assetSell.getId());
+			AssetSellResponseDto dto = convertToDto(nowId, assetSell.getId());
 			dtos.add(dto);
 		}
 		Long nextCursorId = hasNext ? assetSells.get(assetSells.size() - 1).getId() : null;
@@ -99,7 +144,7 @@ public class AssetServiceImpl implements AssetService {
 		}
 
 		for (AssetImage assetImage : assetImages) {
-			AssetResponseDto dto = convertToAssetDto(nowId,assetImage.getId());
+			AssetResponseDto dto = convertToAssetDto(nowId, assetImage.getId());
 			dtos.add(dto);
 		}
 		Long nextCursorId = hasNext ? assetImages.get(assetImages.size() - 1).getId() : null;
@@ -121,7 +166,7 @@ public class AssetServiceImpl implements AssetService {
 			assetImages = assetImages.subList(0, size);
 		}
 		for (AssetImage assetImage : assetImages) {
-			AssetResponseDto dto = convertToAssetDto(nowid,assetImage.getId());
+			AssetResponseDto dto = convertToAssetDto(nowid, assetImage.getId());
 			dtos.add(dto);
 		}
 		Long nextCursorId = hasNext ? assetImages.get(assetImages.size() - 1).getId() : null;
@@ -137,6 +182,7 @@ public class AssetServiceImpl implements AssetService {
 			.build();
 		assetLikeRepository.save(like);
 		assetSellRepository.updateCount(1, assetSellId);
+		syncService.syncData(assetSellId, "like");
 
 	}
 
@@ -147,9 +193,10 @@ public class AssetServiceImpl implements AssetService {
 		assetLikeRepository.delete(like);
 		AssetSell assetSell = assetSellRepository.findById(assetSellId)
 			.orElseThrow(() -> new RuntimeException("Asset Sell Not Found"));
-		if (assetSell.getLikeCount() > 0) {
+		if (assetSell.getLikeCount() > -1) {
 			assetSellRepository.updateCount(-1, assetSellId);
 		}
+			syncService.syncData(assetSellId, "like");
 	}
 
 	@Transactional
@@ -159,15 +206,16 @@ public class AssetServiceImpl implements AssetService {
 	}
 
 	@Override
-	public AssetResponseDto getAssetDetail(Long nowid,Long assetId) {
-		return convertToAssetDto(nowid,assetId);
+	public AssetResponseDto getAssetDetail(Long nowid, Long assetId) {
+		return convertToAssetDto(nowid, assetId);
 	}
 
 	@Transactional
 	@Override
 	public AssetDetailResponseDto getAssetSellDetail(Long nowid, Long assetSellId) {
 		assetSellRepository.plusHits(assetSellId);
-		return convertToDetailDto(nowid,assetSellId);
+		syncService.syncData(assetSellId, "hits");
+		return convertToDetailDto(nowid, assetSellId);
 	}
 
 	private AssetDetailResponseDto convertToDetailDto(Long nowid, Long assetSellId) {
@@ -177,7 +225,7 @@ public class AssetServiceImpl implements AssetService {
 		AssetImage assetImage = assetImageRepository.findById(assetSell.getAssetId())
 			.orElseThrow(() -> new IllegalArgumentException("Asset id not found"));
 
-		boolean isLiked = assetLikeRepository.existsByUserIdAndAssetSellId(nowid,assetSellId);
+		boolean isLiked = assetLikeRepository.existsByUserIdAndAssetSellId(nowid, assetSellId);
 		Users user = userRepository.findById(assetImage.getCreator())
 			.orElseThrow(() -> new IllegalArgumentException("User id not found"));
 		// List<Long> tagId= assetTagRepository.findAllByAssetSellId(assetSellId);
@@ -185,7 +233,7 @@ public class AssetServiceImpl implements AssetService {
 		// for (Long id : tagId) {
 		// 	aTagsRepository.findById(id).ifPresent(atags::add); // Optional을 사용하여 null 체크 후 추가
 		// }
-		List <String> tags=assetTagRepository.findTagsByAssetSellId(assetSellId);
+		List<String> tags = assetTagRepository.findTagsByAssetSellId(assetSellId);
 		AssetDetailResponseDto dto = new AssetDetailResponseDto(
 			assetSell.getAssetId(),
 			assetSell.getId(),
@@ -204,11 +252,10 @@ public class AssetServiceImpl implements AssetService {
 		return dto;
 	}
 
-
-	private AssetResponseDto convertToAssetDto(Long nowid,Long assetId) {
+	private AssetResponseDto convertToAssetDto(Long nowid, Long assetId) {
 		AssetImage assetImage = assetImageRepository.findById(assetId)
 			.orElseThrow(() -> new IllegalArgumentException("Asset id not found"));
-		boolean isLiked = assetLikeRepository.existsByUserIdAndAssetSellId(nowid,assetId);
+		boolean isLiked = assetLikeRepository.existsByUserIdAndAssetSellId(nowid, assetId);
 		AssetResponseDto assetResponseDto = new AssetResponseDto(
 			assetImage.getId(),
 			assetImage.getCreator(),
@@ -225,7 +272,7 @@ public class AssetServiceImpl implements AssetService {
 		AssetImage assetImage = assetImageRepository.findById(assetSell.getAssetId())
 			.orElseThrow(() -> new IllegalArgumentException("Asset id not found"));
 
-		boolean isLiked = assetLikeRepository.existsByUserIdAndAssetSellId(nowid,assetSellId);
+		boolean isLiked = assetLikeRepository.existsByUserIdAndAssetSellId(nowid, assetSellId);
 		Users user = userRepository.findById(assetImage.getCreator())
 			.orElseThrow(() -> new IllegalArgumentException("User id not found"));
 

@@ -10,7 +10,11 @@ import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
+import org.springframework.data.elasticsearch.core.document.Document;
+import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
+import org.springframework.data.elasticsearch.core.query.UpdateQuery;
 
+import com.semonemo.spring_server.domain.asset.model.AssetSell;
 import com.semonemo.spring_server.domain.elasticsearch.document.AssetSellDocument;
 import com.semonemo.spring_server.global.common.CursorResult;
 
@@ -111,5 +115,36 @@ public class AssetElasticsearchRepositoryImpl implements AssetElasticsearchRepos
 
 		long totalHits = searchHits.getTotalHits();
 		return new PageImpl<>(content, PageRequest.of(page, size), totalHits);
+	}
+
+	@Override
+	public void updateData(Long assetSellId,String type, AssetSell assetSell) {
+		Long data=0L;
+		switch (type) {
+			case "like":
+				data = assetSell.getLikeCount();
+				type = "likeCount";
+				break;
+			case "purchase":
+				data = assetSell.getPurchaseCount();
+				type = "purchaseCount";
+				break;
+			case "price":
+				data = assetSell.getPrice();
+				type = "price";
+				break;
+			case "hits":
+				data = assetSell.getHits();
+		}
+		UpdateQuery updateQuery = UpdateQuery.builder(assetSellId.toString())
+			.withDocument(Document.create().append(type, data))
+			.build();
+
+		try {
+			elasticsearchOperations.update(updateQuery, IndexCoordinates.of("asset_sells"));
+		} catch (Exception e) {
+			// 로깅 또는 예외 처리
+			throw new RuntimeException("Failed to update assetSell data: " + assetSellId, e);
+		}
 	}
 }

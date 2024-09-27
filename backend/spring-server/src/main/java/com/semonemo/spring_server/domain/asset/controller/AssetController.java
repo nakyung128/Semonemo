@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -20,6 +21,7 @@ import com.semonemo.spring_server.config.s3.S3Service;
 import com.semonemo.spring_server.domain.asset.dto.AssetDetailResponseDto;
 import com.semonemo.spring_server.domain.asset.dto.AssetRequestDto;
 import com.semonemo.spring_server.domain.asset.dto.AssetResponseDto;
+import com.semonemo.spring_server.domain.asset.dto.AssetSellRequestDto;
 import com.semonemo.spring_server.domain.asset.dto.AssetSellResponseDto;
 import com.semonemo.spring_server.domain.asset.model.AssetImage;
 import com.semonemo.spring_server.domain.asset.service.AssetService;
@@ -55,6 +57,16 @@ public class AssetController implements AssetApi {
 		} catch (Exception e) {
 			throw new CustomException(ErrorCode.ASSET_UPLOAD_FAIL);
 		}
+	}
+
+	@PostMapping("/sell")
+	public CommonResponse<?> registSale(
+		@AuthenticationPrincipal UserDetails userDetails,
+		@RequestBody AssetSellRequestDto assetSellRequestDto
+	){
+		Users users = userService.findByAddress(userDetails.getUsername());
+		assetService.registSale(users.getId(),assetSellRequestDto);
+		return CommonResponse.success("에셋 판매등록 성공");
 	}
 
 	//에셋 상세 조히

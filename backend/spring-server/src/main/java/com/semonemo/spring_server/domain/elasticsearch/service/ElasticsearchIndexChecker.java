@@ -16,7 +16,7 @@ public class ElasticsearchIndexChecker {
     private ElasticsearchOperations elasticsearchOperations;
 
     public boolean isIndexed(Long assetId) {
-        return elasticsearchOperations.exists(assetId.toString(), IndexCoordinates.of("asset_images"));
+        return elasticsearchOperations.exists(assetId.toString(), IndexCoordinates.of("asset_sells"));
     }
 
     public void indexDocument(AssetSellDocument document) {
@@ -24,6 +24,6 @@ public class ElasticsearchIndexChecker {
                 .withId(document.getAssetId().toString())
                 .withObject(document)
                 .build();
-        elasticsearchOperations.index(indexQuery, IndexCoordinates.of("asset_images"));
+        elasticsearchOperations.index(indexQuery, IndexCoordinates.of("asset_sells"));
     }
 }
