@@ -68,25 +68,6 @@ public class ElasticsearchSyncService {
             .orElseThrow(() -> new IllegalArgumentException("Asset Image not found"));
         assetElasticsearchRepository.updateData(assetSellId, type, assetSell);
     }
-    // //판매물품 클릭시
-    // public void synchit(Long assetSellId){
-    //     AssetSell assetSell = assetSellRepository.findById(assetSellId)
-    //         .orElseThrow(() -> new IllegalArgumentException("Asset Image not found"));
-    //     assetElasticsearchRepository.updateHit(assetSellId,assetSell.getHits());
-    // }
-
-    // public void syncSingleAsset(Long assetId) {
-    //     AssetImage assetImage = assetImageRepository.findById(assetId)
-    //         .orElseThrow(() -> new RuntimeException("Asset not found"));
-    //     AssetSell assetSell = assetSellRepository.findByAssetId(assetId);
-    //     List<AssetTag> assetTags = assetTagRepository.findByAssetSellId(assetSell.getId());
-    //     List<Atags> tags = assetTags.stream()
-    //         .map(tag -> atagsRepository.findById(tag.getAtagId()).orElse(null))
-    //         .filter(Objects::nonNull)
-    //         .collect(Collectors.toList());
-    //     AssetSellDocument document = convertToDocument(assetImage, assetSell, tags);
-    //     assetElasticsearchRepository.save(document);
-    // }
 
 
     private AssetSellDocument convertToDocument(AssetImage assetImage, AssetSell assetSell, List<Atags> tags) {

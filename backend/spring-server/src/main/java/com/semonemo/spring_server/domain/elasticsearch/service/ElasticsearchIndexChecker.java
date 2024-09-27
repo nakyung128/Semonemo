@@ -9,11 +9,13 @@ import org.springframework.stereotype.Component;
 
 import com.semonemo.spring_server.domain.elasticsearch.document.AssetSellDocument;
 
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor
 @Component
 public class ElasticsearchIndexChecker {
 
-    @Autowired
-    private ElasticsearchOperations elasticsearchOperations;
+    private final ElasticsearchOperations elasticsearchOperations;
 
     public boolean isIndexed(Long assetId) {
         return elasticsearchOperations.exists(assetId.toString(), IndexCoordinates.of("asset_sells"));

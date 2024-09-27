@@ -25,14 +25,15 @@ public class ElasticsearchController {
 
 	private final SearchService searchService;
 	private final UserService userService;
+
 	@GetMapping("/asset")
 	public CommonResponse<?> searchAsset(
 		@AuthenticationPrincipal UserDetails userDetails,
 		@RequestParam(required = false) String keyword,
-		@RequestParam(required = false) Long cursorId ,
+		@RequestParam(required = false) Long cursorId,
 		@RequestParam(defaultValue = "10") int size) {
 		Users users = userService.findByAddress(userDetails.getUsername());
-		CursorResult<AssetSearchResponseDto> result =searchService.searchAsset(users.getId(), keyword,cursorId,size);
+		CursorResult<AssetSearchResponseDto> result = searchService.searchAsset(users.getId(), keyword, cursorId, size);
 
 		return CommonResponse.success(result, "에셋 키워드 검색 성공");
 	}
@@ -41,18 +42,12 @@ public class ElasticsearchController {
 	public CommonResponse<?> orderBy(
 		@AuthenticationPrincipal UserDetails userDetails,
 		@RequestParam(required = false) String keyword,
-		@RequestParam	String orderBy,
-		@RequestParam(defaultValue = "0") int page ,
+		@RequestParam String orderBy,
+		@RequestParam(defaultValue = "0") int page,
 		@RequestParam(defaultValue = "10") int size) {
 		Users users = userService.findByAddress(userDetails.getUsername());
-		Page<AssetSearchResponseDto> result =searchService.findOrderBy(users.getId(), orderBy, keyword,page,size);
+		Page<AssetSearchResponseDto> result = searchService.findOrderBy(users.getId(), orderBy, keyword, page, size);
 
 		return CommonResponse.success(result, "에셋 키워드 검색 성공");
 	}
-
-	@GetMapping("/all")
-	public AssetSellDocument findById(@RequestParam(required = false) Long id) {
-		return searchService.getAsset(id);
-	}
-
 }

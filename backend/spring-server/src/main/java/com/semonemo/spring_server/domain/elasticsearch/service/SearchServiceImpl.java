@@ -69,13 +69,4 @@ public class SearchServiceImpl implements SearchService {
 		return dto;
 	}
 
-
-	@Override
-	public AssetSellDocument getAsset(Long id) {
-		AssetSellDocument assetImageDocument = assetElasticsearchRepository.findById(id)
-			.orElse(null);
-		return assetImageDocument;
-	}
-
-
 }
