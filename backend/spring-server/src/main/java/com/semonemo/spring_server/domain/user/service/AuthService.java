@@ -5,7 +5,7 @@ import com.semonemo.spring_server.domain.user.dto.response.UserLoginResponseDTO;
 
 public interface AuthService {
 
-	String registerUser(UserRegisterRequestDTO requestDTO);
+	void registerUser(UserRegisterRequestDTO requestDTO);
 
 	boolean existsByAddress(String address);
 

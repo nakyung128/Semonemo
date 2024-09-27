@@ -47,7 +47,7 @@ public class AuthController implements AuthApi {
 		@RequestPart(value = "image", required = false) MultipartFile file,
 		@RequestPart(value = "data") UserRegisterRequestDTO requestDTO
 	) throws IOException {
-		if (!file.isEmpty()) {
+		if (file != null && !file.isEmpty()) {
 			requestDTO.setProfileImage(s3Service.upload(file));
 		}
 		authService.registerUser(requestDTO);
