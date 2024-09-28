@@ -30,10 +30,11 @@ public class ElasticsearchController {
 	public CommonResponse<?> searchAsset(
 		@AuthenticationPrincipal UserDetails userDetails,
 		@RequestParam(required = false) String keyword,
+		@RequestParam(defaultValue = "latest") String orderBy,
 		@RequestParam(required = false) Long cursorId,
 		@RequestParam(defaultValue = "10") int size) {
 		Users users = userService.findByAddress(userDetails.getUsername());
-		CursorResult<AssetSearchResponseDto> result = searchService.searchAsset(users.getId(), keyword, cursorId, size);
+		CursorResult<AssetSearchResponseDto> result = searchService.searchAsset(users.getId(), keyword,orderBy, cursorId, size);
 
 		return CommonResponse.success(result, "에셋 키워드 검색 성공");
 	}

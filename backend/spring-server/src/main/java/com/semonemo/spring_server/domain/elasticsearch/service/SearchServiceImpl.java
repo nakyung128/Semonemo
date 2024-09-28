@@ -31,8 +31,8 @@ public class SearchServiceImpl implements SearchService {
 	// 	syncService.syncAllData();
 	// }
 	@Override
-	public CursorResult<AssetSearchResponseDto> searchAsset(Long nowid, String keyword, Long cursorId, int size) {
-		CursorResult<AssetSellDocument> assetSellDocument = assetElasticsearchRepository.findByTagKeyword(keyword, cursorId, size);
+	public CursorResult<AssetSearchResponseDto> searchAsset(Long nowid, String keyword,String orderBy, Long cursorId, int size) {
+		CursorResult<AssetSellDocument> assetSellDocument = assetElasticsearchRepository.findByTagKeyword(keyword, orderBy, cursorId, size);
 		List<AssetSearchResponseDto> dtos = assetSellDocument.getContent().stream()
 			.map(document -> convertToDto(nowid, document))
 			.toList();

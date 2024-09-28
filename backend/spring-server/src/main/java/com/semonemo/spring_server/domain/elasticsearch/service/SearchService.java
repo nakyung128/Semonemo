@@ -8,7 +8,7 @@ import com.semonemo.spring_server.global.common.CursorResult;
 
 public interface SearchService {
 
-	CursorResult<AssetSearchResponseDto> searchAsset(Long nowid, String keyword, Long page, int size);
+	CursorResult<AssetSearchResponseDto> searchAsset(Long nowid, String keyword,String orderBy, Long page, int size);
 
 	Page<AssetSearchResponseDto> findOrderBy(Long id, String orderBy, String keyword, int page, int size);
 }

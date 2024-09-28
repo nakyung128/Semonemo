@@ -29,7 +29,7 @@ public class AssetElasticsearchRepositoryImpl implements AssetElasticsearchRepos
 	private final ElasticsearchOperations elasticsearchOperations;
 
 	@Override
-	public CursorResult<AssetSellDocument> findByTagKeyword(String keyword, Long cursorId, int size) {
+	public CursorResult<AssetSellDocument> findByTagKeyword(String keyword,String orderBy, Long cursorId, int size) {
 		BoolQuery.Builder boolQueryBuilder = new BoolQuery.Builder()
 			.must(new NestedQuery.Builder()
 				.path("tags")
@@ -46,10 +46,14 @@ public class AssetElasticsearchRepositoryImpl implements AssetElasticsearchRepos
 				.lt(JsonData.of(cursorId))
 				.build()._toQuery());
 		}
-
+		SortOrder sortOrder=SortOrder.Desc;
+		 if(orderBy.equals("oldest")) {
+			sortOrder = SortOrder.Asc;
+		}
+		SortOrder finalSortOrder = sortOrder;
 		NativeQuery query = NativeQuery.builder()
 			.withQuery(boolQueryBuilder.build()._toQuery())
-			.withSort(sort -> sort.field(f -> f.field("assetSellId").order(SortOrder.Desc)))
+			.withSort(sort -> sort.field(f -> f.field("assetSellId").order(finalSortOrder)))
 			.withPageable(PageRequest.of(0, size + 1))
 			.build();
 
@@ -80,11 +84,9 @@ public class AssetElasticsearchRepositoryImpl implements AssetElasticsearchRepos
 				.build()._toQuery());
 
 		String option = "";
+		SortOrder sortOrder = SortOrder.Desc;
 		switch (orderBy) {
-			case "create":
-				option = "created_at";
-				break;
-			case "price":
+			case "high":
 				option = "price";
 				break;
 			case "like":
@@ -93,14 +95,19 @@ public class AssetElasticsearchRepositoryImpl implements AssetElasticsearchRepos
 			case "hit":
 				option = "hits";
 				break;
-			case "purchase":
+			case "sell":
 				option = "purchaseCount";
+				break;
+			case "low":
+				option="price";
+				sortOrder = SortOrder.Asc;
 				break;
 		}
 		String finalOption = option;
+		SortOrder finalSortOrder = sortOrder;
 		NativeQuery query = NativeQuery.builder()
 			.withQuery(boolQueryBuilder.build()._toQuery())
-			.withSort(sort -> sort.field(f -> f.field(finalOption).order(SortOrder.Desc)))
+			.withSort(sort -> sort.field(f -> f.field(finalOption).order(finalSortOrder)))
 			.withPageable(PageRequest.of(page, size))
 			.build();
 
