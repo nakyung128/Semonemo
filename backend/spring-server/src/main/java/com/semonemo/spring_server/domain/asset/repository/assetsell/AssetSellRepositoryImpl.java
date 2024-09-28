@@ -19,50 +19,27 @@ public class AssetSellRepositoryImpl implements AssetSellRepositoryCustom {
 	@Override
 	public List<AssetSell> findTopN(Long nowId,String orderBy, int size) {
 		List<AssetSell> assetSells=new ArrayList<>();
-		if (orderBy.equals("create")) {
+		if(orderBy.equals("latest")){
 			assetSells=queryFactory
 				.selectFrom(assetSell)
 				.orderBy(assetSell.Id.desc())
 				.limit(size)
 				.fetch();
 		}
-		else if (orderBy.equals("price")) {
+		else if(orderBy.equals("oldest")){
 			assetSells=queryFactory
 				.selectFrom(assetSell)
-				.orderBy(assetSell.price.desc())
+				.orderBy(assetSell.Id.asc())
 				.limit(size)
 				.fetch();
 		}
-		else if (orderBy.equals("like")) {
-			assetSells=queryFactory
-				.selectFrom(assetSell)
-				.orderBy(assetSell.likeCount.desc())
-				.limit(size)
-				.fetch();
-		}
-		else if(orderBy.equals("hit")) {
-			assetSells=queryFactory
-				.selectFrom(assetSell)
-				.orderBy(assetSell.hits.desc())
-				.limit(size)
-				.fetch();
-		}
-		else if(orderBy.equals("purchase")) {
-			assetSells=queryFactory
-				.selectFrom(assetSell)
-				.orderBy(assetSell.purchaseCount.desc())
-				.limit(size)
-				.fetch();
-		}
-
-
 		return assetSells;
 	}
 
 	@Override
-	public List<AssetSell> findNextN(Long nowId, String orderBy, Long cursorId, int size) {
+	public List<AssetSell> findNextN(Long nowId,String orderBy, Long cursorId, int size) {
 		List<AssetSell> assetSells=new ArrayList<>();
-		if (orderBy.equals("create")) {
+		if(orderBy.equals("latest")){
 			assetSells=queryFactory
 				.selectFrom(assetSell)
 				.where(assetSell.Id.lt(cursorId))
@@ -70,40 +47,15 @@ public class AssetSellRepositoryImpl implements AssetSellRepositoryCustom {
 				.limit(size)
 				.fetch();
 		}
-		else if (orderBy.equals("price")) {
+		else if(orderBy.equals("oldest")){
 			assetSells=queryFactory
 				.selectFrom(assetSell)
 				.where(assetSell.Id.lt(cursorId))
-				.orderBy(assetSell.price.desc())
+				.orderBy(assetSell.Id.asc())
 				.limit(size)
 				.fetch();
 		}
-		else if (orderBy.equals("like")) {
-			assetSells=queryFactory
-				.selectFrom(assetSell)
-				.where(assetSell.Id.lt(cursorId))
-				.orderBy(assetSell.likeCount.desc())
-				.limit(size)
-				.fetch();
-		}
-		else if (orderBy.equals("hit")) {
-			assetSells=queryFactory
-				.selectFrom(assetSell)
-				.where(assetSell.Id.lt(cursorId))
-				.orderBy(assetSell.hits.desc())
-				.limit(size)
-				.fetch();
-		}
-		else if (orderBy.equals("purchase")) {
-			assetSells=queryFactory
-				.selectFrom(assetSell)
-				.where(assetSell.Id.lt(cursorId))
-				.orderBy(assetSell.purchaseCount.desc())
-				.limit(size)
-				.fetch();
-		}
-
-		return assetSells;
+			return assetSells;
 	}
 
 	@Override

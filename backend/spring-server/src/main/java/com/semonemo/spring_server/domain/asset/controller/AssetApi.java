@@ -68,7 +68,7 @@ public interface AssetApi {
 	})
 	CommonResponse<CursorResult<AssetSellResponseDto>> getAllAsset(
 		@AuthenticationPrincipal UserDetails userDetails,
-		@RequestParam(defaultValue = "created") String orderBy,
+		@RequestParam String orderBy,
 		@RequestParam(required = false) Long cursorId,
 		@RequestParam(defaultValue = "40") int size
 	);
