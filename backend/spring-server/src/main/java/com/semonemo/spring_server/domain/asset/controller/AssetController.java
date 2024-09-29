@@ -102,14 +102,13 @@ public class AssetController implements AssetApi {
 	@GetMapping
 	public CommonResponse<CursorResult<AssetSellResponseDto>> getAllAsset(
 		@AuthenticationPrincipal UserDetails userDetails,
-		@RequestParam(defaultValue = "latest") String orderBy,
 		@RequestParam(required = false) Long cursorId,
 		@RequestParam(defaultValue = "40") int size
 
 	) {
 		try {
 			Users users = userService.findByAddress(userDetails.getUsername());
-			CursorResult<AssetSellResponseDto> result = assetService.getAllAsset(users.getId(),orderBy, cursorId, size);
+			CursorResult<AssetSellResponseDto> result = assetService.getAllAsset(users.getId(), cursorId, size);
 			return CommonResponse.success(result, "전체조회 성공");
 		} catch (Exception e) {
 			throw new CustomException(ErrorCode.ASSET_LOAD_FAIL);
@@ -121,7 +120,7 @@ public class AssetController implements AssetApi {
 		@AuthenticationPrincipal UserDetails userDetails,
 		@RequestParam String orderBy,
 		@RequestParam(defaultValue = "0") int page,
-		@RequestParam(defaultValue = "10") int size
+		@RequestParam(defaultValue = "40") int size
 
 	) {
 		try {

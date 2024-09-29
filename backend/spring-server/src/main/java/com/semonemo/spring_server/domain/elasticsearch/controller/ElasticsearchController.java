@@ -21,7 +21,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/search")
 @RequiredArgsConstructor
-public class ElasticsearchController {
+public class ElasticsearchController implements ElasticSearchApi {
 
 	private final SearchService searchService;
 	private final UserService userService;
@@ -29,12 +29,11 @@ public class ElasticsearchController {
 	@GetMapping("/asset")
 	public CommonResponse<?> searchAsset(
 		@AuthenticationPrincipal UserDetails userDetails,
-		@RequestParam(required = false) String keyword,
-		@RequestParam(defaultValue = "latest") String orderBy,
+		@RequestParam String keyword,
 		@RequestParam(required = false) Long cursorId,
 		@RequestParam(defaultValue = "10") int size) {
 		Users users = userService.findByAddress(userDetails.getUsername());
-		CursorResult<AssetSearchResponseDto> result = searchService.searchAsset(users.getId(), keyword,orderBy, cursorId, size);
+		CursorResult<AssetSearchResponseDto> result = searchService.searchAsset(users.getId(), keyword, cursorId, size);
 
 		return CommonResponse.success(result, "에셋 키워드 검색 성공");
 	}

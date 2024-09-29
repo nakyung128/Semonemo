@@ -14,7 +14,7 @@ import com.semonemo.spring_server.global.common.CursorResult;
 public interface AssetService {
 	void saveImage(AssetRequestDto assetRequestDto);
 
-	CursorResult<AssetSellResponseDto> getAllAsset(Long nowid, String orderBy, Long cursorId, int size);
+	CursorResult<AssetSellResponseDto> getAllAsset(Long nowid, Long cursorId, int size);
 
 	Page<AssetSellResponseDto> getAllAssetSort(Long nowid, String orderBy, int page, int size);
 

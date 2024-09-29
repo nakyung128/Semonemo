@@ -17,45 +17,22 @@ public class AssetSellRepositoryImpl implements AssetSellRepositoryCustom {
 	}
 
 	@Override
-	public List<AssetSell> findTopN(Long nowId,String orderBy, int size) {
-		List<AssetSell> assetSells=new ArrayList<>();
-		if(orderBy.equals("latest")){
-			assetSells=queryFactory
-				.selectFrom(assetSell)
-				.orderBy(assetSell.Id.desc())
-				.limit(size)
-				.fetch();
-		}
-		else if(orderBy.equals("oldest")){
-			assetSells=queryFactory
-				.selectFrom(assetSell)
-				.orderBy(assetSell.Id.asc())
-				.limit(size)
-				.fetch();
-		}
-		return assetSells;
+	public List<AssetSell> findTopN(int size) {
+		return queryFactory
+			.selectFrom(assetSell)
+			.orderBy(assetSell.Id.desc())
+			.limit(size)
+			.fetch();
 	}
 
 	@Override
-	public List<AssetSell> findNextN(Long nowId,String orderBy, Long cursorId, int size) {
-		List<AssetSell> assetSells=new ArrayList<>();
-		if(orderBy.equals("latest")){
-			assetSells=queryFactory
+	public List<AssetSell> findNextN(Long cursorId, int size) {
+			return queryFactory
 				.selectFrom(assetSell)
 				.where(assetSell.Id.lt(cursorId))
 				.orderBy(assetSell.Id.desc())
 				.limit(size)
 				.fetch();
-		}
-		else if(orderBy.equals("oldest")){
-			assetSells=queryFactory
-				.selectFrom(assetSell)
-				.where(assetSell.Id.lt(cursorId))
-				.orderBy(assetSell.Id.asc())
-				.limit(size)
-				.fetch();
-		}
-			return assetSells;
 	}
 
 	@Override

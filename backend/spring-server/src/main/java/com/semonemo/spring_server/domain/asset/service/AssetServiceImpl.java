@@ -34,6 +34,7 @@ import com.semonemo.spring_server.domain.user.repository.UserRepository;
 import com.semonemo.spring_server.domain.user.service.UserService;
 import com.semonemo.spring_server.global.common.CursorResult;
 
+import co.elastic.clients.elasticsearch._types.SortOrder;
 import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -111,12 +112,12 @@ public class AssetServiceImpl implements AssetService {
 
 	@Transactional
 	@Override
-	public CursorResult<AssetSellResponseDto> getAllAsset(Long nowId,String orderBy, Long cursorId, int size) {
+	public CursorResult<AssetSellResponseDto> getAllAsset(Long nowId, Long cursorId, int size) {
 		List<AssetSell> assetSells;
 		if (cursorId == null) {
-			assetSells = assetSellRepository.findTopN(nowId,orderBy, size + 1);
+			assetSells = assetSellRepository.findTopN( size + 1);
 		} else {
-			assetSells = assetSellRepository.findNextN(nowId,orderBy, cursorId, size + 1);
+			assetSells = assetSellRepository.findNextN( cursorId, size + 1);
 		}
 		List<AssetSellResponseDto> dtos = new ArrayList<>();
 		boolean hasNext = false;
@@ -158,7 +159,12 @@ public class AssetServiceImpl implements AssetService {
 				option = "price";
 				pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, option));
 				break;
+			case "oldest":
+				option = "createdAt";
+				pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, option));
+				break;
 		}
+
 		Page<AssetSell> assetSellPage = assetSellRepository.findAll(pageable);
 		List<AssetSellResponseDto> dtos = assetSellPage.getContent().stream()
 			.map(assetSell -> convertToDto(nowId, assetSell.getId()))
@@ -235,7 +241,7 @@ public class AssetServiceImpl implements AssetService {
 		if (assetSell.getLikeCount() > -1) {
 			assetSellRepository.updateCount(-1, assetSellId);
 		}
-		syncService.syncData(assetSellId, "like");
+		syncService.syncData(assetSellId, "dislike");
 	}
 
 	@Transactional
