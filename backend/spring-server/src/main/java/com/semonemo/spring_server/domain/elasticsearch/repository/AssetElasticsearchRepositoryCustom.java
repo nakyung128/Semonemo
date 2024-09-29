@@ -8,7 +8,7 @@ import com.semonemo.spring_server.global.common.CursorResult;
 
 public interface AssetElasticsearchRepositoryCustom {
 
-	CursorResult<AssetSellDocument> findByTagKeyword(String keyword,String orderBy, Long cursorId, int size);
+	CursorResult<AssetSellDocument> findByTagKeyword(String keyword, Long cursorId, int size);
 
 	Page<AssetSellDocument> keywordAndOrderby(String keyword, String orderBy, int page, int size);
 

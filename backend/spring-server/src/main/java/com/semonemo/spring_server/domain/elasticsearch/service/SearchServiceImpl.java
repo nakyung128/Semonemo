@@ -26,13 +26,13 @@ public class SearchServiceImpl implements SearchService {
 	private  final ElasticsearchSyncService syncService;
 
 
-	// @PostConstruct
-	// public void initializeElasticsearch() {
-	// 	syncService.syncAllData();
-	// }
+	@PostConstruct
+	public void initializeElasticsearch() {
+		syncService.syncAllData();
+	}
 	@Override
-	public CursorResult<AssetSearchResponseDto> searchAsset(Long nowid, String keyword,String orderBy, Long cursorId, int size) {
-		CursorResult<AssetSellDocument> assetSellDocument = assetElasticsearchRepository.findByTagKeyword(keyword, orderBy, cursorId, size);
+	public CursorResult<AssetSearchResponseDto> searchAsset(Long nowid, String keyword, Long cursorId, int size) {
+		CursorResult<AssetSellDocument> assetSellDocument = assetElasticsearchRepository.findByTagKeyword(keyword, cursorId, size);
 		List<AssetSearchResponseDto> dtos = assetSellDocument.getContent().stream()
 			.map(document -> convertToDto(nowid, document))
 			.toList();

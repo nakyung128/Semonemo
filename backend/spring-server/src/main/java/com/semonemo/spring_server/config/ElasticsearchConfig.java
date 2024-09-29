@@ -10,12 +10,16 @@ import org.springframework.data.elasticsearch.client.elc.ElasticsearchConfigurat
 public class ElasticsearchConfig extends ElasticsearchConfiguration {
 	@Value("${elasticsearch.server}")
 	private String server;
+	@Value("${elasticsearch.id}")
+	private String id;
+
+	@Value("${elasticsearch.password}")
+	private String password;
 	@Override
 	public ClientConfiguration clientConfiguration() {
 		return ClientConfiguration.builder()
 			.connectedTo(server)
-			// .usingSsl()  // 제거 또는 주석 처리
-			// .withBasicAuth("elastic", "wns0201")  // 제거 또는 주석 처리
+			.withBasicAuth(id, password)
 			.build();
 	}
 }

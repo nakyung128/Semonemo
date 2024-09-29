@@ -29,7 +29,7 @@ public class AssetElasticsearchRepositoryImpl implements AssetElasticsearchRepos
 	private final ElasticsearchOperations elasticsearchOperations;
 
 	@Override
-	public CursorResult<AssetSellDocument> findByTagKeyword(String keyword,String orderBy, Long cursorId, int size) {
+	public CursorResult<AssetSellDocument> findByTagKeyword(String keyword, Long cursorId, int size) {
 		BoolQuery.Builder boolQueryBuilder = new BoolQuery.Builder()
 			.must(new NestedQuery.Builder()
 				.path("tags")
@@ -46,14 +46,10 @@ public class AssetElasticsearchRepositoryImpl implements AssetElasticsearchRepos
 				.lt(JsonData.of(cursorId))
 				.build()._toQuery());
 		}
-		SortOrder sortOrder=SortOrder.Desc;
-		 if(orderBy.equals("oldest")) {
-			sortOrder = SortOrder.Asc;
-		}
-		SortOrder finalSortOrder = sortOrder;
+
 		NativeQuery query = NativeQuery.builder()
 			.withQuery(boolQueryBuilder.build()._toQuery())
-			.withSort(sort -> sort.field(f -> f.field("assetSellId").order(finalSortOrder)))
+			.withSort(sort -> sort.field(f -> f.field("assetSellId").order(SortOrder.Desc)))
 			.withPageable(PageRequest.of(0, size + 1))
 			.build();
 
@@ -102,6 +98,9 @@ public class AssetElasticsearchRepositoryImpl implements AssetElasticsearchRepos
 				option="price";
 				sortOrder = SortOrder.Asc;
 				break;
+			case "oldest":
+				option="createdAt";
+				sortOrder = SortOrder.Asc;
 		}
 		String finalOption = option;
 		SortOrder finalSortOrder = sortOrder;
@@ -127,6 +126,10 @@ public class AssetElasticsearchRepositoryImpl implements AssetElasticsearchRepos
 		switch (type) {
 			case "like":
 				data = assetSell.getLikeCount();
+				type = "likeCount";
+				break;
+			case "dislike":
+				data = assetSell.getLikeCount()-1;
 				type = "likeCount";
 				break;
 			case "purchase":
