@@ -6,6 +6,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.math.BigInteger;
+import java.util.List;
 
 @Getter
 @Setter
@@ -14,4 +15,5 @@ import java.math.BigInteger;
 public class NFTServiceRequestDto {
     private Long userId;
     private BigInteger tokenId;
+    private List<String> tags;
 }

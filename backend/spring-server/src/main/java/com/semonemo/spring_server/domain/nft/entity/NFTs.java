@@ -45,6 +45,9 @@ public class NFTs extends BaseTimeEntity {
     @OneToMany(mappedBy = "nftId")
     private Set<NFTMarket> createdNFTMarkets;
 
+    @OneToMany(mappedBy = "nftId")
+    private Set<NFTTag> tags;
+
     public void changeOwner(Users newOwner) {
         this.owner = newOwner;
     }

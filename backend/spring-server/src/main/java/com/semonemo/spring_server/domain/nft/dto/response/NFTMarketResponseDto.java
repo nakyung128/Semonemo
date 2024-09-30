@@ -3,6 +3,7 @@ package com.semonemo.spring_server.domain.nft.dto.response;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+import java.util.List;
 import java.util.Optional;
 
 import com.semonemo.spring_server.domain.blockchain.dto.NFTInfoDto;
@@ -14,6 +15,7 @@ public record NFTMarketResponseDto (
     Long price,
     int likeCount,
     boolean isLiked,
-    NFTInfoDto nftInfo
+    NFTInfoDto nftInfo,
+    List<String> tags
 ) {
 }
