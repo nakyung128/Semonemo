@@ -11,6 +11,10 @@ public enum ErrorCode {
 	// Server
 	INTERNAL_SERVER_ERROR("S001", "서버 내부 오류", HttpStatus.INTERNAL_SERVER_ERROR),
 	RESOURCE_NOT_FOUND_ERROR("S002", "요청한 리소스를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+	BAD_REQUEST_ERROR("S003", "잘못된 요청입니다.", HttpStatus.BAD_REQUEST),
+	METHOD_NOT_ALLOWED_ERROR("S004", "허용되지 않은 HTTP 메서드입니다.", HttpStatus.METHOD_NOT_ALLOWED),
+	INVALID_CREDENTIALS_ERROR("S005", "잘못된 인증 정보입니다.", HttpStatus.UNAUTHORIZED),
+	INSUFFICIENT_AUTHENTICATION_ERROR("S006","인증 정보가 부족합니다.", HttpStatus.UNAUTHORIZED),
 
 	// Auth
 	INVALID_USER_DATA_ERROR("AU001", "유효하지 않은 값이 입력되었습니다.", HttpStatus.BAD_REQUEST),
@@ -45,7 +49,19 @@ public enum ErrorCode {
     MARKET_OPEN_FAIL("NM009", "NFT 공개/비공개 전환에 실패하였습니다.", HttpStatus.BAD_REQUEST),
 
     // BlockChain
-    BLOCKCHAIN_ERROR("NM001", "트랜잭션 처리과정에서 오류가 발생했습니다.", HttpStatus.BAD_REQUEST),
+    BLOCKCHAIN_ERROR("BC001", "트랜잭션 처리과정에서 오류가 발생했습니다.", HttpStatus.BAD_REQUEST),
+
+	// Asset
+	LIKE_NOT_FOUND_ERROR("AS001", "좋아요를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+	LIKE_Already_exist("AS002", "이미 좋아요 눌렀습니다.", HttpStatus.ALREADY_REPORTED),
+	ASSET_UPLOAD_FAIL("AS003", "에셋 업로드 실패했습니다", HttpStatus.BAD_REQUEST),
+	ASSET_DETAIL_FAIL("AS004", "에셋 상세 조회 실패했습니다", HttpStatus.NOT_FOUND),
+	SELL_DETAIL_FAIL("AS005", "판매에셋 상세 조회 실패했습니다", HttpStatus.NOT_FOUND),
+	ASSET_LOAD_FAIL("AS006", "판매에셋 전체 조회 실패했습니다", HttpStatus.NOT_FOUND),
+	MINE_LOAD_FAIL("A007", "보유중 에셋 조회 실패했습니다", HttpStatus.NOT_FOUND),
+	USERS_LOAD_FAIL("A008", "유저 생성 에셋 조회 실패했습니다", HttpStatus.NOT_FOUND),
+	LIKE_FAIL("A009", "좋아요 실패하였습니다", HttpStatus.INTERNAL_SERVER_ERROR),
+	DISLIKE_FAIL("A010", "좋아요 취소 실패하였습니다", HttpStatus.INTERNAL_SERVER_ERROR),
 	;
 
 	private final String code;

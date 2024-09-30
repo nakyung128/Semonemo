@@ -43,6 +43,11 @@ dependencies {
 
     // Json
     implementation 'org.json:json:20210307'
+	
+	// Elasticsearch 의존성
+	implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch'
+	implementation 'co.elastic.clients:elasticsearch-java'
+	implementation 'jakarta.json:jakarta.json-api:2.1.1'
 
 	compileOnly 'org.projectlombok:lombok'
 	runtimeOnly 'com.mysql:mysql-connector-j'

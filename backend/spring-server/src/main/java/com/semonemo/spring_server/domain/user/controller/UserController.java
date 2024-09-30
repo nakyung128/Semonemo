@@ -23,6 +23,7 @@ import com.semonemo.spring_server.domain.user.entity.Users;
 import com.semonemo.spring_server.domain.user.service.UserService;
 import com.semonemo.spring_server.global.common.CommonResponse;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -54,9 +55,9 @@ public class UserController implements UserApi {
 	public CommonResponse<Void> updateUser(
 		@AuthenticationPrincipal UserDetails userDetails,
 		@RequestPart(value = "image", required = false) MultipartFile file,
-		@RequestPart(value = "data") UserUpdateRequestDTO requestDTO
+		@Valid @RequestPart(value = "data") UserUpdateRequestDTO requestDTO
 	) throws IOException {
-		if (!file.isEmpty()) {
+		if (file != null && !file.isEmpty()) {
 			requestDTO.setProfileImage(s3Service.upload(file));
 		}
 		userService.updateUser(userDetails.getUsername(), requestDTO);

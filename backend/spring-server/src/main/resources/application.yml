@@ -17,10 +17,9 @@ spring:
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    #    url: jdbc:mysql://43.201.33.160:3306/testdb?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
-    url: jdbc:mysql://localhost:3306/semonemo?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
-    username: root
-    password: root
+    url: jdbc:mysql://{domain}:3306/{schema}?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    username: {username}
+    password: {password}
   jpa:
     properties:
       hibernate.format_sql: true
@@ -34,10 +33,13 @@ cloud:
     stack.auto: false
     region.static: us-east-1
     credentials:
-      accessKey: AKIA5ZEGUVDFO4VNKFUR
-      secretKey: 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
-
+      accessKey: {s3-access-key}
+      secretKey: {s3-secret-key}
+elasticsearch:
+  server: { url }
+  id: { elastic-id }
+  password: { elastic-password }
 jwt:
-  secret: MDwwDQYJKoZIhvcNAQEBBQADKwAwKAIhAI9Z5wvMwVe9S4PwNW+spFUuxqfOeThS9udoMC9F8z/zAgMBAAE=
+  secret: {jwt-secret-key}
   access-token-expiration: 7200000 # 2h
   refresh-token-expiration: 604800000 # 7d

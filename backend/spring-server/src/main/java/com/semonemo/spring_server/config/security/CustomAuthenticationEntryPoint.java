@@ -24,7 +24,7 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
 	public void commence(HttpServletRequest request, HttpServletResponse response,
 		AuthenticationException authException) throws IOException, ServletException {
 
-		ErrorCode errorCode = getErrorCode(authException, response);
+		ErrorCode errorCode = ErrorCode.AUTHENTICATION_FAIL_ERROR;
 		ErrorResponse<?> errorResponse = ErrorResponse.error(errorCode);
 
 		response.setStatus(errorCode.getHttpStatus().value());
@@ -32,13 +32,5 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
 		response.setCharacterEncoding("UTF-8");
 
 		response.getWriter().write(objectMapper.writeValueAsString(errorResponse));
-	}
-
-	private ErrorCode getErrorCode(AuthenticationException authException, HttpServletResponse response) {
-		if (response.getStatus() == HttpServletResponse.SC_NOT_FOUND) {
-			return ErrorCode.RESOURCE_NOT_FOUND_ERROR;
-		} else {
-			return ErrorCode.AUTHENTICATION_FAIL_ERROR;
-		}
 	}
 }

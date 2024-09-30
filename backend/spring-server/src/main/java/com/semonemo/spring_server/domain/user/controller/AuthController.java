@@ -3,6 +3,8 @@ package com.semonemo.spring_server.domain.user.controller;
 import java.io.IOException;
 
 import org.springframework.http.MediaType;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -18,6 +20,8 @@ import com.semonemo.spring_server.domain.user.dto.request.UserRegisterRequestDTO
 import com.semonemo.spring_server.domain.user.dto.response.UserLoginResponseDTO;
 import com.semonemo.spring_server.domain.user.service.AuthService;
 import com.semonemo.spring_server.global.common.CommonResponse;
+import com.semonemo.spring_server.global.exception.CustomException;
+import com.semonemo.spring_server.global.exception.ErrorCode;
 
 import lombok.RequiredArgsConstructor;
 
@@ -43,7 +47,7 @@ public class AuthController implements AuthApi {
 		@RequestPart(value = "image", required = false) MultipartFile file,
 		@RequestPart(value = "data") UserRegisterRequestDTO requestDTO
 	) throws IOException {
-		if (!file.isEmpty()) {
+		if (file != null && !file.isEmpty()) {
 			requestDTO.setProfileImage(s3Service.upload(file));
 		}
 		authService.registerUser(requestDTO);
@@ -61,4 +65,12 @@ public class AuthController implements AuthApi {
 	public CommonResponse<Boolean> checkNicknameExistence(@RequestParam String nickname) {
 		return CommonResponse.success(authService.existsByNickname(nickname), "중복 확인에 성공했습니다.");
 	}
+
+	@Override
+	@GetMapping("/refresh-token")
+	public CommonResponse<UserLoginResponseDTO> regenerateJWTToken(@RequestParam String refreshToken) {
+		UserLoginResponseDTO responseDTO = authService.regenerateToken(refreshToken);
+		return CommonResponse.success(responseDTO, "토큰 재발급에 성공했습니다.");
+	}
+
 }

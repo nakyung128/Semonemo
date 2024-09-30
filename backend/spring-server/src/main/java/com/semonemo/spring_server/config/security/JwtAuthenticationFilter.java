@@ -61,6 +61,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		response.getWriter().write(objectMapper.writeValueAsString(ErrorResponse.error(errorCode)));
 	}
 
+	@Override
+	protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+		return request.getServletPath().startsWith("/api/auth");
+	}
+
 	private String abstractJwt(HttpServletRequest request) {
 		String bearerToken = request.getHeader(HttpHeaders.AUTHORIZATION);
 		if (bearerToken != null && bearerToken.startsWith(TOKEN_PREFIX)) {
