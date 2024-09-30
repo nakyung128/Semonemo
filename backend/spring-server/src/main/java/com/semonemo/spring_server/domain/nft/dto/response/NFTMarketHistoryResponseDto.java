@@ -3,17 +3,13 @@ package com.semonemo.spring_server.domain.nft.dto.response;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
-import com.semonemo.spring_server.domain.blockchain.dto.NFTInfoDto;
-
-public record NFTMarketResponseDto (
-    Long marketId,
+public record NFTMarketHistoryResponseDto (
     Long nftId,
     Long seller,
     Long price,
-    int likeCount,
-    boolean isLiked,
-    NFTInfoDto nftInfo
+    LocalDateTime time
 ) {
 }

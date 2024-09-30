@@ -1,43 +1,38 @@
 package com.semonemo.spring_server.domain.blockchain.service;
 
+import com.semonemo.spring_server.domain.blockchain.dto.NFTInfoDto;
+import com.semonemo.spring_server.domain.nft.service.NFTServiceImpl;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.util.List;
-import java.io.InputStream;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.*;
+import java.util.stream.Collectors;
 
-import org.web3j.crypto.RawTransaction;
-import org.web3j.protocol.Web3j;
-import org.web3j.tx.RawTransactionManager;
-import org.web3j.utils.Convert;
-import org.web3j.protocol.core.methods.response.Web3ClientVersion;
-import org.web3j.protocol.core.methods.response.EthGetBalance;
-import org.web3j.abi.FunctionEncoder;
-import org.web3j.abi.datatypes.Function;
+import org.web3j.abi.FunctionReturnDecoder;
+import org.web3j.abi.TypeReference;
+import org.web3j.abi.datatypes.*;
+import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.crypto.Credentials;
+import org.web3j.crypto.RawTransaction;
+import org.web3j.crypto.TransactionEncoder;
 import org.web3j.protocol.Web3j;
-import org.web3j.protocol.core.methods.response.TransactionReceipt;
-import org.web3j.tx.gas.ContractGasProvider;
-import org.web3j.tx.gas.DefaultGasProvider;
-import org.web3j.tx.gas.ContractGasProvider;
-import org.web3j.tx.gas.StaticGasProvider;
+import org.web3j.protocol.core.DefaultBlockParameterName;
+import org.web3j.protocol.core.methods.response.*;
+import org.web3j.abi.FunctionEncoder;
+import org.web3j.utils.Numeric;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-
+import com.semonemo.spring_server.domain.blockchain.dto.NFTInfo;
 import com.semonemo.spring_server.global.exception.CustomException;
 import com.semonemo.spring_server.global.exception.ErrorCode;
 
 @Service
 public class BlockChainServiceImpl implements BlockChainService {
+    private static final Log log = LogFactory.getLog(NFTServiceImpl.class);
+
     private final Web3j web3j;
     private final String coinContractAddress;
     private final String nftContractAddress;
@@ -48,11 +43,11 @@ public class BlockChainServiceImpl implements BlockChainService {
     @Autowired
     public BlockChainServiceImpl(Web3j web3j) {
         this.web3j = web3j;
-        this.coinContractAddress = "0x7dC302d7D99273Cab00C3046599108F605CCB55c"; // 예시 주소
-        this.nftContractAddress = "0x1234567890123456789012345678901234567890"; // 예시 주소
-        this.systemContractAddress = "0x1234567890123456789012345678901234567890"; // 예시 주소
-        this.adminAddress = "0xF17ce10D8c13f97Fd6Db4fCB05F7877512098337"; // 예시 주소
-        this.adminPrivateKey = "0x746b86dcdb199524b77523d43bfb56f0e1b73cae738e66a6bfce4748072ee95c"; // 예시 키
+        this.coinContractAddress = "0x7dC302d7D99273Cab00C3046599108F605CCB55c";
+        this.nftContractAddress = "0x7dC302d7D99273Cab00C3046599108F605CCB55c";
+        this.systemContractAddress = "0x503932fFA68504646FebC302aedFEBd7f64CcAd8";
+        this.adminAddress = "0xF17ce10D8c13f97Fd6Db4fCB05F7877512098337";
+        this.adminPrivateKey = "0x746b86dcdb199524b77523d43bfb56f0e1b73cae738e66a6bfce4748072ee95c";
     }
 
     @Override
@@ -76,14 +71,11 @@ public class BlockChainServiceImpl implements BlockChainService {
 
         Credentials credentials = Credentials.create(adminPrivateKey);
 
-        // gasPrice와 gasLimit를 0으로 설정
-        BigInteger gasPrice = BigInteger.ZERO;
-        BigInteger gasLimit = BigInteger.ZERO;
+        BigInteger gasPrice = web3j.ethGasPrice().send().getGasPrice();
+        BigInteger gasLimit = BigInteger.valueOf(300000); // 예상 가스 한도
 
-        // nonce 값을 가져옴
-        BigInteger nonce = web3j.ethGetTransactionCount(adminAddress, org.web3j.protocol.core.DefaultBlockParameterName.LATEST).send().getTransactionCount();
+        BigInteger nonce = web3j.ethGetTransactionCount(credentials.getAddress(), DefaultBlockParameterName.LATEST).send().getTransactionCount();
 
-        // RawTransaction 생성
         RawTransaction rawTransaction = RawTransaction.createTransaction(
             nonce,
             gasPrice,
@@ -92,17 +84,96 @@ public class BlockChainServiceImpl implements BlockChainService {
             encodedFunction
         );
 
-        // RawTransactionManager를 사용하여 트랜잭션 서명 및 전송
-        RawTransactionManager transactionManager = new RawTransactionManager(web3j, credentials);
-        String transactionHash = transactionManager.signAndSend(rawTransaction).getTransactionHash();
+        byte[] signedMessage = TransactionEncoder.signMessage(rawTransaction, credentials);
+        String hexValue = Numeric.toHexString(signedMessage);
 
-        // 트랜잭션 전송 및 영수증 반환
-        return transactionManager.sendTransaction(
-            gasPrice,
-            gasLimit,
-            coinContractAddress,
-            encodedFunction,
-            BigInteger.ZERO
+        EthSendTransaction ethSendTransaction = web3j.ethSendRawTransaction(hexValue).send();
+
+        if (ethSendTransaction.hasError()) {
+            throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
+        }
+
+        String transactionHash = ethSendTransaction.getTransactionHash();
+
+        return waitForTransactionReceipt(transactionHash);
+    }
+
+    @Override
+    public List<NFTInfoDto> getNFTsByIds(List<BigInteger> tokenIds) throws Exception {
+        List<Uint256> uint256TokenIds = tokenIds.stream()
+            .map(Uint256::new)
+            .collect(Collectors.toList());
+
+        Function function = new Function(
+            "getNFTsByIds",
+            Collections.singletonList(new DynamicArray<>(Uint256.class, uint256TokenIds)),
+            Collections.singletonList(new TypeReference<DynamicArray<NFTInfo>>() {})
+        );
+
+        String encodedFunction = FunctionEncoder.encode(function);
+
+        Credentials credentials = Credentials.create(adminPrivateKey);
+
+        EthCall ethCall = web3j.ethCall(
+            org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction(
+                credentials.getAddress(), nftContractAddress, encodedFunction
+            ),
+            DefaultBlockParameterName.LATEST
         ).send();
+
+        String rawValue = ethCall.getValue();
+        log.info("Raw ethCall value: " + rawValue);
+
+        if (ethCall.hasError()) {
+            throw new Exception("Error calling contract: " + ethCall.getError().getMessage());
+        }
+
+        List<NFTInfoDto> result = new ArrayList<>();
+
+        try {
+            List<Type> decoded = FunctionReturnDecoder.decode(rawValue, function.getOutputParameters());
+            log.info("Decoded value: " + decoded);
+
+            if (decoded.isEmpty() || !(decoded.get(0) instanceof DynamicArray)) {
+                throw new Exception("Unexpected response format");
+            }
+
+            DynamicArray<NFTInfo> nftArray = (DynamicArray<NFTInfo>) decoded.get(0);
+
+            for (NFTInfo nft : nftArray.getValue()) {
+                NFTInfoDto nftInfoDto = new NFTInfoDto();
+                nftInfoDto.setTokenId(nft.tokenId.getValue());
+                nftInfoDto.setCreator(nft.creator.toString());
+                nftInfoDto.setCurrentOwner(nft.currentOwner.toString());
+                nftInfoDto.setTokenURI(new String(nft.tokenURI.getValue(), StandardCharsets.UTF_8));
+                result.add(nftInfoDto);
+            }
+        } catch (Exception e) {
+            log.error("Error decoding contract response: " + e.getMessage(), e);
+            log.error("Raw response: " + rawValue);
+            throw new Exception("Failed to decode contract response", e);
+        }
+
+        return result;
+    }
+
+
+    // 1초마다 트랜잭션 확인, 40초까지. 결과 확인을 위한 함수
+    private TransactionReceipt waitForTransactionReceipt(String transactionHash) throws Exception {
+        Optional<TransactionReceipt> receiptOptional;
+        int attempts = 0;
+        do {
+            EthGetTransactionReceipt transactionReceipt = web3j.ethGetTransactionReceipt(transactionHash).send();
+            receiptOptional = transactionReceipt.getTransactionReceipt();
+
+            if (receiptOptional.isPresent()) {
+                return receiptOptional.get();
+            }
+
+            Thread.sleep(1000);
+            attempts++;
+        } while (attempts < 40);
+
+        throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
     }
 }

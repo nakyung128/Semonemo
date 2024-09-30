@@ -37,10 +37,15 @@ public enum ErrorCode {
 	NFT_MARKET_NOT_FOUND_ERROR("NM001", "NFT 판매 정보를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
     NFT_ALREADY_ON_SALE("NM002", "이미 판매중인 NFT 입니다.", HttpStatus.BAD_REQUEST),
     MARKET_CREATE_FAIL("NM003", "NFT 판매 등록에 실패했습니다.", HttpStatus.BAD_REQUEST),
+    MARKET_LIKE_FAIL("NM004", "좋아요를 할 수 없습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
+    MARKET_DISLIKE_FAIL("NM005", "좋아요 취소를 할 수 없습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
+    MARKET_ALREADY_LIKE("NM006", "이미 좋아요된 판매 게시글입니다.", HttpStatus.BAD_REQUEST),
+    MARKET_ALREADY_DISLIKE("NM007", "이미 좋아요 취소되어있습니다.", HttpStatus.BAD_REQUEST),
+    MARKET_BUY_FAIL("NM008", "NFT 구매를 실패하였습니다.", HttpStatus.BAD_REQUEST),
+    MARKET_OPEN_FAIL("NM009", "NFT 공개/비공개 전환에 실패하였습니다.", HttpStatus.BAD_REQUEST),
 
-	// 기타
-	NODE_SERVER_ERROR("E001", "Block Chain 서버 오류", HttpStatus.INTERNAL_SERVER_ERROR),
-	JSON_PARSING_ERROR("E002", "JSON PARSING 에러", HttpStatus.INTERNAL_SERVER_ERROR),
+    // BlockChain
+    BLOCKCHAIN_ERROR("NM001", "트랜잭션 처리과정에서 오류가 발생했습니다.", HttpStatus.BAD_REQUEST),
 	;
 
 	private final String code;

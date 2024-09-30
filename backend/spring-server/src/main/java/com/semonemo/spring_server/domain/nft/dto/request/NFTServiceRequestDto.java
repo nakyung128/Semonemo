@@ -5,11 +5,13 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.math.BigInteger;
+
 @Getter
 @Setter
 @NoArgsConstructor
 @ToString
 public class NFTServiceRequestDto {
     private Long userId;
-    private Long tokenId;
+    private BigInteger tokenId;
 }

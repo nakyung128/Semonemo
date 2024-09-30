@@ -8,4 +8,14 @@ public interface NFTMarketRepositoryCustom {
     List<NFTMarket> findSellingTopN(int size);
 
     List<NFTMarket> findSellingNextN(Long cursorId, int size);
+
+    List<NFTMarket> findSold(Long nftId);
+
+    List<NFTMarket> findUserSellingTopN(Long userId, int size);
+
+    List<NFTMarket> findUserSellingNextN(Long userId, Long cursorId, int size);
+
+    List<NFTMarket> findCreatorSellingTopN(Long userId, int size);
+
+    List<NFTMarket> findCreatorSellingNextN(Long userId, Long cursorId, int size);
 }

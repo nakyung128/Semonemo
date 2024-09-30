@@ -1,4 +1,4 @@
-package com.semonemo.spring_server.domain.nft.dto.request;
+package com.semonemo.spring_server.domain.blockchain.dto;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,6 +11,10 @@ import java.math.BigInteger;
 @Setter
 @NoArgsConstructor
 @ToString
-public class NFTRequestDto {
+public class NFTInfoDto {
     private BigInteger tokenId;
+    private String creator;
+    private String currentOwner;
+    private String tokenURI;
 }
+

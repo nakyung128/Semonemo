@@ -1,5 +1,6 @@
 package com.semonemo.spring_server.domain.nft.entity;
 
+import java.math.BigInteger;
 import java.util.Set;
 
 import com.semonemo.spring_server.domain.user.entity.Users;
@@ -33,7 +34,7 @@ public class NFTs extends BaseTimeEntity {
     private Users owner;
 
     @Column(name = "token_id", unique = true)
-    private Long tokenId;
+    private BigInteger tokenId;
 
     @Column(name = "is_open")
     private Boolean isOpen;
@@ -44,7 +45,15 @@ public class NFTs extends BaseTimeEntity {
     @OneToMany(mappedBy = "nftId")
     private Set<NFTMarket> createdNFTMarkets;
 
+    public void changeOwner(Users newOwner) {
+        this.owner = newOwner;
+    }
+
     public void toggleOnSale(boolean onSale) {
         this.isOnSale = onSale;
+    }
+
+    public void toggleOpen() {
+        this.isOpen = !this.isOpen;
     }
 }
