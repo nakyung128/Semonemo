@@ -4,6 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -29,6 +34,7 @@ import com.semonemo.spring_server.domain.user.repository.UserRepository;
 import com.semonemo.spring_server.domain.user.service.UserService;
 import com.semonemo.spring_server.global.common.CursorResult;
 
+import co.elastic.clients.elasticsearch._types.SortOrder;
 import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -63,8 +69,8 @@ public class AssetServiceImpl implements AssetService {
 	@Transactional
 	@Override
 	public void registSale(Long nowid, AssetSellRequestDto assetSellRequestDto) {
-		Long assetId= assetSellRequestDto.assetId();
-		AssetImage assetImage =assetImageRepository.findById(assetId).
+		Long assetId = assetSellRequestDto.assetId();
+		AssetImage assetImage = assetImageRepository.findById(assetId).
 			orElse(null);
 		AssetSell assetSell = AssetSell.builder()
 			.assetId(assetId)
@@ -106,12 +112,12 @@ public class AssetServiceImpl implements AssetService {
 
 	@Transactional
 	@Override
-	public CursorResult<AssetSellResponseDto> getAllAsset(Long nowId, String orderBy, Long cursorId, int size) {
+	public CursorResult<AssetSellResponseDto> getAllAsset(Long nowId, Long cursorId, int size) {
 		List<AssetSell> assetSells;
 		if (cursorId == null) {
-			assetSells = assetSellRepository.findTopN(nowId, orderBy, size + 1);
+			assetSells = assetSellRepository.findTopN( size + 1);
 		} else {
-			assetSells = assetSellRepository.findNextN(nowId, orderBy, cursorId, size + 1);
+			assetSells = assetSellRepository.findNextN( cursorId, size + 1);
 		}
 		List<AssetSellResponseDto> dtos = new ArrayList<>();
 		boolean hasNext = false;
@@ -126,6 +132,45 @@ public class AssetServiceImpl implements AssetService {
 		}
 		Long nextCursorId = hasNext ? assetSells.get(assetSells.size() - 1).getId() : null;
 		return new CursorResult<>(dtos, nextCursorId, hasNext);
+	}
+
+	@Override
+	public Page<AssetSellResponseDto> getAllAssetSort(Long nowId, String orderBy, int page, int size) {
+		Pageable pageable =null ;
+		String option = null;
+		switch (orderBy) {
+			case "high":
+				option = "price";
+				pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, option));
+				break;
+			case "like":
+				option = "likeCount";
+				pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, option));
+				break;
+			case "hit":
+				option = "hits";
+				pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, option));
+				break;
+			case "sell":
+				option = "purchaseCount";
+				pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, option));
+				break;
+			case "low":
+				option = "price";
+				pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, option));
+				break;
+			case "oldest":
+				option = "createdAt";
+				pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, option));
+				break;
+		}
+
+		Page<AssetSell> assetSellPage = assetSellRepository.findAll(pageable);
+		List<AssetSellResponseDto> dtos = assetSellPage.getContent().stream()
+			.map(assetSell -> convertToDto(nowId, assetSell.getId()))
+			.collect(Collectors.toList());
+
+		return new PageImpl<>(dtos, pageable, assetSellPage.getTotalElements());
 	}
 
 	@Override
@@ -196,7 +241,7 @@ public class AssetServiceImpl implements AssetService {
 		if (assetSell.getLikeCount() > -1) {
 			assetSellRepository.updateCount(-1, assetSellId);
 		}
-			syncService.syncData(assetSellId, "like");
+		syncService.syncData(assetSellId, "dislike");
 	}
 
 	@Transactional

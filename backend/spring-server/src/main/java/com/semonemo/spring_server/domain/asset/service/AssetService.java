@@ -1,5 +1,6 @@
 package com.semonemo.spring_server.domain.asset.service;
 
+import org.springframework.data.domain.Page;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import com.semonemo.spring_server.domain.asset.dto.AssetDetailResponseDto;
@@ -13,7 +14,9 @@ import com.semonemo.spring_server.global.common.CursorResult;
 public interface AssetService {
 	void saveImage(AssetRequestDto assetRequestDto);
 
-	CursorResult<AssetSellResponseDto> getAllAsset(Long nowid,String orderBy, Long cursorId, int size);
+	CursorResult<AssetSellResponseDto> getAllAsset(Long nowid, Long cursorId, int size);
+
+	Page<AssetSellResponseDto> getAllAssetSort(Long nowid, String orderBy, int page, int size);
 
 	AssetResponseDto getAssetDetail(Long nowid, Long assetId);
 
@@ -30,4 +33,5 @@ public interface AssetService {
 	boolean checkLike(Long userId, Long assetSellId);
 
 	void registSale(Long nowid, AssetSellRequestDto assetSellRequestDto);
+
 }

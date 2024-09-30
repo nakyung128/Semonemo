@@ -3,6 +3,7 @@ package com.semonemo.spring_server.domain.asset.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -101,15 +102,31 @@ public class AssetController implements AssetApi {
 	@GetMapping
 	public CommonResponse<CursorResult<AssetSellResponseDto>> getAllAsset(
 		@AuthenticationPrincipal UserDetails userDetails,
-		@RequestParam(defaultValue = "create") String orderBy,
 		@RequestParam(required = false) Long cursorId,
 		@RequestParam(defaultValue = "40") int size
 
 	) {
 		try {
 			Users users = userService.findByAddress(userDetails.getUsername());
-			CursorResult<AssetSellResponseDto> result = assetService.getAllAsset(users.getId(),orderBy, cursorId, size);
+			CursorResult<AssetSellResponseDto> result = assetService.getAllAsset(users.getId(), cursorId, size);
 			return CommonResponse.success(result, "전체조회 성공");
+		} catch (Exception e) {
+			throw new CustomException(ErrorCode.ASSET_LOAD_FAIL);
+		}
+	}
+	// 모든 에셋 조회 정렬
+	@GetMapping("/sort")
+	public CommonResponse<?> getAllAssetSort(
+		@AuthenticationPrincipal UserDetails userDetails,
+		@RequestParam String orderBy,
+		@RequestParam(defaultValue = "0") int page,
+		@RequestParam(defaultValue = "40") int size
+
+	) {
+		try {
+			Users users = userService.findByAddress(userDetails.getUsername());
+			Page<AssetSellResponseDto> result = assetService.getAllAssetSort(users.getId(),orderBy, page, size);
+			return CommonResponse.success(result, orderBy+"로 정렬 결과 조회 성공");
 		} catch (Exception e) {
 			throw new CustomException(ErrorCode.ASSET_LOAD_FAIL);
 		}

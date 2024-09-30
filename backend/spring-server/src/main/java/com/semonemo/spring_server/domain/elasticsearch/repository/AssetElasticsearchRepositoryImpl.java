@@ -80,11 +80,9 @@ public class AssetElasticsearchRepositoryImpl implements AssetElasticsearchRepos
 				.build()._toQuery());
 
 		String option = "";
+		SortOrder sortOrder = SortOrder.Desc;
 		switch (orderBy) {
-			case "create":
-				option = "created_at";
-				break;
-			case "price":
+			case "high":
 				option = "price";
 				break;
 			case "like":
@@ -93,14 +91,22 @@ public class AssetElasticsearchRepositoryImpl implements AssetElasticsearchRepos
 			case "hit":
 				option = "hits";
 				break;
-			case "purchase":
+			case "sell":
 				option = "purchaseCount";
 				break;
+			case "low":
+				option="price";
+				sortOrder = SortOrder.Asc;
+				break;
+			case "oldest":
+				option="createdAt";
+				sortOrder = SortOrder.Asc;
 		}
 		String finalOption = option;
+		SortOrder finalSortOrder = sortOrder;
 		NativeQuery query = NativeQuery.builder()
 			.withQuery(boolQueryBuilder.build()._toQuery())
-			.withSort(sort -> sort.field(f -> f.field(finalOption).order(SortOrder.Desc)))
+			.withSort(sort -> sort.field(f -> f.field(finalOption).order(finalSortOrder)))
 			.withPageable(PageRequest.of(page, size))
 			.build();
 
@@ -120,6 +126,10 @@ public class AssetElasticsearchRepositoryImpl implements AssetElasticsearchRepos
 		switch (type) {
 			case "like":
 				data = assetSell.getLikeCount();
+				type = "likeCount";
+				break;
+			case "dislike":
+				data = assetSell.getLikeCount()-1;
 				type = "likeCount";
 				break;
 			case "purchase":

@@ -26,10 +26,10 @@ public class SearchServiceImpl implements SearchService {
 	private  final ElasticsearchSyncService syncService;
 
 
-	// @PostConstruct
-	// public void initializeElasticsearch() {
-	// 	syncService.syncAllData();
-	// }
+	@PostConstruct
+	public void initializeElasticsearch() {
+		syncService.syncAllData();
+	}
 	@Override
 	public CursorResult<AssetSearchResponseDto> searchAsset(Long nowid, String keyword, Long cursorId, int size) {
 		CursorResult<AssetSellDocument> assetSellDocument = assetElasticsearchRepository.findByTagKeyword(keyword, cursorId, size);
