@@ -12,6 +12,9 @@ import com.semonemo.spring_server.domain.nft.dto.request.NFTMarketRequestDto;
 import com.semonemo.spring_server.domain.nft.dto.request.NFTMarketServiceRequestDto;
 import com.semonemo.spring_server.domain.nft.dto.response.NFTMarketHistoryResponseDto;
 import com.semonemo.spring_server.domain.nft.dto.response.NFTMarketResponseDto;
+import com.semonemo.spring_server.domain.nft.entity.*;
+import com.semonemo.spring_server.domain.nft.repository.nfttag.NFTTagRepository;
+import com.semonemo.spring_server.domain.nft.repository.ntags.NTagRepository;
 import com.semonemo.spring_server.global.exception.CustomException;
 import com.semonemo.spring_server.global.exception.ErrorCode;
 import org.apache.commons.logging.Log;
@@ -22,9 +25,6 @@ import com.semonemo.spring_server.domain.blockchain.service.BlockChainService;
 
 import com.semonemo.spring_server.global.common.CursorResult;
 import com.semonemo.spring_server.domain.user.entity.Users;
-import com.semonemo.spring_server.domain.nft.entity.NFTs;
-import com.semonemo.spring_server.domain.nft.entity.NFTMarket;
-import com.semonemo.spring_server.domain.nft.entity.NFTMarketLike;
 import com.semonemo.spring_server.domain.user.repository.UserRepository;
 import com.semonemo.spring_server.domain.nft.repository.nfts.NFTRepository;
 import com.semonemo.spring_server.domain.nft.repository.nftmarket.NFTMarketRepository;
@@ -45,6 +45,8 @@ public class NFTServiceImpl implements NFTService {
     private final NFTMarketRepository nftMarketRepository;
     private final NFTMarketLikeRepository nftMarketLikeRepository;
     private final UserRepository userRepository;
+    private final NTagRepository nTagRepository;
+    private final NFTTagRepository nftTagRepository;
 
     private final BlockChainService blockChainService;
 
@@ -74,12 +76,41 @@ public class NFTServiceImpl implements NFTService {
             throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
         }
 
+        for (String tagName : nftServiceRequestDto.getTags()) {
+            // 태그가 존재하는지 확인하고, 없으면 생성
+            Ntags tag = nTagRepository.findByName(tagName);
+            if (tag == null) {
+                Ntags newTag = Ntags.builder()
+                    .name(tagName)
+                    .build();
+
+                nTagRepository.save(newTag);
+
+                NFTTag nftTag = NFTTag.builder()
+                    .nftId(nft)
+                    .nTagId(newTag)
+                    .build();
+
+                nftTagRepository.save(nftTag);
+            } else {
+                NFTTag nftTag = NFTTag.builder()
+                    .nftId(nft)
+                    .nTagId(tag)
+                    .build();
+
+                nftTagRepository.save(nftTag);
+            }
+        }
+
+        List<String> tagNames = nftTagRepository.findTagNamesByNFT(nft.getNftId());
+
         if (!allNFTInfo.isEmpty()) {
             return new NFTResponseDto(
                 nft.getNftId(),
                 nft.getCreator().getId(),
                 nft.getOwner().getId(),
                 nft.getTokenId(),
+                tagNames,
                 nft.getIsOpen(),
                 nft.getIsOnSale(),
                 allNFTInfo.get(0)
@@ -129,6 +160,8 @@ public class NFTServiceImpl implements NFTService {
             throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
         }
 
+        List<String> tagNames = nftTagRepository.findTagNamesByNFT(nft.getNftId());
+
         if (!allNFTInfo.isEmpty()) {
             return new NFTMarketResponseDto(
                 market.getMarketId(),
@@ -137,7 +170,8 @@ public class NFTServiceImpl implements NFTService {
                 market.getPrice(),
                 market.getLikeCount(),
                 false,
-                allNFTInfo.get(0)
+                allNFTInfo.get(0),
+                tagNames
             );
         } else {
             throw new CustomException(ErrorCode.NFT_NOT_FOUND_ERROR);
@@ -289,6 +323,7 @@ public class NFTServiceImpl implements NFTService {
         List<BigInteger> tokenIds = List.of(market.getNftId().getTokenId());
 
         List<NFTInfoDto> nftInfo;
+
         try {
             nftInfo = blockChainService.getNFTsByIds(tokenIds);
             log.info(nftInfo);
@@ -495,6 +530,8 @@ public class NFTServiceImpl implements NFTService {
         // 좋아요 여부 확인
         boolean isLiked = nftMarketLikeRepository.existsByUserIdAndMarketId(userId, sellingNFT.getMarketId());
 
+        List<String> tagNames = nftTagRepository.findTagNamesByNFT(sellingNFT.getNftId().getNftId());
+
         // 외부 API 호출
         return new NFTMarketResponseDto(
             sellingNFT.getMarketId(),
@@ -503,17 +540,20 @@ public class NFTServiceImpl implements NFTService {
             sellingNFT.getPrice(),
             sellingNFT.getLikeCount(),
             isLiked,
-            nftInfo
+            nftInfo,
+            tagNames
         );
     }
 
     private NFTResponseDto nftConvertToDto(NFTs nft, NFTInfoDto nftInfo) {
-        // 외부 API 호출
+        List<String> tagNames = nftTagRepository.findTagNamesByNFT(nft.getNftId());
+
         return new NFTResponseDto(
             nft.getNftId(),
             nft.getCreator().getId(),
             nft.getOwner().getId(),
             nft.getTokenId(),
+            tagNames,
             nft.getIsOpen(),
             nft.getIsOnSale(),
             nftInfo

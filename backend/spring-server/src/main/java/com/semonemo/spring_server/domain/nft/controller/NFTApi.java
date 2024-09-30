@@ -100,7 +100,7 @@ public interface NFTApi {
     })
     CommonResponse<NFTMarketResponseDto> getSellingNFTDetail(
         @AuthenticationPrincipal UserDetails userDetails,
-        @RequestParam() Long marketId
+        @PathVariable Long marketId
     );
 
     @Operation(summary = "특정 NFT 시세 조회", description = "특정 NFT의 거래 시세 조회")

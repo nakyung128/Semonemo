@@ -44,6 +44,7 @@ public class NFTController implements NFTApi {
             NFTServiceRequestDto nftServiceRequestDto = new NFTServiceRequestDto();
             nftServiceRequestDto.setUserId(users.getId());
             nftServiceRequestDto.setTokenId(NFTRequestDto.getTokenId());
+            nftServiceRequestDto.setTags(NFTRequestDto.getTags());
             NFTResponseDto nftResponseDto = nftService.mintNFT(nftServiceRequestDto);
             return CommonResponse.success(nftResponseDto, "NFT 발행 성공");
         } catch (Exception e) {
@@ -62,6 +63,7 @@ public class NFTController implements NFTApi {
             nftMarketServiceRequestDto.setNftId(nftMarketRequestDto.getNftId());
             nftMarketServiceRequestDto.setSeller(users.getId());
             nftMarketServiceRequestDto.setPrice(nftMarketRequestDto.getPrice());
+            log.info(nftMarketServiceRequestDto);
             NFTMarketResponseDto nftMarketResponseDto = nftService.sellNFT(nftMarketServiceRequestDto);
             return CommonResponse.success(nftMarketResponseDto, "NFT 판매 등록 성공");
         } catch (Exception e) {
