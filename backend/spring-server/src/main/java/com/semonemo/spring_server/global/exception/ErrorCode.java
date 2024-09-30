@@ -31,6 +31,26 @@ public enum ErrorCode {
 	NOT_FOLLOW_ERROR("U004", "팔로우 목록에 없는 사용자입니다.", HttpStatus.NOT_FOUND),
 	CHECK_SELF_FOLLOW_ERROR("U005", "자기 자신은 확인할 수 없습니다.", HttpStatus.BAD_REQUEST),
 
+	// NFT
+	NFT_NOT_FOUND_ERROR("N001", "NFT를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+	USER_NFT_NOT_FOUND_ERROR("N002", "유저 NFT 조회를 실패했습니다", HttpStatus.NOT_FOUND),
+	MINT_NFT_FAIL("N003", "NFT 발행에 실패했습니다.", HttpStatus.BAD_REQUEST),
+    OWNER_NOT_MATCH("N004", "본인소유의 NFT가 아닙니다.", HttpStatus.BAD_REQUEST),
+
+	// NFT MARKET
+	NFT_MARKET_NOT_FOUND_ERROR("NM001", "NFT 판매 정보를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+    NFT_ALREADY_ON_SALE("NM002", "이미 판매중인 NFT 입니다.", HttpStatus.BAD_REQUEST),
+    MARKET_CREATE_FAIL("NM003", "NFT 판매 등록에 실패했습니다.", HttpStatus.BAD_REQUEST),
+    MARKET_LIKE_FAIL("NM004", "좋아요를 할 수 없습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
+    MARKET_DISLIKE_FAIL("NM005", "좋아요 취소를 할 수 없습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
+    MARKET_ALREADY_LIKE("NM006", "이미 좋아요된 판매 게시글입니다.", HttpStatus.BAD_REQUEST),
+    MARKET_ALREADY_DISLIKE("NM007", "이미 좋아요 취소되어있습니다.", HttpStatus.BAD_REQUEST),
+    MARKET_BUY_FAIL("NM008", "NFT 구매를 실패하였습니다.", HttpStatus.BAD_REQUEST),
+    MARKET_OPEN_FAIL("NM009", "NFT 공개/비공개 전환에 실패하였습니다.", HttpStatus.BAD_REQUEST),
+
+    // BlockChain
+    BLOCKCHAIN_ERROR("BC001", "트랜잭션 처리과정에서 오류가 발생했습니다.", HttpStatus.BAD_REQUEST),
+
 	// Asset
 	LIKE_NOT_FOUND_ERROR("AS001", "좋아요를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
 	LIKE_Already_exist("AS002", "이미 좋아요 눌렀습니다.", HttpStatus.ALREADY_REPORTED),
