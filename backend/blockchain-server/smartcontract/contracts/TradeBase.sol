@@ -17,6 +17,7 @@ contract TradeBase is Ownable, ReentrancyGuard {
     event Deposit(address indexed user, uint256 amount);
     event Withdrawal(address indexed user, uint256 amount);
     event BalanceAdjusted(address indexed from, address indexed to, uint256 amount);
+    event BalanceTransferred(address indexed from, address indexed to, uint256 amount);
 
     // 초기설정
     function initializeContracts(address _nftContractAddress, address _tokenContractAddress) internal {
@@ -53,9 +54,22 @@ contract TradeBase is Ownable, ReentrancyGuard {
         emit BalanceAdjusted(from, to, amount);
     }
 
+    // 유저 간 잔액 이동
+    function transferBalance(address to, uint256 amount) external nonReentrant {
+        require(to != address(0), "Invalid recipient address");
+        require(to != msg.sender, "Cannot transfer to yourself");
+        require(amount > 0, "Transfer amount must be greater than 0");
+        require(userBalances[msg.sender] >= amount, "Insufficient balance");
+
+        userBalances[msg.sender] -= amount;
+        userBalances[to] += amount;
+
+        emit BalanceTransferred(msg.sender, to, amount);
+    }
+
     // 컨트랙트 보유 NFT
     function getContractOwnedNFTs() public view returns (uint256[] memory) {
-        return nftContract.getUserNFTIds(address(this));
+        return nftContract.getUserNFTIds(address(this)); 
     }
 
     // 컨트랙트 보유 잔액

@@ -2,6 +2,9 @@ package com.semonemo.spring_server.domain.user.entity;
 
 import java.util.Set;
 
+import com.semonemo.spring_server.domain.nft.entity.NFTs;
+import com.semonemo.spring_server.domain.nft.entity.NFTMarket;
+import com.semonemo.spring_server.domain.nft.entity.NFTMarketLike;
 import com.semonemo.spring_server.global.common.BaseTimeEntity;
 
 import jakarta.persistence.Entity;
@@ -41,6 +44,18 @@ public class Users extends BaseTimeEntity {
 
 	@OneToMany(mappedBy = "toUser")
 	private Set<Follow> followers;
+
+	@OneToMany(mappedBy = "creator")
+	private Set<NFTs> createdNFTs;
+
+	@OneToMany(mappedBy = "owner")
+	private Set<NFTs> ownedNFTs;
+
+	@OneToMany(mappedBy = "seller")
+	private Set<NFTMarket> selledNFTMarkets;
+
+	@OneToMany(mappedBy = "likedUserId")
+	private Set<NFTMarketLike> createdNFTMarketLikes;
 
 	public void modify(String nickname, String profileImage) {
 		this.nickname = nickname;
