@@ -1,15 +1,17 @@
 package com.semonemo.spring_server.domain.nft.repository.nfts;
 
+import java.math.BigInteger;
 import java.util.List;
 
+import com.semonemo.spring_server.domain.nft.entity.NFTMarket;
 import com.semonemo.spring_server.domain.nft.entity.NFTs;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface NFTRepositoryCustom {
-    List<NFTs> findOwnedByUserIdTopN(Long userId, int size);
+    Page<NFTs> findOwnedByUser(Long userId, Pageable pageable);
 
-    List<NFTs> findOwnedByUserIdNextN(Long userId, Long cursorId, int size);
+    Page<NFTs> findPublicByUser(Long userId, Pageable pageable);
 
-    List<NFTs> findPublicByUserIdTopN(Long userId, int size);
-
-    List<NFTs> findPublicByUserIdNextN(Long userId, Long cursorId, int size);
+    boolean existsByTokenId(BigInteger tokenId);
 }

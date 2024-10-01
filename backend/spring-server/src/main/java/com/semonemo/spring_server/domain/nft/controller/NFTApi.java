@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.data.domain.Page;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.ErrorResponse;
@@ -53,42 +54,45 @@ public interface NFTApi {
     @Operation(summary = "마켓 판매 NFT 조회", description = "마켓에 판매중인 모든 NFT 조회")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "조회 성공",
-            content = @Content(schema = @Schema(implementation = CursorResult.class))),
+            content = @Content(schema = @Schema(implementation = Page.class))),
         @ApiResponse(responseCode = "500", description = "서버 내부 오류",
             content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    CommonResponse<CursorResult<NFTMarketResponseDto>> getSellingNFT(
+    CommonResponse<?> getSellingNFT(
         @AuthenticationPrincipal UserDetails userDetails,
-        @RequestParam(required = false) Long cursorId,
-        @RequestParam(defaultValue = "40") int size
+        @RequestParam(defaultValue = "latest") String orderBy,
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "15") int size
     );
 
     @Operation(summary = "특정 유저 마켓 판매 NFT 조회", description = "마켓에 판매중인 특정 유저의 NFT 조회")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "조회 성공",
-            content = @Content(schema = @Schema(implementation = CursorResult.class))),
+            content = @Content(schema = @Schema(implementation = Page.class))),
         @ApiResponse(responseCode = "500", description = "서버 내부 오류",
             content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    CommonResponse<CursorResult<NFTMarketResponseDto>> getUserSellingNFT(
+    CommonResponse<?> getUserSellingNFT(
         @AuthenticationPrincipal UserDetails userDetails,
         @PathVariable Long seller,
-        @RequestParam(required = false) Long cursorId,
-        @RequestParam(defaultValue = "40") int size
+        @RequestParam(defaultValue = "latest") String orderBy,
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "15") int size
     );
 
     @Operation(summary = "특정 제작자 마켓 판매 NFT 조회", description = "마켓에 판매중인 특정 제작자의 NFT 조회")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "조회 성공",
-            content = @Content(schema = @Schema(implementation = CursorResult.class))),
+            content = @Content(schema = @Schema(implementation = Page.class))),
         @ApiResponse(responseCode = "500", description = "서버 내부 오류",
             content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    CommonResponse<CursorResult<NFTMarketResponseDto>> getCreatorSellingNFT(
+    CommonResponse<?> getCreatorSellingNFT(
         @AuthenticationPrincipal UserDetails userDetails,
         @PathVariable Long creator,
-        @RequestParam(required = false) Long cursorId,
-        @RequestParam(defaultValue = "40") int size
+        @RequestParam(defaultValue = "latest") String orderBy,
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "15") int size
     );
 
     @Operation(summary = "특정 마켓 판매 NFT 상세 조회", description = "마켓에 판매중인 특정 NFT 상세 조회")
@@ -118,15 +122,15 @@ public interface NFTApi {
     @Operation(summary = "유저 NFT 조회", description = "유저가 보유하고 있는 NFT 조회")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "조회 성공",
-            content = @Content(schema = @Schema(implementation = CursorResult.class))),
+            content = @Content(schema = @Schema(implementation = Page.class))),
         @ApiResponse(responseCode = "500", description = "서버 내부 오류",
             content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    CommonResponse<CursorResult<NFTResponseDto>> getUserNFT(
+    CommonResponse<?> getUserNFT(
         @AuthenticationPrincipal UserDetails userDetails,
         @PathVariable Long userId,
-        @RequestParam(required = false) Long cursorId,
-        @RequestParam(defaultValue = "40") int size
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "15") int size
     );
 
     @Operation(summary = "NFT 정보 상세 조회", description = "판매중이지 않은 NFT 정보 상세 조회")
@@ -186,6 +190,6 @@ public interface NFTApi {
     })
     CommonResponse<NFTResponseDto> buyNFT(
         @AuthenticationPrincipal UserDetails userDetails,
-        @RequestParam() Long nftId
+        @RequestParam() Long marketId
     );
 }
