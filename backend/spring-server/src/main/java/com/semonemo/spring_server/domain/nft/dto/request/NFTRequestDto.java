@@ -13,6 +13,6 @@ import java.util.List;
 @NoArgsConstructor
 @ToString
 public class NFTRequestDto {
-    private BigInteger tokenId;
+    private String txHash;
     private List<String> tags;
 }

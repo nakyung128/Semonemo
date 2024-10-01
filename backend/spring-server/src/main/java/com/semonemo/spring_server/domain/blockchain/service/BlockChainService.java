@@ -9,7 +9,9 @@ import java.util.List;
 public interface BlockChainService {
     String getClientVersion() throws Exception;
 
-    public TransactionReceipt mintCoin(String to, BigInteger amount) throws Exception;
+    TransactionReceipt mintCoin(String to, BigInteger amount) throws Exception;
 
-    public List<NFTInfoDto> getNFTsByIds(List<BigInteger> tokenIds) throws Exception;
+    List<NFTInfoDto> getNFTsByIds(List<BigInteger> tokenIds) throws Exception;
+
+    TransactionReceipt waitForTransactionReceipt(String transactionHash) throws Exception;
 }
