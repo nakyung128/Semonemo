@@ -6,12 +6,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.semonemo.spring_server.domain.asset.dto.AssetSellResponseDto;
+import com.semonemo.spring_server.domain.asset.model.AssetSell;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+
 import com.semonemo.spring_server.domain.blockchain.dto.NFTInfo;
 import com.semonemo.spring_server.domain.blockchain.dto.NFTInfoDto;
 import com.semonemo.spring_server.domain.nft.dto.request.NFTMarketRequestDto;
 import com.semonemo.spring_server.domain.nft.dto.request.NFTMarketServiceRequestDto;
 import com.semonemo.spring_server.domain.nft.dto.response.NFTMarketHistoryResponseDto;
 import com.semonemo.spring_server.domain.nft.dto.response.NFTMarketResponseDto;
+import com.semonemo.spring_server.domain.nft.entity.*;
+import com.semonemo.spring_server.domain.nft.repository.nfttag.NFTTagRepository;
+import com.semonemo.spring_server.domain.nft.repository.ntags.NTagRepository;
 import com.semonemo.spring_server.global.exception.CustomException;
 import com.semonemo.spring_server.global.exception.ErrorCode;
 import org.apache.commons.logging.Log;
@@ -22,9 +33,6 @@ import com.semonemo.spring_server.domain.blockchain.service.BlockChainService;
 
 import com.semonemo.spring_server.global.common.CursorResult;
 import com.semonemo.spring_server.domain.user.entity.Users;
-import com.semonemo.spring_server.domain.nft.entity.NFTs;
-import com.semonemo.spring_server.domain.nft.entity.NFTMarket;
-import com.semonemo.spring_server.domain.nft.entity.NFTMarketLike;
 import com.semonemo.spring_server.domain.user.repository.UserRepository;
 import com.semonemo.spring_server.domain.nft.repository.nfts.NFTRepository;
 import com.semonemo.spring_server.domain.nft.repository.nftmarket.NFTMarketRepository;
@@ -45,6 +53,8 @@ public class NFTServiceImpl implements NFTService {
     private final NFTMarketRepository nftMarketRepository;
     private final NFTMarketLikeRepository nftMarketLikeRepository;
     private final UserRepository userRepository;
+    private final NTagRepository nTagRepository;
+    private final NFTTagRepository nftTagRepository;
 
     private final BlockChainService blockChainService;
 
@@ -74,12 +84,41 @@ public class NFTServiceImpl implements NFTService {
             throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
         }
 
+        for (String tagName : nftServiceRequestDto.getTags()) {
+            // 태그가 존재하는지 확인하고, 없으면 생성
+            Ntags tag = nTagRepository.findByName(tagName);
+            if (tag == null) {
+                Ntags newTag = Ntags.builder()
+                    .name(tagName)
+                    .build();
+
+                nTagRepository.save(newTag);
+
+                NFTTag nftTag = NFTTag.builder()
+                    .nftId(nft)
+                    .nTagId(newTag)
+                    .build();
+
+                nftTagRepository.save(nftTag);
+            } else {
+                NFTTag nftTag = NFTTag.builder()
+                    .nftId(nft)
+                    .nTagId(tag)
+                    .build();
+
+                nftTagRepository.save(nftTag);
+            }
+        }
+
+        List<String> tagNames = nftTagRepository.findTagNamesByNFT(nft.getNftId());
+
         if (!allNFTInfo.isEmpty()) {
             return new NFTResponseDto(
                 nft.getNftId(),
                 nft.getCreator().getId(),
                 nft.getOwner().getId(),
                 nft.getTokenId(),
+                tagNames,
                 nft.getIsOpen(),
                 nft.getIsOnSale(),
                 allNFTInfo.get(0)
@@ -129,6 +168,8 @@ public class NFTServiceImpl implements NFTService {
             throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
         }
 
+        List<String> tagNames = nftTagRepository.findTagNamesByNFT(nft.getNftId());
+
         if (!allNFTInfo.isEmpty()) {
             return new NFTMarketResponseDto(
                 market.getMarketId(),
@@ -137,7 +178,8 @@ public class NFTServiceImpl implements NFTService {
                 market.getPrice(),
                 market.getLikeCount(),
                 false,
-                allNFTInfo.get(0)
+                allNFTInfo.get(0),
+                tagNames
             );
         } else {
             throw new CustomException(ErrorCode.NFT_NOT_FOUND_ERROR);
@@ -147,21 +189,22 @@ public class NFTServiceImpl implements NFTService {
     // 마켓에 판매중인 모든 NFT 조회
     @Transactional
     @Override
-    public CursorResult<NFTMarketResponseDto> getSellingNFTs(Long userId, Long cursorId, int size) {
-        List<NFTMarket> sellingNFTs;
-        if (cursorId == null) {
-            sellingNFTs = nftMarketRepository.findSellingTopN(size + 1);
-        } else {
-            sellingNFTs = nftMarketRepository.findSellingNextN(cursorId, size + 1);
-        }
-        List<NFTMarketResponseDto> dtos = new ArrayList<>();
-        boolean hasNext = false;
-        if (sellingNFTs.size() > size) {
-            hasNext = true;
-            sellingNFTs = sellingNFTs.subList(0, size);
-        }
+    public Page<NFTMarketResponseDto> getSellingNFTs(Long userId, String orderBy, int page, int size) {
+        Pageable pageable = null;
 
-        List<BigInteger> tokenIds = sellingNFTs.stream()
+        pageable = switch (orderBy) {
+            case "high" -> PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "price"));
+            case "low" -> PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "price"));
+            case "like" -> PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "likeCount"));
+            case "oldest" -> PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "createdAt"));
+            default -> PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        };
+
+        Page<NFTMarket> sellingNFTs = nftMarketRepository.findAll(pageable);
+
+        List<NFTMarketResponseDto> dtos = new ArrayList<>();
+
+        List<BigInteger> tokenIds = sellingNFTs.getContent().stream()
             .map(nft -> nft.getNftId().getTokenId())
             .toList();
 
@@ -179,34 +222,34 @@ public class NFTServiceImpl implements NFTService {
                 info -> info
             ));
 
-        for (NFTMarket sellingNFT : sellingNFTs) {
+        for (NFTMarket sellingNFT : sellingNFTs.getContent()) {
             NFTInfoDto nftInfo = nftInfoMap.get(sellingNFT.getNftId().getTokenId());
             NFTMarketResponseDto dto = nftMarketConvertToDto(userId, sellingNFT, nftInfo);
             dtos.add(dto);
         }
 
-        Long nextCursorId = hasNext ? sellingNFTs.get(sellingNFTs.size() - 1).getMarketId() : null;
-        return new CursorResult<>(dtos, nextCursorId, hasNext);
+        return new PageImpl<>(dtos, pageable, sellingNFTs.getTotalElements());
     }
 
     // 마켓에 판매중인 특정 유저 NFT 조회
     @Transactional
     @Override
-    public CursorResult<NFTMarketResponseDto> getUserSellingNFTs(Long seller, Long userId, Long cursorId, int size) {
-        List<NFTMarket> sellingNFTs;
-        if (cursorId == null) {
-            sellingNFTs = nftMarketRepository.findUserSellingTopN(seller, size + 1);
-        } else {
-            sellingNFTs = nftMarketRepository.findUserSellingNextN(seller, cursorId, size + 1);
-        }
-        List<NFTMarketResponseDto> dtos = new ArrayList<>();
-        boolean hasNext = false;
-        if (sellingNFTs.size() > size) {
-            hasNext = true;
-            sellingNFTs = sellingNFTs.subList(0, size);
-        }
+    public Page<NFTMarketResponseDto> getUserSellingNFTs(Long seller, Long userId, String orderBy, int page, int size) {
+        Pageable pageable = null;
 
-        List<BigInteger> tokenIds = sellingNFTs.stream()
+        pageable = switch (orderBy) {
+            case "high" -> PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "price"));
+            case "low" -> PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "price"));
+            case "like" -> PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "likeCount"));
+            case "oldest" -> PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "createdAt"));
+            default -> PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        };
+
+        Page<NFTMarket> sellingNFTs = nftMarketRepository.findBySeller(seller, pageable);
+
+        List<NFTMarketResponseDto> dtos = new ArrayList<>();
+
+        List<BigInteger> tokenIds = sellingNFTs.getContent().stream()
             .map(nft -> nft.getNftId().getTokenId())
             .toList();
 
@@ -224,34 +267,34 @@ public class NFTServiceImpl implements NFTService {
                 info -> info
             ));
 
-        for (NFTMarket sellingNFT : sellingNFTs) {
+        for (NFTMarket sellingNFT : sellingNFTs.getContent()) {
             NFTInfoDto nftInfo = nftInfoMap.get(sellingNFT.getNftId().getTokenId());
             NFTMarketResponseDto dto = nftMarketConvertToDto(userId, sellingNFT, nftInfo);
             dtos.add(dto);
         }
 
-        Long nextCursorId = hasNext ? sellingNFTs.get(sellingNFTs.size() - 1).getMarketId() : null;
-        return new CursorResult<>(dtos, nextCursorId, hasNext);
+        return new PageImpl<>(dtos, pageable, sellingNFTs.getTotalElements());
     }
 
     // 마켓에 판매중인 특정 제작자 NFT 조회
     @Transactional
     @Override
-    public CursorResult<NFTMarketResponseDto> getCreatorSellingNFTs(Long creator, Long userId, Long cursorId, int size) {
-        List<NFTMarket> sellingNFTs;
-        if (cursorId == null) {
-            sellingNFTs = nftMarketRepository.findCreatorSellingTopN(creator, size + 1);
-        } else {
-            sellingNFTs = nftMarketRepository.findCreatorSellingNextN(creator, cursorId, size + 1);
-        }
-        List<NFTMarketResponseDto> dtos = new ArrayList<>();
-        boolean hasNext = false;
-        if (sellingNFTs.size() > size) {
-            hasNext = true;
-            sellingNFTs = sellingNFTs.subList(0, size);
-        }
+    public Page<NFTMarketResponseDto> getCreatorSellingNFTs(Long creator, Long userId, String orderBy, int page, int size) {
+        Pageable pageable = null;
 
-        List<BigInteger> tokenIds = sellingNFTs.stream()
+        pageable = switch (orderBy) {
+            case "high" -> PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "price"));
+            case "low" -> PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "price"));
+            case "like" -> PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "likeCount"));
+            case "oldest" -> PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "createdAt"));
+            default -> PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        };
+
+        Page<NFTMarket> sellingNFTs = nftMarketRepository.findByCreator(creator, pageable);
+
+        List<NFTMarketResponseDto> dtos = new ArrayList<>();
+
+        List<BigInteger> tokenIds = sellingNFTs.getContent().stream()
             .map(nft -> nft.getNftId().getTokenId())
             .toList();
 
@@ -269,14 +312,13 @@ public class NFTServiceImpl implements NFTService {
                 info -> info
             ));
 
-        for (NFTMarket sellingNFT : sellingNFTs) {
+        for (NFTMarket sellingNFT : sellingNFTs.getContent()) {
             NFTInfoDto nftInfo = nftInfoMap.get(sellingNFT.getNftId().getTokenId());
             NFTMarketResponseDto dto = nftMarketConvertToDto(userId, sellingNFT, nftInfo);
             dtos.add(dto);
         }
 
-        Long nextCursorId = hasNext ? sellingNFTs.get(sellingNFTs.size() - 1).getMarketId() : null;
-        return new CursorResult<>(dtos, nextCursorId, hasNext);
+        return new PageImpl<>(dtos, pageable, sellingNFTs.getTotalElements());
     }
 
     // 판매 NFT 상세 조회
@@ -289,6 +331,7 @@ public class NFTServiceImpl implements NFTService {
         List<BigInteger> tokenIds = List.of(market.getNftId().getTokenId());
 
         List<NFTInfoDto> nftInfo;
+
         try {
             nftInfo = blockChainService.getNFTsByIds(tokenIds);
             log.info(nftInfo);
@@ -318,21 +361,14 @@ public class NFTServiceImpl implements NFTService {
     // 내가 보유중인 NFT 조회
     @Transactional
     @Override
-    public CursorResult<NFTResponseDto> getOwnedNFTs(Long userId, Long cursorId, int size) {
-        List<NFTs> userNFTs;
-        if (cursorId == null) {
-            userNFTs = nftRepository.findOwnedByUserIdTopN(userId, size + 1);
-        } else {
-            userNFTs = nftRepository.findOwnedByUserIdNextN(userId, cursorId, size + 1);
-        }
-        List<NFTResponseDto> dtos = new ArrayList<>();
-        boolean hasNext = false;
-        if (userNFTs.size() > size) {
-            hasNext = true;
-            userNFTs = userNFTs.subList(0, size);
-        }
+    public Page<NFTResponseDto> getOwnedNFTs(Long userId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
 
-        List<BigInteger> tokenIds = userNFTs.stream()
+        Page<NFTs> userNFTs = nftRepository.findOwnedByUser(userId, pageable);
+
+        List<NFTResponseDto> dtos = new ArrayList<>();
+
+        List<BigInteger> tokenIds = userNFTs.getContent().stream()
             .map(NFTs::getTokenId)
             .toList();
 
@@ -350,34 +386,26 @@ public class NFTServiceImpl implements NFTService {
                 info -> info
             ));
 
-        for (NFTs userNFT : userNFTs) {
+        for (NFTs userNFT : userNFTs.getContent()) {
             NFTInfoDto nftInfo = nftInfoMap.get(userNFT.getTokenId());
             NFTResponseDto dto = nftConvertToDto(userNFT, nftInfo);
             dtos.add(dto);
         }
 
-        Long nextCursorId = hasNext ? userNFTs.get(userNFTs.size() - 1).getNftId() : null;
-        return new CursorResult<>(dtos, nextCursorId, hasNext);
+        return new PageImpl<>(dtos, pageable, userNFTs.getTotalElements());
     }
 
     // 타 유저가 보유중인 NFT 조회
     @Transactional
     @Override
-    public CursorResult<NFTResponseDto> getUserNFTs(Long userId, Long cursorId, int size) {
-        List<NFTs> userNFTs;
-        if (cursorId == null) {
-            userNFTs = nftRepository.findPublicByUserIdTopN(userId, size + 1);
-        } else {
-            userNFTs = nftRepository.findPublicByUserIdNextN(userId, cursorId, size + 1);
-        }
-        List<NFTResponseDto> dtos = new ArrayList<>();
-        boolean hasNext = false;
-        if (userNFTs.size() > size) {
-            hasNext = true;
-            userNFTs = userNFTs.subList(0, size);
-        }
+    public Page<NFTResponseDto> getUserNFTs(Long userId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
 
-        List<BigInteger> tokenIds = userNFTs.stream()
+        Page<NFTs> userNFTs = nftRepository.findPublicByUser(userId, pageable);
+
+        List<NFTResponseDto> dtos = new ArrayList<>();
+
+        List<BigInteger> tokenIds = userNFTs.getContent().stream()
             .map(NFTs::getTokenId)
             .toList();
 
@@ -395,14 +423,13 @@ public class NFTServiceImpl implements NFTService {
                 info -> info
             ));
 
-        for (NFTs userNFT : userNFTs) {
+        for (NFTs userNFT : userNFTs.getContent()) {
             NFTInfoDto nftInfo = nftInfoMap.get(userNFT.getTokenId());
             NFTResponseDto dto = nftConvertToDto(userNFT, nftInfo);
             dtos.add(dto);
         }
 
-        Long nextCursorId = hasNext ? userNFTs.get(userNFTs.size() - 1).getNftId() : null;
-        return new CursorResult<>(dtos, nextCursorId, hasNext);
+        return new PageImpl<>(dtos, pageable, userNFTs.getTotalElements());
     }
 
     // 유저화면에서 판매중이지 않은 NFT 조회
@@ -486,14 +513,37 @@ public class NFTServiceImpl implements NFTService {
 
     @Transactional
     @Override
+    public boolean checkTokenId(BigInteger tokenId) {
+        return nftRepository.existsByTokenId(tokenId);
+    }
+
+    @Transactional
+    @Override
+    public boolean checkMarket(Long nftId) {
+        return nftMarketRepository.existsOnSaleByNftId(nftId);
+    }
+
+    @Transactional
+    @Override
     public boolean checkLike(Long userId, Long marketId) {
         return nftMarketLikeRepository.existsByUserIdAndMarketId(userId, marketId);
+    }
+
+    @Transactional
+    @Override
+    public boolean checkOnSale(Long marketId) {
+        NFTMarket market = nftMarketRepository.findById(marketId)
+            .orElseThrow(() -> new CustomException(ErrorCode.NFT_MARKET_NOT_FOUND_ERROR));
+
+        return market.getIsSold();
     }
 
     // Utils
     private NFTMarketResponseDto nftMarketConvertToDto(Long userId, NFTMarket sellingNFT, NFTInfoDto nftInfo) {
         // 좋아요 여부 확인
         boolean isLiked = nftMarketLikeRepository.existsByUserIdAndMarketId(userId, sellingNFT.getMarketId());
+
+        List<String> tagNames = nftTagRepository.findTagNamesByNFT(sellingNFT.getNftId().getNftId());
 
         // 외부 API 호출
         return new NFTMarketResponseDto(
@@ -503,17 +553,20 @@ public class NFTServiceImpl implements NFTService {
             sellingNFT.getPrice(),
             sellingNFT.getLikeCount(),
             isLiked,
-            nftInfo
+            nftInfo,
+            tagNames
         );
     }
 
     private NFTResponseDto nftConvertToDto(NFTs nft, NFTInfoDto nftInfo) {
-        // 외부 API 호출
+        List<String> tagNames = nftTagRepository.findTagNamesByNFT(nft.getNftId());
+
         return new NFTResponseDto(
             nft.getNftId(),
             nft.getCreator().getId(),
             nft.getOwner().getId(),
             nft.getTokenId(),
+            tagNames,
             nft.getIsOpen(),
             nft.getIsOnSale(),
             nftInfo

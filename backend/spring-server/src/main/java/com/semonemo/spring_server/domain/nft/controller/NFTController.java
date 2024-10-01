@@ -7,6 +7,7 @@ import com.semonemo.spring_server.domain.nft.dto.request.NFTServiceRequestDto;
 import com.semonemo.spring_server.domain.nft.dto.response.NFTMarketHistoryResponseDto;
 import com.semonemo.spring_server.domain.nft.dto.response.NFTMarketResponseDto;
 import com.semonemo.spring_server.domain.nft.dto.response.NFTResponseDto;
+import com.semonemo.spring_server.domain.nft.entity.NFTMarket;
 import com.semonemo.spring_server.domain.user.entity.Users;
 import com.semonemo.spring_server.domain.nft.service.NFTService;
 import com.semonemo.spring_server.domain.user.service.UserService;
@@ -17,6 +18,7 @@ import com.semonemo.spring_server.global.exception.ErrorCode;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.data.domain.Page;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
@@ -40,10 +42,14 @@ public class NFTController implements NFTApi {
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestBody NFTRequestDto NFTRequestDto) {
         try {
+            if (nftService.checkTokenId(NFTRequestDto.getTokenId())) {
+                throw new CustomException(ErrorCode.NFT_ALREADY_MINT);
+            }
             Users users = userService.findByAddress(userDetails.getUsername());
             NFTServiceRequestDto nftServiceRequestDto = new NFTServiceRequestDto();
             nftServiceRequestDto.setUserId(users.getId());
             nftServiceRequestDto.setTokenId(NFTRequestDto.getTokenId());
+            nftServiceRequestDto.setTags(NFTRequestDto.getTags());
             NFTResponseDto nftResponseDto = nftService.mintNFT(nftServiceRequestDto);
             return CommonResponse.success(nftResponseDto, "NFT 발행 성공");
         } catch (Exception e) {
@@ -57,11 +63,15 @@ public class NFTController implements NFTApi {
         @AuthenticationPrincipal UserDetails userDetails,
         @RequestBody NFTMarketRequestDto nftMarketRequestDto) {
         try {
+            if (nftService.checkMarket(nftMarketRequestDto.getNftId())) {
+                throw new CustomException(ErrorCode.NFT_ALREADY_ON_SALE);
+            }
             Users users = userService.findByAddress(userDetails.getUsername());
             NFTMarketServiceRequestDto nftMarketServiceRequestDto = new NFTMarketServiceRequestDto();
             nftMarketServiceRequestDto.setNftId(nftMarketRequestDto.getNftId());
             nftMarketServiceRequestDto.setSeller(users.getId());
             nftMarketServiceRequestDto.setPrice(nftMarketRequestDto.getPrice());
+            log.info(nftMarketServiceRequestDto);
             NFTMarketResponseDto nftMarketResponseDto = nftService.sellNFT(nftMarketServiceRequestDto);
             return CommonResponse.success(nftMarketResponseDto, "NFT 판매 등록 성공");
         } catch (Exception e) {
@@ -71,14 +81,15 @@ public class NFTController implements NFTApi {
 
     // 마켓에 판매중인 모든 NFT 조회
     @GetMapping("")
-    public CommonResponse<CursorResult<NFTMarketResponseDto>> getSellingNFT(
+    public CommonResponse<?> getSellingNFT(
         @AuthenticationPrincipal UserDetails userDetails,
-        @RequestParam(required = false) Long cursorId,
+        @RequestParam(defaultValue = "latest") String orderBy,
+        @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "15") int size) {
         try {
             Users users = userService.findByAddress(userDetails.getUsername());
-            CursorResult<NFTMarketResponseDto> sellingNFT;
-            sellingNFT = nftService.getSellingNFTs(users.getId(), cursorId, size);
+            Page<NFTMarketResponseDto> sellingNFT;
+            sellingNFT = nftService.getSellingNFTs(users.getId(), orderBy, page, size);
             return CommonResponse.success(sellingNFT, "NFT 조회 성공");
         } catch (Exception e) {
             throw new CustomException(ErrorCode.NFT_NOT_FOUND_ERROR);
@@ -86,16 +97,17 @@ public class NFTController implements NFTApi {
     }
 
     // 마켓에 판매중인 특정 유저의 NFT 조회
-    @GetMapping("/users/{seller}/sell")
-    public CommonResponse<CursorResult<NFTMarketResponseDto>> getUserSellingNFT(
+    @GetMapping("/users/{seller}/seller")
+    public CommonResponse<?> getUserSellingNFT(
         @AuthenticationPrincipal UserDetails userDetails,
         @PathVariable Long seller,
-        @RequestParam(required = false) Long cursorId,
+        @RequestParam(defaultValue = "latest") String orderBy,
+        @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "15") int size) {
         try {
             Users users = userService.findByAddress(userDetails.getUsername());
-            CursorResult<NFTMarketResponseDto> sellingNFT;
-            sellingNFT = nftService.getUserSellingNFTs(seller, users.getId(), cursorId, size);
+            Page<NFTMarketResponseDto> sellingNFT;
+            sellingNFT = nftService.getUserSellingNFTs(seller, users.getId(), orderBy, page, size);
             return CommonResponse.success(sellingNFT, "유저 NFT 조회 성공");
         } catch (Exception e) {
             throw new CustomException(ErrorCode.USER_NFT_NOT_FOUND_ERROR);
@@ -104,15 +116,16 @@ public class NFTController implements NFTApi {
 
     // 마켓에 판매중인 특정 제작자의 NFT 조회
     @GetMapping("/users/{creator}/creator")
-    public CommonResponse<CursorResult<NFTMarketResponseDto>> getCreatorSellingNFT(
+    public CommonResponse<?> getCreatorSellingNFT(
         @AuthenticationPrincipal UserDetails userDetails,
         @PathVariable Long creator,
-        @RequestParam(required = false) Long cursorId,
+        @RequestParam(defaultValue = "latest") String orderBy,
+        @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "15") int size) {
         try {
             Users users = userService.findByAddress(userDetails.getUsername());
-            CursorResult<NFTMarketResponseDto> sellingNFT;
-            sellingNFT = nftService.getCreatorSellingNFTs(creator, users.getId(), cursorId, size);
+            Page<NFTMarketResponseDto> sellingNFT;
+            sellingNFT = nftService.getCreatorSellingNFTs(creator, users.getId(), orderBy, page, size);
             return CommonResponse.success(sellingNFT, "제작자 NFT 조회 성공");
         } catch (Exception e) {
             throw new CustomException(ErrorCode.USER_NFT_NOT_FOUND_ERROR);
@@ -150,18 +163,18 @@ public class NFTController implements NFTApi {
 
     // 유저 보유 NFT 조회
     @GetMapping("/users/{userId}/owned")
-    public CommonResponse<CursorResult<NFTResponseDto>> getUserNFT(
+    public CommonResponse<?> getUserNFT(
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable Long userId,
-            @RequestParam(required = false) Long cursorId,
+            @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "15") int size) {
         try {
             Users users = userService.findByAddress(userDetails.getUsername());
-            CursorResult<NFTResponseDto> nft;
+            Page<NFTResponseDto> nft;
             if (users.getId().equals(userId)) {
-                nft = nftService.getOwnedNFTs(userId, cursorId, size);
+                nft = nftService.getOwnedNFTs(userId, page, size);
             } else {
-                nft = nftService.getUserNFTs(userId, cursorId, size);
+                nft = nftService.getUserNFTs(userId, page, size);
             }
             return CommonResponse.success(nft, "유저 NFT 조회 성공");
         } catch (Exception e) {
@@ -235,10 +248,13 @@ public class NFTController implements NFTApi {
     @PostMapping("/purchase")
     public CommonResponse<NFTResponseDto> buyNFT(
         @AuthenticationPrincipal UserDetails userDetails,
-        @RequestParam() Long nftId) {
+        @RequestParam() Long marketId) {
         try {
+            if (nftService.checkOnSale(marketId)) {
+                throw new CustomException(ErrorCode.MARKET_ALREADY_SOLD);
+            }
             Users users = userService.findByAddress(userDetails.getUsername());
-            nftService.marketBuy(users.getId(), nftId);
+            nftService.marketBuy(users.getId(), marketId);
             return CommonResponse.success("NFT 시세 조회 성공");
         } catch (Exception e) {
             throw new CustomException(ErrorCode.MARKET_BUY_FAIL);
