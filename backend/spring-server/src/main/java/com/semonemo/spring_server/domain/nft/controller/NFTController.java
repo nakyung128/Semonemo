@@ -1,5 +1,7 @@
 package com.semonemo.spring_server.domain.nft.controller;
 
+import com.semonemo.spring_server.domain.blockchain.service.BlockChainService;
+import com.semonemo.spring_server.domain.blockchain.event.NFTEvent;
 import com.semonemo.spring_server.domain.nft.dto.request.NFTMarketRequestDto;
 import com.semonemo.spring_server.domain.nft.dto.request.NFTMarketServiceRequestDto;
 import com.semonemo.spring_server.domain.nft.dto.request.NFTRequestDto;
@@ -24,7 +26,13 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import lombok.RequiredArgsConstructor;
+import org.web3j.abi.EventEncoder;
+import org.web3j.abi.EventValues;
+import org.web3j.abi.datatypes.Type;
+import org.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.web3j.tx.Contract;
 
+import java.math.BigInteger;
 import java.util.List;
 
 @RestController
@@ -35,6 +43,7 @@ public class NFTController implements NFTApi {
 
     private final UserService userService;
     private final NFTService nftService;
+    private final BlockChainService blockChainService;
 
     // NFT 발행
     @PostMapping(value = "")
@@ -42,13 +51,52 @@ public class NFTController implements NFTApi {
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestBody NFTRequestDto NFTRequestDto) {
         try {
-            if (nftService.checkTokenId(NFTRequestDto.getTokenId())) {
+            TransactionReceipt transactionResult = blockChainService.waitForTransactionReceipt(NFTRequestDto.getTxHash());
+
+            BigInteger tokenId = null;
+            String creator;
+            String tokenURI;
+
+            for (org.web3j.protocol.core.methods.response.Log txLog : transactionResult.getLogs()) {
+                String eventHash = EventEncoder.encode(NFTEvent.NFT_MINTED_EVENT);
+
+                if (txLog.getTopics().get(0).equals(eventHash)) {
+                    EventValues eventValues = Contract.staticExtractEventParameters(
+                        NFTEvent.NFT_MINTED_EVENT, txLog
+                    );
+
+                    if (eventValues != null) {
+                        List<Type> indexedValues = eventValues.getIndexedValues();
+                        List<Type> nonIndexedValues = eventValues.getNonIndexedValues();
+
+                        tokenId = (BigInteger) indexedValues.get(0).getValue();
+                        creator = (String) indexedValues.get(1).getValue();
+                        tokenURI = (String) nonIndexedValues.get(0).getValue();
+
+                        // 디코딩된 값들 사용
+                        log.info("NFT Minted Event Detected:");
+                        log.info(tokenId);
+                        log.info(creator);
+                        log.info(tokenURI);
+
+                        // 여기에서 추가적인 비즈니스 로직을 수행할 수 있습니다.
+                        // 예: 데이터베이스에 저장, 다른 서비스 호출 등
+                    } else {
+                        throw new CustomException(ErrorCode.MINT_NFT_FAIL);
+                    }
+                }
+            }
+            if (tokenId == null) {
+                throw new CustomException(ErrorCode.MINT_NFT_FAIL);
+            }
+
+            if (nftService.checkTokenId(tokenId)) {
                 throw new CustomException(ErrorCode.NFT_ALREADY_MINT);
             }
             Users users = userService.findByAddress(userDetails.getUsername());
             NFTServiceRequestDto nftServiceRequestDto = new NFTServiceRequestDto();
             nftServiceRequestDto.setUserId(users.getId());
-            nftServiceRequestDto.setTokenId(NFTRequestDto.getTokenId());
+            nftServiceRequestDto.setTokenId(tokenId);
             nftServiceRequestDto.setTags(NFTRequestDto.getTags());
             NFTResponseDto nftResponseDto = nftService.mintNFT(nftServiceRequestDto);
             return CommonResponse.success(nftResponseDto, "NFT 발행 성공");
