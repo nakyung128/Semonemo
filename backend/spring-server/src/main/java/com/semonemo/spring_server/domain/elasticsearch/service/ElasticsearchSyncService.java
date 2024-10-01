@@ -1,5 +1,6 @@
 package com.semonemo.spring_server.domain.elasticsearch.service;
 
+import java.math.BigInteger;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -15,9 +16,19 @@ import com.semonemo.spring_server.domain.asset.repository.assetsell.AssetSellRep
 import com.semonemo.spring_server.domain.asset.repository.assettag.AssetTagRepository;
 import com.semonemo.spring_server.domain.asset.repository.atags.ATagsRepository;
 import com.semonemo.spring_server.domain.elasticsearch.document.AssetSellDocument;
+import com.semonemo.spring_server.domain.elasticsearch.document.NFTSellDocument;
 import com.semonemo.spring_server.domain.elasticsearch.document.UserDocument;
+import com.semonemo.spring_server.domain.elasticsearch.repository.NftSearchRepository;
 import com.semonemo.spring_server.domain.elasticsearch.repository.asset.AssetElasticsearchRepository;
 import com.semonemo.spring_server.domain.elasticsearch.repository.user.UserSearchRepository;
+import com.semonemo.spring_server.domain.nft.entity.NFTMarket;
+import com.semonemo.spring_server.domain.nft.entity.NFTTag;
+import com.semonemo.spring_server.domain.nft.entity.NFTs;
+import com.semonemo.spring_server.domain.nft.entity.Ntags;
+import com.semonemo.spring_server.domain.nft.repository.nftmarket.NFTMarketRepository;
+import com.semonemo.spring_server.domain.nft.repository.nfts.NFTRepository;
+import com.semonemo.spring_server.domain.nft.repository.nfttag.NFTTagRepository;
+import com.semonemo.spring_server.domain.nft.repository.ntags.NTagRepository;
 import com.semonemo.spring_server.domain.user.entity.Users;
 import com.semonemo.spring_server.domain.user.repository.UserRepository;
 
@@ -32,6 +43,13 @@ public class ElasticsearchSyncService {
     private final AssetTagRepository assetTagRepository;
     private final ATagsRepository atagsRepository;
     private final AssetElasticsearchRepository assetElasticsearchRepository;
+
+    private final NFTRepository nftRepository;
+    private final NFTMarketRepository nftMarketRepository;
+    private final NFTTagRepository nftTagRepository;
+    private final NTagRepository ntagRepository;
+    private final NftSearchRepository nftSearchRepository;
+
     private final ElasticsearchIndexChecker indexChecker;
     private final UserRepository userRepository;
     private final UserSearchRepository userSearchRepository;
@@ -60,6 +78,19 @@ public class ElasticsearchSyncService {
             .map(this::convertToUserDocument)
             .toList();
         userSearchRepository.saveAll(userDocuments);
+
+        List<NFTMarket> allNFTMarkets = nftMarketRepository.findAll();
+        List<NFTSellDocument> nftDocuments = allNFTMarkets.stream()
+            .map(nftMarket -> {
+                NFTs nft = nftMarket.getNftId();
+                List<NFTTag> nftTags = nftTagRepository.findByNftId(nft);
+                List<Ntags> tags = nftTags.stream()
+                    .map(NFTTag::getNTagId)
+                    .collect(Collectors.toList());
+                return convertToNftDocument(nft, nftMarket, tags);
+            })
+            .collect(Collectors.toList());
+        nftSearchRepository.saveAll(nftDocuments);
     }
     //판매 등록시
     public void syncSellAsset(Long assetSellId) {
@@ -100,6 +131,34 @@ public class ElasticsearchSyncService {
             .map(tag -> {
                 AssetSellDocument.Tag documentTag = new AssetSellDocument.Tag();
                 documentTag.setAtagId(tag.getId());
+                documentTag.setName(tag.getName());
+                return documentTag;
+            })
+            .collect(Collectors.toList());
+        document.setTags(documentTags);
+
+        return document;
+    }
+
+
+    private NFTSellDocument convertToNftDocument(NFTs nft, NFTMarket nftMarket, List<Ntags> tags) {
+        NFTSellDocument document = new NFTSellDocument();
+        BigInteger bigIntegerTokenId = new BigInteger(String.valueOf(nft.getTokenId()));
+        String tokenIdString = bigIntegerTokenId.toString(); // String으로 변환
+
+        document.setNftSellId(nftMarket.getMarketId());
+        document.setNftId(nft.getNftId());
+        document.setCreator(nft.getCreator().getId());
+        document.setSeller(nftMarket.getSeller().getId());
+        document.setTokenId(tokenIdString);
+        document.setPrice(nftMarket.getPrice());
+        document.setCreatedAt(nftMarket.getCreatedAt());
+        document.setLikeCount(nftMarket.getLikeCount());
+
+        List<NFTSellDocument.Tag> documentTags = tags.stream()
+            .map(tag -> {
+                NFTSellDocument.Tag documentTag = new NFTSellDocument.Tag();
+                documentTag.setNtagId(tag.getId());
                 documentTag.setName(tag.getName());
                 return documentTag;
             })
