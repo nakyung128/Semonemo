@@ -26,8 +26,8 @@ public class AssetPurchase extends BaseTimeEntity {
 	@Column(name = "id")
 	private Long Id;
 
-	@Column(name = "asset_id")
-	private Long assetId;
+	@Column(name = "asset_sell_id")
+	private Long assetSellId;
 
 	@Column(name = "user_id")
 	private Long userId;
