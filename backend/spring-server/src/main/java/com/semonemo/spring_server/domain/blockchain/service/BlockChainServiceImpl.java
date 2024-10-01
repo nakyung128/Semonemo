@@ -159,7 +159,8 @@ public class BlockChainServiceImpl implements BlockChainService {
 
 
     // 1초마다 트랜잭션 확인, 40초까지. 결과 확인을 위한 함수
-    private TransactionReceipt waitForTransactionReceipt(String transactionHash) throws Exception {
+    @Override
+    public TransactionReceipt waitForTransactionReceipt(String transactionHash) throws Exception {
         Optional<TransactionReceipt> receiptOptional;
         int attempts = 0;
         do {
@@ -172,7 +173,7 @@ public class BlockChainServiceImpl implements BlockChainService {
 
             Thread.sleep(1000);
             attempts++;
-        } while (attempts < 40);
+        } while (attempts < 30);
 
         throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
     }
