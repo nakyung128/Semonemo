@@ -8,8 +8,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.semonemo.spring_server.domain.elasticsearch.document.UserDocument;
 import com.semonemo.spring_server.domain.elasticsearch.dto.AssetSearchResponseDto;
 import com.semonemo.spring_server.domain.elasticsearch.document.AssetSellDocument;
+import com.semonemo.spring_server.domain.elasticsearch.dto.UserSearchResponseDto;
 import com.semonemo.spring_server.domain.elasticsearch.service.SearchService;
 import com.semonemo.spring_server.domain.user.entity.Users;
 import com.semonemo.spring_server.domain.user.service.UserService;
@@ -36,6 +38,17 @@ public class ElasticsearchController implements ElasticSearchApi {
 		CursorResult<AssetSearchResponseDto> result = searchService.searchAsset(users.getId(), keyword, cursorId, size);
 
 		return CommonResponse.success(result, "에셋 키워드 검색 성공");
+	}
+	@GetMapping("/users")
+	public CommonResponse<?> searchUsers(
+		@AuthenticationPrincipal UserDetails userDetails,
+		@RequestParam String keyword,
+		@RequestParam(defaultValue = "0") int page,
+		@RequestParam(defaultValue = "10") int size) {
+		Users users = userService.findByAddress(userDetails.getUsername());
+		Page<UserSearchResponseDto> result = searchService.findUser(users.getId(), keyword, page, size);
+
+		return CommonResponse.success(result, "유저 키워드 검색 성공");
 	}
 
 	@GetMapping("/asset/sort")

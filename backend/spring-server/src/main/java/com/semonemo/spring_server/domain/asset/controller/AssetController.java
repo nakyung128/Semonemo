@@ -118,7 +118,7 @@ public class AssetController implements AssetApi {
 	@GetMapping("/sort")
 	public CommonResponse<?> getAllAssetSort(
 		@AuthenticationPrincipal UserDetails userDetails,
-		@RequestParam String orderBy,
+		@RequestParam(defaultValue = "latest") String orderBy,
 		@RequestParam(defaultValue = "0") int page,
 		@RequestParam(defaultValue = "40") int size
 

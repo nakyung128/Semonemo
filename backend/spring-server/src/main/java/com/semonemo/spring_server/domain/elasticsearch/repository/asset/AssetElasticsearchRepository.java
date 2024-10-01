@@ -1,4 +1,4 @@
-package com.semonemo.spring_server.domain.elasticsearch.repository;
+package com.semonemo.spring_server.domain.elasticsearch.repository.asset;
 
 import org.springframework.data.elasticsearch.repository.ElasticsearchRepository;
 
