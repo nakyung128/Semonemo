@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.semonemo.spring_server.domain.asset.model.AssetImage;
@@ -16,7 +15,11 @@ import com.semonemo.spring_server.domain.asset.repository.assetsell.AssetSellRep
 import com.semonemo.spring_server.domain.asset.repository.assettag.AssetTagRepository;
 import com.semonemo.spring_server.domain.asset.repository.atags.ATagsRepository;
 import com.semonemo.spring_server.domain.elasticsearch.document.AssetSellDocument;
-import com.semonemo.spring_server.domain.elasticsearch.repository.AssetElasticsearchRepository;
+import com.semonemo.spring_server.domain.elasticsearch.document.UserDocument;
+import com.semonemo.spring_server.domain.elasticsearch.repository.asset.AssetElasticsearchRepository;
+import com.semonemo.spring_server.domain.elasticsearch.repository.user.UserSearchRepository;
+import com.semonemo.spring_server.domain.user.entity.Users;
+import com.semonemo.spring_server.domain.user.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -30,8 +33,11 @@ public class ElasticsearchSyncService {
     private final ATagsRepository atagsRepository;
     private final AssetElasticsearchRepository assetElasticsearchRepository;
     private final ElasticsearchIndexChecker indexChecker;
+    private final UserRepository userRepository;
+    private final UserSearchRepository userSearchRepository;
 
     public void syncAllData() {
+        //에셋 업데이트
         List<AssetSell> allAssetSells = assetSellRepository.findAll();
         List<AssetSellDocument> documents = allAssetSells.stream()
             .map(assetSell -> {
@@ -47,6 +53,13 @@ public class ElasticsearchSyncService {
             .filter(obj -> true)
             .collect(Collectors.toList());
         assetElasticsearchRepository.saveAll(documents);
+
+        //유저 업데이트
+        List<Users> allUsers = userRepository.findAll();
+        List<UserDocument> userDocuments = allUsers.stream()
+            .map(this::convertToUserDocument)
+            .toList();
+        userSearchRepository.saveAll(userDocuments);
     }
     //판매 등록시
     public void syncSellAsset(Long assetSellId) {
@@ -92,6 +105,15 @@ public class ElasticsearchSyncService {
             })
             .collect(Collectors.toList());
         document.setTags(documentTags);
+
+        return document;
+    }
+
+    private UserDocument convertToUserDocument(Users user) {
+        UserDocument document = new UserDocument();
+        document.setId(user.getId());
+        document.setNickname(user.getNickname());
+        document.setProfileImage(user.getProfileImage());
 
         return document;
     }

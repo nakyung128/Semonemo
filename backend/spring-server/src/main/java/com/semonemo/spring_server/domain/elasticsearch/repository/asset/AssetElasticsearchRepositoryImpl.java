@@ -1,4 +1,4 @@
-package com.semonemo.spring_server.domain.elasticsearch.repository;
+package com.semonemo.spring_server.domain.elasticsearch.repository.asset;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -37,6 +37,7 @@ public class AssetElasticsearchRepositoryImpl implements AssetElasticsearchRepos
 					.field("tags.name.ngram")
 					.query(keyword)
 					.operator(Operator.And)
+					
 					.build()._toQuery())
 				.build()._toQuery());
 

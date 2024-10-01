@@ -139,6 +139,14 @@ public class AssetServiceImpl implements AssetService {
 		Pageable pageable =null ;
 		String option = null;
 		switch (orderBy) {
+			case "latest":
+				option = "createdAt";
+				pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, option));
+				break;
+			case "oldest":
+				option = "createdAt";
+				pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, option));
+				break;
 			case "high":
 				option = "price";
 				pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, option));
@@ -159,10 +167,7 @@ public class AssetServiceImpl implements AssetService {
 				option = "price";
 				pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, option));
 				break;
-			case "oldest":
-				option = "createdAt";
-				pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, option));
-				break;
+
 		}
 
 		Page<AssetSell> assetSellPage = assetSellRepository.findAll(pageable);

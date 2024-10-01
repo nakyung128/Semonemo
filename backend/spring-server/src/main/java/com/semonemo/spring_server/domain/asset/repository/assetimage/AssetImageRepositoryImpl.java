@@ -24,7 +24,7 @@ public class AssetImageRepositoryImpl implements AssetImageRepositoryCustom {
 			.selectFrom(assetImage)
 			.where(assetImage.Id.in(
 				JPAExpressions
-					.select(assetPurchase.assetId)
+					.select(assetPurchase.assetSellId)
 					.from(assetPurchase)
 					.where(assetPurchase.userId.eq(nowId))
 			).or(assetImage.creator.eq(nowId)))
@@ -42,7 +42,7 @@ public class AssetImageRepositoryImpl implements AssetImageRepositoryCustom {
 					.and(
 						assetImage.Id.in(
 							JPAExpressions
-								.select(assetPurchase.assetId)
+								.select(assetPurchase.assetSellId)
 								.from(assetPurchase)
 								.where(assetPurchase.userId.eq(nowId))
 						).or(assetImage.creator.eq(nowId))
