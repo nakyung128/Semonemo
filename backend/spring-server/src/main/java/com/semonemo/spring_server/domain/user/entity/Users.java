@@ -57,6 +57,11 @@ public class Users extends BaseTimeEntity {
 	@OneToMany(mappedBy = "likedUserId")
 	private Set<NFTMarketLike> createdNFTMarketLikes;
 
+	public void modify(String nickname) {
+		this.nickname = nickname;
+		this.profileImage = profileImage;
+	}
+
 	public void modify(String nickname, String profileImage) {
 		this.nickname = nickname;
 		this.profileImage = profileImage;
