@@ -17,6 +17,7 @@ import org.springframework.data.elasticsearch.core.query.UpdateQuery;
 import com.semonemo.spring_server.domain.asset.model.AssetSell;
 import com.semonemo.spring_server.domain.elasticsearch.document.AssetSellDocument;
 import com.semonemo.spring_server.domain.elasticsearch.document.NFTSellDocument;
+import com.semonemo.spring_server.domain.nft.entity.NFTMarket;
 import com.semonemo.spring_server.global.common.CursorResult;
 
 import co.elastic.clients.elasticsearch._types.SortOrder;
@@ -85,29 +86,23 @@ public class NftSearchRepositoryImpl implements NftSearchRepositoryCustom {
 	}
 
 	@Override
-	public void updateData(Long assetSellId, String type, AssetSell assetSell) {
+	public void updateData(Long nftSellId, String type, NFTMarket nftMarket) {
 		Long data = 0L;
 		switch (type) {
 			case "like":
-				data = assetSell.getLikeCount();
+				data = (long)nftMarket.getLikeCount();
 				type = "likeCount";
 				break;
 			case "dislike":
-				data = assetSell.getLikeCount()-1;
+				data = (long)nftMarket.getLikeCount()-1;
 				type = "likeCount";
 				break;
-			case "purchase":
-				data = assetSell.getPurchaseCount();
-				type = "purchaseCount";
-				break;
 			case "price":
-				data = assetSell.getPrice();
+				data = nftMarket.getPrice();
 				type = "price";
 				break;
-			case "hits":
-				data = assetSell.getHits();
 		}
-		UpdateQuery updateQuery = UpdateQuery.builder(assetSellId.toString())
+		UpdateQuery updateQuery = UpdateQuery.builder(nftSellId.toString())
 			.withDocument(Document.create().append(type, data))
 			.build();
 
@@ -115,7 +110,7 @@ public class NftSearchRepositoryImpl implements NftSearchRepositoryCustom {
 			elasticsearchOperations.update(updateQuery, IndexCoordinates.of("asset_sells"));
 		} catch (Exception e) {
 			// 로깅 또는 예외 처리
-			throw new RuntimeException("Failed to update assetSell data: " + assetSellId, e);
+			throw new RuntimeException("Failed to update assetSell data: " + nftSellId, e);
 		}
 	}
 }
