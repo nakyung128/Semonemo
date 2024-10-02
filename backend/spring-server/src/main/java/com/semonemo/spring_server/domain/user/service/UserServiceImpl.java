@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.semonemo.spring_server.domain.elasticsearch.service.ElasticsearchSyncService;
 import com.semonemo.spring_server.domain.user.dto.request.UserUpdateRequestDTO;
 import com.semonemo.spring_server.domain.user.entity.Follow;
 import com.semonemo.spring_server.domain.user.entity.Users;
@@ -22,6 +23,7 @@ public class UserServiceImpl implements UserService {
 
 	private final UserRepository userRepository;
 	private final FollowRepository followRepository;
+	private final ElasticsearchSyncService syncService;
 
 	@Override
 	@Transactional(readOnly = true)
@@ -45,6 +47,8 @@ public class UserServiceImpl implements UserService {
 		} else {
 			user.modify(requestDTO.getNickname(), requestDTO.getProfileImage());
 		}
+		syncService.updateUser(user);
+
 	}
 
 	@Override
@@ -52,6 +56,7 @@ public class UserServiceImpl implements UserService {
 	public void deleteUser(String address) {
 		Users user = getUserFromAddress(address);
 		userRepository.delete(user);
+		syncService.deleteUser(user);
 	}
 
 	@Override
@@ -61,12 +66,12 @@ public class UserServiceImpl implements UserService {
 		Users toUser = getUserFromId(toUserId);
 
 		// 자신을 구독할 경우, 예외 처리
-		if(fromUser.equals(toUser)) {
+		if (fromUser.equals(toUser)) {
 			throw new CustomException(ErrorCode.SELF_FOLLOW_ERROR);
 		}
 
 		// 이미 구독한 사용자인 경우, 예외 처리
-		if(followRepository.existsByFromUserAndToUser(fromUser, toUser)) {
+		if (followRepository.existsByFromUserAndToUser(fromUser, toUser)) {
 			throw new CustomException(ErrorCode.ALREADY_FOLLOW_ERROR);
 		}
 
@@ -84,12 +89,12 @@ public class UserServiceImpl implements UserService {
 		Users toUser = getUserFromId(toUserId);
 
 		// 자신을 구독할 경우, 예외 처리
-		if(fromUser.equals(toUser)) {
+		if (fromUser.equals(toUser)) {
 			throw new CustomException(ErrorCode.SELF_FOLLOW_ERROR);
 		}
 
 		// 구독 정보가 없는 경우, 예외 처리
-		if(!followRepository.existsByFromUserAndToUser(fromUser, toUser)) {
+		if (!followRepository.existsByFromUserAndToUser(fromUser, toUser)) {
 			throw new CustomException(ErrorCode.NOT_FOLLOW_ERROR);
 		}
 
@@ -103,7 +108,7 @@ public class UserServiceImpl implements UserService {
 		Users fromUser = getUserFromAddress(fromUserAddress);
 		Users toUser = getUserFromId(toUserId);
 		// 자신을 확인할 경우, 예외 처리
-		if(fromUser.equals(toUser)) {
+		if (fromUser.equals(toUser)) {
 			throw new CustomException(ErrorCode.CHECK_SELF_FOLLOW_ERROR);
 		}
 

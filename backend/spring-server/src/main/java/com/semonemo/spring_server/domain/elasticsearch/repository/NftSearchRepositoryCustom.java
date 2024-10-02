@@ -9,6 +9,6 @@ public interface NftSearchRepositoryCustom {
 
 	Page<NFTSellDocument> keywordAndOrderby(String keyword, String orderBy, int page, int size);
 
-	 void updateData(Long nftSEllId,String type, NFTMarket nftMarket);
+	void updateData(Long nftSellId, String type, NFTMarket nftMarket);
 
-	}
+}

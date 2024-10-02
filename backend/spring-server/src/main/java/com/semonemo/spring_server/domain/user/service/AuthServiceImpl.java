@@ -11,6 +11,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.semonemo.spring_server.domain.elasticsearch.service.ElasticsearchSyncService;
 import com.semonemo.spring_server.domain.user.dto.request.UserRegisterRequestDTO;
 import com.semonemo.spring_server.domain.user.dto.response.UserLoginResponseDTO;
 import com.semonemo.spring_server.domain.user.entity.RefreshToken;
@@ -36,6 +37,7 @@ public class AuthServiceImpl implements AuthService {
 	private final RefreshTokenRepository refreshTokenRepository;
 	private final PasswordEncoder passwordEncoder;
 	private final AuthenticationManager authenticationManager;
+	private final ElasticsearchSyncService syncService;
 
 	@Override
 	@Transactional(readOnly = false)
@@ -53,6 +55,7 @@ public class AuthServiceImpl implements AuthService {
 		user.setPassword(encodedPassword);
 
 		userRepository.save(user);
+		syncService.syncUser(user);
 	}
 
 	@Override
