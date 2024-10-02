@@ -110,6 +110,11 @@ public class AssetServiceImpl implements AssetService {
 
 	}
 
+	@Override
+	public boolean exist(Long assetId) {
+		return assetSellRepository.existsByAssetId(assetId);
+	}
+
 	@Transactional
 	@Override
 	public CursorResult<AssetSellResponseDto> getAllAsset(Long nowId, Long cursorId, int size) {

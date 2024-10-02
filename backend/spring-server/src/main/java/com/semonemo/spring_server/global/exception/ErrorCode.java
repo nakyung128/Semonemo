@@ -64,6 +64,7 @@ public enum ErrorCode {
 	USERS_LOAD_FAIL("A008", "유저 생성 에셋 조회 실패했습니다", HttpStatus.NOT_FOUND),
 	LIKE_FAIL("A009", "좋아요 실패하였습니다", HttpStatus.INTERNAL_SERVER_ERROR),
 	DISLIKE_FAIL("A010", "좋아요 취소 실패하였습니다", HttpStatus.INTERNAL_SERVER_ERROR),
+	ASSET_ON_SALE("AS011", "이미 판매중인 에셋입니다", HttpStatus.BAD_REQUEST),
 	;
 
 	private final String code;

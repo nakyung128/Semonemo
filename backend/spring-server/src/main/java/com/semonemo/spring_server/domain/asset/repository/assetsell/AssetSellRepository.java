@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 import com.semonemo.spring_server.domain.asset.model.AssetSell;
 @Repository
 public interface AssetSellRepository extends JpaRepository<AssetSell, Long>,AssetSellRepositoryCustom {
+	boolean existsByAssetId(Long assetId);
 }

@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "ntf_market_like")
+@Table(name = "nft_market_like")
 @Getter
 @Builder
 @AllArgsConstructor

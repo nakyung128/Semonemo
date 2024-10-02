@@ -65,12 +65,15 @@ public class AssetController implements AssetApi {
 		@AuthenticationPrincipal UserDetails userDetails,
 		@RequestBody AssetSellRequestDto assetSellRequestDto
 	){
+		if(assetService.exist(assetSellRequestDto.assetId())){
+			throw new CustomException(ErrorCode.ASSET_ON_SALE);
+		}
 		Users users = userService.findByAddress(userDetails.getUsername());
 		assetService.registSale(users.getId(),assetSellRequestDto);
 		return CommonResponse.success("에셋 판매등록 성공");
 	}
 
-	//에셋 상세 조히
+	//에셋 상세 조회
 	@GetMapping("/{assetId}/detail")
 	public CommonResponse<AssetResponseDto> getAssetDetail(
 		@AuthenticationPrincipal UserDetails userDetails,
@@ -84,7 +87,7 @@ public class AssetController implements AssetApi {
 		}
 	}
 
-	//판매 에셋 상세 조히
+	//판매 에셋 상세 조회
 	@GetMapping("/sell/{assetSellId}/detail")
 	public CommonResponse<AssetDetailResponseDto> getAssetSellDetail(
 		@AuthenticationPrincipal UserDetails userDetails,

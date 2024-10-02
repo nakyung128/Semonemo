@@ -34,4 +34,5 @@ public interface AssetService {
 
 	void registSale(Long nowid, AssetSellRequestDto assetSellRequestDto);
 
+	boolean exist(Long assetId);
 }
