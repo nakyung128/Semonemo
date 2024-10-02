@@ -55,14 +55,14 @@ public class NftSearchRepositoryImpl implements NftSearchRepositoryCustom {
 				option = "likeCount";
 				break;
 			case "latest":
-				option="createdAt";
+				option = "createdAt";
 				break;
 			case "oldest":
-				option="createdAt";
+				option = "createdAt";
 				sortOrder = SortOrder.Asc;
 				break;
 			case "low":
-				option="price";
+				option = "price";
 				sortOrder = SortOrder.Asc;
 				break;
 
@@ -94,12 +94,8 @@ public class NftSearchRepositoryImpl implements NftSearchRepositoryCustom {
 				type = "likeCount";
 				break;
 			case "dislike":
-				data = (long)nftMarket.getLikeCount()-1;
+				data = (long)nftMarket.getLikeCount() - 1;
 				type = "likeCount";
-				break;
-			case "price":
-				data = nftMarket.getPrice();
-				type = "price";
 				break;
 		}
 		UpdateQuery updateQuery = UpdateQuery.builder(nftSellId.toString())
@@ -107,10 +103,10 @@ public class NftSearchRepositoryImpl implements NftSearchRepositoryCustom {
 			.build();
 
 		try {
-			elasticsearchOperations.update(updateQuery, IndexCoordinates.of("asset_sells"));
+			elasticsearchOperations.update(updateQuery, IndexCoordinates.of("nft_sells"));
 		} catch (Exception e) {
 			// 로깅 또는 예외 처리
-			throw new RuntimeException("Failed to update assetSell data: " + nftSellId, e);
+			throw new RuntimeException("Failed to update nftSell data: " + nftSellId, e);
 		}
 	}
 }
