@@ -39,7 +39,12 @@ public class UserServiceImpl implements UserService {
 	@Transactional
 	public void updateUser(String address, UserUpdateRequestDTO requestDTO) {
 		Users user = getUserFromAddress(address);
-		user.modify(requestDTO.getNickname(), requestDTO.getProfileImage());
+
+		if (requestDTO.getProfileImage() == null) {
+			user.modify(requestDTO.getNickname());
+		} else {
+			user.modify(requestDTO.getNickname(), requestDTO.getProfileImage());
+		}
 	}
 
 	@Override
