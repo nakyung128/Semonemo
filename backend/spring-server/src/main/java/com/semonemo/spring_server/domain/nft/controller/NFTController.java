@@ -34,6 +34,7 @@ import org.web3j.tx.Contract;
 
 import java.math.BigInteger;
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/nft")
@@ -51,41 +52,48 @@ public class NFTController implements NFTApi {
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestBody NFTRequestDto NFTRequestDto) {
         try {
+
+            log.info(NFTRequestDto.getTxHash());
             TransactionReceipt transactionResult = blockChainService.waitForTransactionReceipt(NFTRequestDto.getTxHash());
 
             BigInteger tokenId = null;
             String creator;
             String tokenURI;
 
-            for (org.web3j.protocol.core.methods.response.Log txLog : transactionResult.getLogs()) {
-                String eventHash = EventEncoder.encode(NFTEvent.NFT_MINTED_EVENT);
+            if (Objects.equals(transactionResult.getStatus(), "0x1")) {
+                for (org.web3j.protocol.core.methods.response.Log txLog : transactionResult.getLogs()) {
+                    String eventHash = EventEncoder.encode(NFTEvent.NFT_MINTED_EVENT);
 
-                if (txLog.getTopics().get(0).equals(eventHash)) {
-                    EventValues eventValues = Contract.staticExtractEventParameters(
-                        NFTEvent.NFT_MINTED_EVENT, txLog
-                    );
+                    if (txLog.getTopics().get(0).equals(eventHash)) {
+                        EventValues eventValues = Contract.staticExtractEventParameters(
+                            NFTEvent.NFT_MINTED_EVENT, txLog
+                        );
 
-                    if (eventValues != null) {
-                        List<Type> indexedValues = eventValues.getIndexedValues();
-                        List<Type> nonIndexedValues = eventValues.getNonIndexedValues();
+                        if (eventValues != null) {
+                            List<Type> indexedValues = eventValues.getIndexedValues();
+                            List<Type> nonIndexedValues = eventValues.getNonIndexedValues();
 
-                        tokenId = (BigInteger) indexedValues.get(0).getValue();
-                        creator = (String) indexedValues.get(1).getValue();
-                        tokenURI = (String) nonIndexedValues.get(0).getValue();
+                            tokenId = (BigInteger) indexedValues.get(0).getValue();
+                            creator = (String) indexedValues.get(1).getValue();
+                            tokenURI = (String) nonIndexedValues.get(0).getValue();
 
-                        // 디코딩된 값들 사용
-                        log.info("NFT Minted Event Detected:");
-                        log.info(tokenId);
-                        log.info(creator);
-                        log.info(tokenURI);
+                            // 디코딩된 값들 사용
+                            log.info("NFT Minted Event Detected:");
+                            log.info(tokenId);
+                            log.info(creator);
+                            log.info(tokenURI);
 
-                        // 여기에서 추가적인 비즈니스 로직을 수행할 수 있습니다.
-                        // 예: 데이터베이스에 저장, 다른 서비스 호출 등
-                    } else {
-                        throw new CustomException(ErrorCode.MINT_NFT_FAIL);
+                            // 여기에서 추가적인 비즈니스 로직을 수행할 수 있습니다.
+                            // 예: 데이터베이스에 저장, 다른 서비스 호출 등
+                        } else {
+                            throw new CustomException(ErrorCode.MINT_NFT_FAIL);
+                        }
                     }
                 }
+            } else {
+                throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
             }
+
             if (tokenId == null) {
                 throw new CustomException(ErrorCode.MINT_NFT_FAIL);
             }
