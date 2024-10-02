@@ -11,10 +11,8 @@ import java.math.BigInteger;
 @Setter
 @NoArgsConstructor
 @ToString
-public class NFTInfoDto {
-    private BigInteger tokenId;
-    private String creator;
-    private String currentOwner;
-    private IPFSHashDto data;
+public class IPFSHashDto {
+    String title;
+    String content;
+    String image;
 }
-
