@@ -7,7 +7,6 @@ import org.springframework.data.elasticsearch.repository.ElasticsearchRepository
 
 import com.semonemo.spring_server.domain.elasticsearch.document.UserDocument;
 
-public interface UserSearchRepository extends ElasticsearchRepository<UserDocument, Long>,UserSearchRepositoryCustom  {
-	@Query("{\"match\": {\"nickname\": {\"query\": \"?0\", \"analyzer\": \"nori\"}}}")
+public interface UserSearchRepository extends ElasticsearchRepository<UserDocument, Long>, UserSearchRepositoryCustom {
 	Page<UserDocument> findByNicknameContaining(String keyword, Pageable pageable);
 }
