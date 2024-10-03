@@ -1,9 +1,8 @@
-package com.semonemo.spring_server.domain.blockchain.dto;
+package com.semonemo.spring_server.domain.blockchain.dto.decoded;
 
 import org.web3j.abi.datatypes.*;
 import org.web3j.abi.datatypes.generated.Uint256;
-import java.math.BigInteger;
-import java.util.Arrays;
+
 import java.util.List;
 
 public class NFTInfo extends DynamicStruct {
@@ -18,14 +17,5 @@ public class NFTInfo extends DynamicStruct {
         this.creator = creator;
         this.currentOwner = currentOwner;
         this.tokenURI = tokenURI;
-    }
-
-    public static NFTInfo decode(List<Type> values) {
-        return new NFTInfo(
-            (Uint256) values.get(0),
-            (Address) values.get(1),
-            (Address) values.get(2),
-            (DynamicBytes) values.get(3)
-        );
     }
 }

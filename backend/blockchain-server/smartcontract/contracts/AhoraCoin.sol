@@ -40,15 +40,8 @@ contract AhoraCoin is ERC20, Ownable, ReentrancyGuard {
         _burn(msg.sender, amount);
     }
 
-    // 본인코인 타인에게 이동
-    function transferSenderToUser(address _to, uint256 _amount) public nonReentrant returns (bool) {
-        require(balanceOf(msg.sender) >= _amount, "Not enough balance");
-        _transfer(msg.sender, _to, _amount);
-        return true;
-    }
-
     // 특정 유저 코인 이동 (메인 컨트랙트에서만 호출가능)
-    function transferUserToSystem(address _from, address _to, uint256 _amount) public onlyMainContract nonReentrant returns (bool) {
+    function transferCoinByAdmin(address _from, address _to, uint256 _amount) public onlyMainContract nonReentrant returns (bool) {
       require(balanceOf(_from) >= _amount, "Not enough balance");
       _transfer(_from, _to, _amount);
       return true;

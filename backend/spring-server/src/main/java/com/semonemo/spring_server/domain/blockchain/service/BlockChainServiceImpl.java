@@ -31,7 +31,7 @@ import org.web3j.protocol.core.methods.response.*;
 import org.web3j.abi.FunctionEncoder;
 import org.web3j.utils.Numeric;
 
-import com.semonemo.spring_server.domain.blockchain.dto.NFTInfo;
+import com.semonemo.spring_server.domain.blockchain.dto.decoded.NFTInfo;
 import com.semonemo.spring_server.global.exception.CustomException;
 import com.semonemo.spring_server.global.exception.ErrorCode;
 
@@ -53,9 +53,9 @@ public class BlockChainServiceImpl implements BlockChainService {
     public BlockChainServiceImpl(Web3j web3j, RestTemplate restTemplate) {
         this.web3j = web3j;
         this.restTemplate = restTemplate;
-        this.coinContractAddress = "0x7dC302d7D99273Cab00C3046599108F605CCB55c";
-        this.nftContractAddress = "0x7dC302d7D99273Cab00C3046599108F605CCB55c";
-        this.systemContractAddress = "0x503932fFA68504646FebC302aedFEBd7f64CcAd8";
+        this.coinContractAddress = "0x00d6a95967F5c30b67E4E9D08FFa67efB2d894f6";
+        this.nftContractAddress = "0x312E5549fc78537903b7D29636C47132E5bB76D3";
+        this.systemContractAddress = "0xde308c9e0ce9F3dA58DB1F9C620eA43e2121a2A1";
         this.adminAddress = "0xF17ce10D8c13f97Fd6Db4fCB05F7877512098337";
         this.adminPrivateKey = "0x746b86dcdb199524b77523d43bfb56f0e1b73cae738e66a6bfce4748072ee95c";
     }
@@ -150,9 +150,8 @@ public class BlockChainServiceImpl implements BlockChainService {
 
             DynamicArray<NFTInfo> nftArray = (DynamicArray<NFTInfo>) decoded.get(0);
 
-
             for (NFTInfo nft : nftArray.getValue()) {
-                log.info(1);
+                log.info(new String(nft.tokenURI.getValue(), StandardCharsets.UTF_8));
                 JsonNode tokenData = fetchTokenURIData(new String(nft.tokenURI.getValue(), StandardCharsets.UTF_8));
 
                 log.info(tokenData);
@@ -180,7 +179,6 @@ public class BlockChainServiceImpl implements BlockChainService {
 
         return result;
     }
-
 
     // 1초마다 트랜잭션 확인, 40초까지. 결과 확인을 위한 함수
     @Override

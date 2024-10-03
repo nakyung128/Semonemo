@@ -12,6 +12,7 @@ public record NFTResponseDto (
     Long creator,
     Long owner,
     BigInteger tokenId,
+    int frameType,
     List<String> tags,
     boolean isOpen,
     boolean isOnSale,

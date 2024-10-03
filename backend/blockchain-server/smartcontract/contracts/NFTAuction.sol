@@ -21,7 +21,7 @@ contract NFTAuction is TradeBase {
         require(nftContract.ownerOf(_nftId) == msg.sender, "You don't own this NFT");
         require(price > 0, "Price must be greater than zero");
         
-        nftContract.transferNFTUserToSystem(_nftId, msg.sender, address(this));
+        nftContract.transferNFTByAdmin(_nftId, msg.sender, address(this));
 
         auctions[_nftId] = Auction({
             nftId: _nftId,
@@ -39,7 +39,7 @@ contract NFTAuction is TradeBase {
         require(auction.seller == msg.sender, "You don't own this NFT");
         require(auction.seller != address(0), "This auction does not exist");
         
-        nftContract.transferNFT(_nftId, msg.sender);
+        nftContract.transferNFTByAdmin(_nftId, address(this), msg.sender);
 
         delete auctions[_nftId];
 
@@ -59,7 +59,7 @@ contract NFTAuction is TradeBase {
 
         _adjustBalances(buyer, seller, price);
 
-        require(nftContract.transferNFT(_nftId, buyer), "NFT transfer failed");
+        nftContract.transferNFTByAdmin(_nftId, address(this), msg.sender);
 
         delete auctions[_nftId];
 

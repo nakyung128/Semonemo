@@ -32,6 +32,8 @@ public interface NFTService {
 
     NFTResponseDto getNFTDetails(Long nftId);
 
+    Page<NFTResponseDto> getOwnedNFTsByType(Long userId, int type, int page, int size);
+
     void marketLike(Long userId, Long marketId);
 
     void marketDislike(Long userId, Long marketId);

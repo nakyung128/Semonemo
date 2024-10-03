@@ -21,7 +21,7 @@ contract NFTMarket is TradeBase {
         require(nftContract.ownerOf(_nftId) == msg.sender, "You don't own this NFT");
         require(price > 0, "Price must be greater than zero");
         
-        nftContract.transferNFTUserToSystem(_nftId, msg.sender, address(this));
+        nftContract.transferNFTByAdmin(_nftId, msg.sender, address(this));
 
         markets[_nftId] = Market({
             nftId: _nftId,
@@ -39,7 +39,7 @@ contract NFTMarket is TradeBase {
         require(market.seller == msg.sender, "You don't own this NFT");
         require(market.seller != address(0), "This market does not exist");
 
-        nftContract.transferNFT(_nftId, msg.sender);
+        nftContract.transferNFTByAdmin(_nftId, address(this), msg.sender);
 
         delete markets[_nftId];
 
@@ -59,7 +59,7 @@ contract NFTMarket is TradeBase {
 
         _adjustBalances(msg.sender, seller, price);
 
-        require(nftContract.transferNFT(_nftId, msg.sender), "NFT transfer failed");
+        nftContract.transferNFTByAdmin(_nftId, address(this), msg.sender);
 
         delete markets[_nftId];
 
