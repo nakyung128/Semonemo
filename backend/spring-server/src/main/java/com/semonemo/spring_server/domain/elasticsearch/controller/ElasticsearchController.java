@@ -10,7 +10,6 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,9 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
-import com.semonemo.spring_server.domain.elasticsearch.document.UserDocument;
 import com.semonemo.spring_server.domain.elasticsearch.dto.AssetSearchResponseDto;
-import com.semonemo.spring_server.domain.elasticsearch.document.AssetSellDocument;
 import com.semonemo.spring_server.domain.elasticsearch.dto.NftSearchResponseDto;
 import com.semonemo.spring_server.domain.elasticsearch.dto.PopularSearchDto;
 import com.semonemo.spring_server.domain.elasticsearch.dto.UserSearchResponseDto;
@@ -29,7 +26,6 @@ import com.semonemo.spring_server.domain.elasticsearch.service.SearchService;
 import com.semonemo.spring_server.domain.user.entity.Users;
 import com.semonemo.spring_server.domain.user.service.UserService;
 import com.semonemo.spring_server.global.common.CommonResponse;
-import com.semonemo.spring_server.global.common.CursorResult;
 
 import lombok.RequiredArgsConstructor;
 
@@ -48,8 +44,8 @@ public class ElasticsearchController implements ElasticSearchApi {
 		@RequestParam(defaultValue = "0") int page,
 		@RequestParam(defaultValue = "10") int size) {
 		Users users = userService.findByAddress(userDetails.getUsername());
-		sendSearchQuery(keyword);
 		Page<UserSearchResponseDto> result = searchService.findUser(users.getId(), keyword, page, size);
+		sendSearchQuery(keyword);
 		return CommonResponse.success(result, "유저 키워드 검색 성공");
 	}
 
@@ -61,9 +57,8 @@ public class ElasticsearchController implements ElasticSearchApi {
 		@RequestParam(defaultValue = "0") int page,
 		@RequestParam(defaultValue = "40") int size) {
 		Users users = userService.findByAddress(userDetails.getUsername());
-		sendSearchQuery(keyword);
 		Page<AssetSearchResponseDto> result = searchService.findOrderBy(users.getId(), orderBy, keyword, page, size);
-
+		sendSearchQuery(keyword);
 		return CommonResponse.success(result, "에셋 키워드 검색 성공");
 	}
 
@@ -82,7 +77,7 @@ public class ElasticsearchController implements ElasticSearchApi {
 	}
 
 	private void sendSearchQuery(String keyword) {
-		RestTemplate restTemplate = new RestTemplate(); // RestTemplate 인스턴스 생성
+		RestTemplate restTemplate = new RestTemplate();
 
 		String logMessage = String.format("%s INFO [SearchService] Search query: %s",
 			LocalDateTime.now(), keyword);
@@ -97,7 +92,8 @@ public class ElasticsearchController implements ElasticSearchApi {
 		HttpEntity<Map<String, String>> request = new HttpEntity<>(body, headers);
 
 		try {
-			ResponseEntity<String> response = restTemplate.postForEntity("http://localhost:5000", request, String.class);
+			ResponseEntity<String> response = restTemplate.postForEntity("http://localhost:5000", request,
+				String.class);
 			System.out.println("Logstash response: " + response.getStatusCode());
 		} catch (Exception e) {
 			System.err.println("Error sending log to Logstash: " + e.getMessage());
@@ -105,7 +101,7 @@ public class ElasticsearchController implements ElasticSearchApi {
 		}
 	}
 
-	@GetMapping("/popular")
+	@GetMapping("/hot")
 	public CommonResponse<?> getPopularSearches(
 		@RequestParam(defaultValue = "7") int days,
 		@RequestParam(defaultValue = "10") int size) {

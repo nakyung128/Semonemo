@@ -1,58 +1,59 @@
 package com.semonemo.spring_server.domain.elasticsearch.repository.searchquery;
 
-import java.time.ZonedDateTime;
+import java.io.IOException;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
-import org.springframework.data.elasticsearch.client.elc.NativeQuery;
-import org.springframework.data.elasticsearch.core.SearchHits;
-import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
-import co.elastic.clients.elasticsearch._types.aggregations.Aggregate;
-import co.elastic.clients.elasticsearch._types.aggregations.StringTermsAggregate;
-import co.elastic.clients.elasticsearch._types.query_dsl.MatchAllQuery;
-import co.elastic.clients.elasticsearch._types.query_dsl.RangeQuery;
+import com.semonemo.spring_server.domain.elasticsearch.dto.PopularSearchDto;
+
+import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch._types.aggregations.StringTermsBucket;
+import co.elastic.clients.elasticsearch.core.SearchResponse;
+import co.elastic.clients.json.JsonData;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public class SearchQueryRepositoryImpl implements SearchQueryRepositoryCustom {
-
-	private final ElasticsearchOperations elasticsearchOperations;
-
+	private final ElasticsearchClient elasticsearchClient;
 
 	@Override
-	public List<String> findTopSearchQueries(int size) {
-		// NativeQuery query = NativeQuery.builder()
-		// 	.withQuery(new MatchAllQuery.Builder().build()._toQuery())
-		// 	.withAggregation("popular_searches",
-		// 		a -> a.terms(t -> t.field("search_query").size(size)))
-		// 	.build();
-		//
-		// SearchHits<Object> searchHits = elasticsearchOperations.search(query, Object.class);
+	public List<PopularSearchDto> getPopularSearches(int days, int size) {
+		try {
 
-		return null;
-	}
+			SearchResponse<Void> response = elasticsearchClient.search(s -> s
+					.index("search_queries-*")
+					.query(q -> q
+						.range(r -> r
+							.field("@timestamp")
+							.gte(JsonData.of(LocalDate.now().minusDays(days).atStartOfDay(ZoneOffset.UTC).toString()))
+							.lte(JsonData.of(LocalDate.now().plusDays(1).atStartOfDay(ZoneOffset.UTC).toString()))
 
-	@Override
-	public List<String> findTopSearchQueriesByTimeRange(int size, int days) {
-		// ZonedDateTime now = ZonedDateTime.now();
-		// ZonedDateTime fromDate = now.minusDays(days);
-		//
-		// NativeQuery query = NativeQuery.builder()
-		// 	.withQuery(new RangeQuery.Builder()
-		// 		.field("timestamp")
-		// 		.gte(JsonData.of(fromDate.toString()))
-		// 		.lte(JsonData.of(now.toString()))
-		// 		.build()._toQuery())
-		// 	.withAggregation("popular_searches",
-		// 		a -> a.terms(t -> t.field("search_query").size(size)))
-		// 	.build();
-		//
-		// SearchHits<Object> searchHits = elasticsearchOperations.search(query, Object.class);
+						)
+					)
+					.aggregations("popular_searches", a -> a
+						.terms(t -> t
+							.field("search_query.keyword")
+							.size(size)
+						)
+					),
+				Void.class
+			);
 
-		return null;
-	}
+			List<PopularSearchDto> popularSearches = new ArrayList<>();
+			List<StringTermsBucket> buckets = response.aggregations()
+				.get("popular_searches")
+				.sterms()
+				.buckets().array();
 
-	private List<String> extractTopTerms(SearchHits<Object> searchHits, String aggregationName) {
-		return null;
+			for (StringTermsBucket bucket : buckets) {
+				popularSearches.add(new PopularSearchDto(bucket.key().stringValue(), bucket.docCount()));
+			}
+
+			return popularSearches;
+		} catch (IOException e) {
+			throw new RuntimeException("Error querying Elasticsearch", e);
+		}
 	}
-	}
+}

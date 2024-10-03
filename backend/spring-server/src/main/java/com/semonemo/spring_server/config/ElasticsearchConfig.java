@@ -22,6 +22,7 @@ public class ElasticsearchConfig extends ElasticsearchConfiguration {
 
 	@Value("${elasticsearch.password}")
 	private String password;
+
 	@Override
 	public ClientConfiguration clientConfiguration() {
 		return ClientConfiguration.builder()
@@ -29,6 +30,7 @@ public class ElasticsearchConfig extends ElasticsearchConfiguration {
 			.withBasicAuth(id, password)
 			.build();
 	}
+
 	@Bean
 	public ElasticsearchClient elasticsearchClient() {
 		RestClient restClient = RestClient.builder(
