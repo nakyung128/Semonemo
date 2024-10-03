@@ -1,4 +1,4 @@
-package com.semonemo.presentation.screen.camera
+package com.semonemo.presentation.screen.picture.camera
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -50,9 +50,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.semonemo.presentation.R
 import com.semonemo.presentation.component.TopAppBar
-import com.semonemo.presentation.screen.camera.subscreen.CameraPreviewWithPermission
-import com.semonemo.presentation.screen.camera.subscreen.CircularCountdownTimer
-import com.semonemo.presentation.screen.camera.subscreen.PicturesContent
+import com.semonemo.presentation.screen.picture.PictureUiEvent
+import com.semonemo.presentation.screen.picture.camera.subscreen.CameraPreviewWithPermission
+import com.semonemo.presentation.screen.picture.camera.subscreen.CircularCountdownTimer
+import com.semonemo.presentation.screen.picture.camera.subscreen.PicturesContent
 import com.semonemo.presentation.theme.Gray01
 import com.semonemo.presentation.theme.Gray02
 import com.semonemo.presentation.theme.Gray03
@@ -61,23 +62,28 @@ import com.semonemo.presentation.theme.SemonemoTheme
 import com.semonemo.presentation.theme.Typography
 import com.semonemo.presentation.theme.White
 import com.semonemo.presentation.util.noRippleClickable
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun CameraRoute(
     modifier: Modifier,
+    amount: Int,
     popUpBackStack: () -> Unit,
     onShowSnackBar: (String) -> Unit,
     viewModel: CameraViewModel = hiltViewModel(),
     navigateToSelect: () -> Unit,
 ) {
-    val bitmaps = viewModel.bitmaps.collectAsStateWithLifecycle()
+    val uiState = viewModel.uiState.collectAsStateWithLifecycle()
     CameraContent(
         modifier = modifier,
         popUpBackStack = popUpBackStack,
         onShowSnackBar = onShowSnackBar,
         onTakePhoto = viewModel::takePhoto,
-        bitmaps = bitmaps.value,
-        navigateToSelect = navigateToSelect
+        navigateToSelect = navigateToSelect,
+        uiEvent = viewModel.uiEvent,
+        amount = amount,
+        bitmaps = uiState.value.bitmaps,
     )
 }
 
@@ -86,17 +92,28 @@ fun CameraContent(
     modifier: Modifier,
     popUpBackStack: () -> Unit,
     onShowSnackBar: (String) -> Unit,
-    onTakePhoto: (Bitmap) -> Unit = {},
+    onTakePhoto: (Bitmap, Int) -> Unit = { _, _ -> },
+    uiEvent: SharedFlow<PictureUiEvent>,
     bitmaps: List<Bitmap> = listOf(),
     navigateToSelect: () -> Unit = {},
+    amount: Int,
 ) {
+    LaunchedEffect(uiEvent) {
+        uiEvent.collectLatest { event ->
+            when (event) {
+                is PictureUiEvent.Error -> onShowSnackBar(event.errorMessage)
+                PictureUiEvent.NavigateToSelect -> navigateToSelect()
+            }
+        }
+    }
     CameraScreen(
         modifier = modifier,
         popUpBackStack = popUpBackStack,
         onShowSnackBar = onShowSnackBar,
         onTakePhoto = onTakePhoto,
+        navigateToSelect = navigateToSelect,
+        amount = amount,
         bitmaps = bitmaps,
-        navigateToSelect = navigateToSelect
     )
 }
 
@@ -105,12 +122,15 @@ fun CameraScreen(
     modifier: Modifier = Modifier,
     popUpBackStack: () -> Unit = {},
     onShowSnackBar: (String) -> Unit = {},
-    onTakePhoto: (Bitmap) -> Unit = {},
-    bitmaps: List<Bitmap> = listOf(),
+    onTakePhoto: (Bitmap, Int) -> Unit = { _, _ -> },
     navigateToSelect: () -> Unit = {},
+    amount: Int = 4,
+    bitmaps: List<Bitmap> = listOf(),
 ) {
     val context = LocalContext.current
     var selectedIndex by remember { mutableStateOf(0) }
+    val (cnt, setCount) = remember { mutableStateOf(amount) }
+
     val options = listOf(3, 10)
     var timerTime =
         remember {
@@ -160,15 +180,6 @@ fun CameraScreen(
                 )
             }
             Spacer(modifier = Modifier.height(30.dp))
-            PicturesContent(
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .height(100.dp),
-                bitmaps = bitmaps,
-            )
-
-            Spacer(modifier = Modifier.height(30.dp))
             SingleChoiceSegmentedButtonRow {
                 options.forEachIndexed { index, label ->
                     SegmentedButton(
@@ -204,15 +215,21 @@ fun CameraScreen(
                     }
                 }
             }
-
-            Spacer(modifier = Modifier.height(20.dp))
+            PicturesContent(
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .height(150.dp),
+                bitmaps = bitmaps,
+            )
+            Spacer(modifier = Modifier.weight(1f))
             Row(
                 modifier = Modifier.wrapContentSize(),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Spacer(modifier = Modifier.weight(1f))
                 Text(
-                    modifier = Modifier.noRippleClickable { popUpBackStack() },
+                    modifier = Modifier.noRippleClickable { navigateToSelect() },
                     text = stringResource(id = R.string.mypage_cancel_tag),
                     style = Typography.bodyMedium.copy(color = White),
                 )
@@ -228,7 +245,9 @@ fun CameraScreen(
                             controller = controller,
                             onPhotoTaken = onTakePhoto,
                             onErrorSnackBar = onShowSnackBar,
+                            amount = cnt,
                         )
+                        setCount(cnt - 1)
                     },
                 )
                 Spacer(modifier = Modifier.weight(1f))
@@ -251,13 +270,15 @@ fun CameraScreen(
                 )
                 Spacer(modifier = Modifier.weight(1f))
             }
+            Spacer(modifier = Modifier.height(30.dp))
         }
     }
 }
 
 private fun takePhoto(
     controller: LifecycleCameraController,
-    onPhotoTaken: (Bitmap) -> Unit,
+    amount: Int,
+    onPhotoTaken: (Bitmap, Int) -> Unit,
     context: Context,
     onErrorSnackBar: (String) -> Unit,
 ) {
@@ -280,7 +301,7 @@ private fun takePhoto(
                         matrix,
                         true,
                     )
-                onPhotoTaken(rotatedBitmap)
+                onPhotoTaken(rotatedBitmap, amount)
             }
 
             override fun onError(exception: ImageCaptureException) {

@@ -7,8 +7,8 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.semonemo.presentation.navigation.ScreenDestinations
-import com.semonemo.presentation.screen.camera.CameraRoute
-import com.semonemo.presentation.screen.camera.CameraViewModel
+import com.semonemo.presentation.screen.picture.camera.CameraRoute
+import com.semonemo.presentation.screen.picture.camera.CameraViewModel
 
 fun NavGraphBuilder.PictureGraph(
     modifier: Modifier,
@@ -33,6 +33,7 @@ fun NavGraphBuilder.PictureGraph(
             route = ScreenDestinations.Camera.route,
             arguments = ScreenDestinations.Camera.arguments,
         ) {
+            val amount = it.arguments?.getInt("amount") ?: -1
             val viewModel =
                 hiltViewModel<CameraViewModel>(
                     navController.getBackStackEntry(graphRoute),
@@ -40,6 +41,7 @@ fun NavGraphBuilder.PictureGraph(
 
             CameraRoute(
                 modifier = modifier,
+                amount = amount,
                 popUpBackStack = navController::popBackStack,
                 onShowSnackBar = onErrorSnackBar,
                 viewModel = viewModel,
