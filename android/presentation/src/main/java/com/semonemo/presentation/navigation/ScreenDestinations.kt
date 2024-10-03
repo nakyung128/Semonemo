@@ -124,6 +124,10 @@ sealed class ScreenDestinations(
 
     data object Frame : ScreenDestinations(route = "frame")
 
+    data object FrameSale : ScreenDestinations(route = "frameSale")
+
+    data object AssetSale : ScreenDestinations(route = "assetSale")
+
     data object AuctionProcess : ScreenDestinations(route = "auctionProcess") {
         override val route: String
             get() = "auctionProcess/{auctionId}"

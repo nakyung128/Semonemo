@@ -43,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.semonemo.presentation.BuildConfig
 import com.semonemo.presentation.R
 import com.semonemo.presentation.component.CustomTextField
 import com.semonemo.presentation.component.HashTag
@@ -60,6 +61,10 @@ import com.semonemo.presentation.theme.Typography
 import com.semonemo.presentation.util.converterFile
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.collectLatest
+import org.web3j.abi.TypeReference
+import org.web3j.abi.datatypes.Function
+import org.web3j.abi.datatypes.Utf8String
+import org.web3j.abi.datatypes.generated.Uint256
 import java.io.File
 
 @Composable
@@ -84,13 +89,19 @@ fun FrameDoneRoute(
         deleteTags = viewModel::deleteTag,
         sendTransaction = { data ->
             nftViewModel.sendTransaction(
-                data,
+                function =
+                    Function(
+                        "mintNFT",
+                        listOf(Utf8String(data)),
+                        listOf<TypeReference<*>>(object : TypeReference<Uint256>() {}),
+                    ),
                 onSuccess = {
                     viewModel.publishNft(imageHash = it, ipfsHash = data)
                 },
                 onError = {
                     onErrorSnackBar(it)
                 },
+                contractAddress = BuildConfig.NFT_CONTRACT_ADDRESS,
             )
         },
         nftEvent = nftViewModel.nftEvent,

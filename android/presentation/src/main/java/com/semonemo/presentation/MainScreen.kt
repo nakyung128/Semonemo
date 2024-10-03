@@ -38,8 +38,10 @@ import com.semonemo.presentation.screen.mypage.setting.SettingRoute
 import com.semonemo.presentation.screen.picture.PictureGraph
 import com.semonemo.presentation.screen.search.SearchRoute
 import com.semonemo.presentation.screen.signup.SignUpRoute
+import com.semonemo.presentation.screen.store.AssetSaleScreen
 import com.semonemo.presentation.screen.store.StoreFullViewScreen
 import com.semonemo.presentation.screen.store.StoreScreen
+import com.semonemo.presentation.screen.store.frame.FrameSaleRoute
 import com.semonemo.presentation.screen.wallet.WalletScreen
 import com.semonemo.presentation.theme.Gray01
 import com.semonemo.presentation.theme.GunMetal
@@ -175,6 +177,12 @@ fun MainNavHost(
                 },
                 navigateToSearch = {
                     navController.navigate(ScreenDestinations.Search.route)
+                },
+                navigateToAssetSale = {
+                    navController.navigate(ScreenDestinations.AssetSale.route)
+                },
+                navigateToFrameSale = {
+                    navController.navigate(ScreenDestinations.FrameSale.route)
                 },
             )
         }
@@ -390,6 +398,22 @@ fun MainNavHost(
                 modifier = modifier,
                 isFrame = navBackStackEntry.arguments?.getBoolean("isFrame") ?: false,
             )
+        }
+
+        composable(
+            route = ScreenDestinations.FrameSale.route,
+        ) {
+            FrameSaleRoute(
+                modifier = modifier,
+                popUpBackStack = navController::popBackStack,
+                onShowSnackBar = onShowErrorSnackBar,
+            )
+        }
+
+        composable(
+            route = ScreenDestinations.AssetSale.route,
+        ) {
+            AssetSaleScreen()
         }
 
         PictureGraph(

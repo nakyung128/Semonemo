@@ -10,4 +10,5 @@ data class MyFrame(
     val isOnSale: Boolean = false,
     val nftInfo: FrameInfo = FrameInfo(),
     val tags: List<String> = listOf(),
+    val frameType: Int = 0,
 )

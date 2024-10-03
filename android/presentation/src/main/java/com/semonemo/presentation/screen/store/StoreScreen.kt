@@ -21,7 +21,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -43,6 +42,8 @@ fun StoreScreen(
     modifier: Modifier = Modifier,
     navigateToFullView: (Boolean) -> Unit = {},
     navigateToSearch: () -> Unit = {},
+    navigateToAssetSale: () -> Unit = {},
+    navigateToFrameSale: () -> Unit = {},
 ) {
     val verticalScrollState = rememberScrollState()
     Column(
@@ -109,7 +110,11 @@ fun StoreScreen(
         )
         Spacer(modifier = Modifier.height(100.dp))
     }
-    CustomStoreFAB(modifier = modifier)
+    CustomStoreFAB(
+        modifier = modifier,
+        navigateToAssetSale = navigateToAssetSale,
+        navigateToFrameSale = navigateToFrameSale,
+    )
 }
 
 @Composable

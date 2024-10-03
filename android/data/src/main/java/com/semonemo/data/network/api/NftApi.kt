@@ -1,9 +1,11 @@
 package com.semonemo.data.network.api
 
 import com.semonemo.data.network.response.BaseResponse
+import com.semonemo.domain.model.FrameDetail
 import com.semonemo.domain.model.Nft
 import com.semonemo.domain.model.myFrame.GetMyFrameResponse
 import com.semonemo.domain.request.PublishNftRequest
+import com.semonemo.domain.request.SellNftRequest
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
@@ -23,6 +25,11 @@ interface NftApi {
 
     @GET("api/nft/available")
     suspend fun getAvailableNft(
-        @Query("type") type: Int
+        @Query("type") type: Int,
     ): BaseResponse<GetMyFrameResponse>
+
+    @POST("api/nft/sell")
+    suspend fun sellRegisterNft(
+        @Body request: SellNftRequest,
+    ): BaseResponse<FrameDetail>
 }

@@ -1,5 +1,7 @@
 package com.semonemo.domain.model
 
+import java.math.BigInteger
+
 data class SearchFrame(
     val content: List<FrameDetail> = emptyList(),
     val pageable: Pageable = Pageable(),
@@ -18,7 +20,7 @@ data class FrameDetail(
     val marketId: Long = 0,
     val nftId: Long = 0,
     val seller: Long = 0,
-    val price: Long = 0,
+    val price: BigInteger = BigInteger.ZERO,
     val likeCount: Long = 0,
     val isLiked: Boolean = false,
     val nftInfo: FrameInfo = FrameInfo(),
@@ -29,7 +31,7 @@ data class FrameInfo(
     val tokenId: Long = 0,
     val creator: String = "",
     val currentOwner: String = "",
-    val data: NftData = NftData()
+    val data: NftData = NftData(),
 )
 
 data class NftData(

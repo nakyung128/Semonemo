@@ -7,13 +7,12 @@ import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.semonemo.domain.model.myFrame.MyFrame
 import com.semonemo.presentation.theme.Gray02
 import com.semonemo.presentation.theme.GunMetal
 import com.semonemo.presentation.theme.Typography
@@ -32,6 +31,7 @@ import kotlinx.collections.immutable.toPersistentList
 fun CustomTab(
     modifier: Modifier = Modifier,
     tabList: List<String> = listOf(),
+    frameList: List<MyFrame> = listOf(),
     selectedIndex: Int = 0,
     onTabSelected: (Int) -> Unit,
 ) {

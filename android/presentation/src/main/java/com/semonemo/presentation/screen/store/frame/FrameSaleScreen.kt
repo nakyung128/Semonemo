@@ -1,4 +1,4 @@
-package com.semonemo.presentation.screen.store
+package com.semonemo.presentation.screen.store.frame
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
@@ -12,10 +12,8 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -44,6 +42,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -61,12 +60,19 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.semonemo.domain.model.myFrame.MyFrame
+import com.semonemo.presentation.BuildConfig
 import com.semonemo.presentation.R
 import com.semonemo.presentation.component.CustomTab
 import com.semonemo.presentation.component.HashTag
+import com.semonemo.presentation.component.LoadingDialog
 import com.semonemo.presentation.component.LongBlackButton
 import com.semonemo.presentation.component.LongUnableButton
 import com.semonemo.presentation.component.PriceTextField
+import com.semonemo.presentation.component.TopAppBar
+import com.semonemo.presentation.screen.nft.NftViewModel
 import com.semonemo.presentation.theme.Gray01
 import com.semonemo.presentation.theme.Gray02
 import com.semonemo.presentation.theme.Gray03
@@ -74,57 +80,112 @@ import com.semonemo.presentation.theme.SemonemoTheme
 import com.semonemo.presentation.theme.Typography
 import com.semonemo.presentation.theme.WhiteGray
 import com.semonemo.presentation.util.addFocusCleaner
+import com.semonemo.presentation.util.noRippleClickable
+import com.semonemo.presentation.util.toPrice
+import com.semonemo.presentation.util.urlToIpfs
+import com.skydoves.landscapist.glide.GlideImage
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.collectLatest
+import org.web3j.abi.TypeReference
+import org.web3j.abi.datatypes.Function
+import org.web3j.abi.datatypes.generated.Uint256
+
+@Composable
+fun FrameSaleRoute(
+    modifier: Modifier,
+    popUpBackStack: () -> Unit,
+    viewModel: FrameSaleViewModel = hiltViewModel(),
+    nftViewModel: NftViewModel = hiltViewModel(),
+    onShowSnackBar: (String) -> Unit,
+) {
+    val uiState = viewModel.uiState.collectAsStateWithLifecycle()
+    FrameSaleContent(
+        modifier = modifier,
+        popUpBackStack = popUpBackStack,
+        uiState = uiState.value,
+        uiEvent = viewModel.uiEvent,
+        onShowSnackBar = onShowSnackBar,
+        selectFrame = viewModel::selectFrame,
+        sendTransaction = { price ->
+            nftViewModel.sendTransaction(
+                function =
+                    Function(
+                        "createMarket",
+                        listOf(
+                            Uint256(
+                                uiState.value.selectFrame
+                                    ?.nftInfo
+                                    ?.tokenId ?: 0L,
+                            ),
+                            Uint256(price.toBigInteger().toPrice()),
+                        ),
+                        listOf<TypeReference<*>>(object : TypeReference<Uint256>() {}),
+                    ),
+                onSuccess = { tx ->
+                    viewModel.sellRegisterFrame(price = price.toBigInteger(), hash = tx)
+                },
+                onError = {
+                    onShowSnackBar(it)
+                },
+                contractAddress = BuildConfig.SYSTEM_CONTRACT_ADDRESS,
+            )
+        },
+    )
+}
+
+@Composable
+fun FrameSaleContent(
+    modifier: Modifier,
+    popUpBackStack: () -> Unit,
+    uiState: FrameSaleUiState,
+    uiEvent: SharedFlow<FrameSaleUiEvent>,
+    onShowSnackBar: (String) -> Unit,
+    selectFrame: (MyFrame) -> Unit,
+    sendTransaction: (String) -> Unit = {},
+) {
+    LaunchedEffect(uiEvent) {
+        uiEvent.collectLatest { event ->
+            when (event) {
+                is FrameSaleUiEvent.Error -> onShowSnackBar(event.errorMessage)
+                FrameSaleUiEvent.SaleDone -> popUpBackStack()
+            }
+        }
+    }
+    if (uiState.isLoading) {
+        LoadingDialog()
+    }
+    FrameSaleScreen(
+        modifier = modifier,
+        popUpBackStack = popUpBackStack,
+        frames = uiState.frames,
+        selectFrame = selectFrame,
+        selectedFrame = uiState.selectFrame,
+        sendTransaction = sendTransaction,
+    )
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FrameSaleScreen() {
+fun FrameSaleScreen(
+    modifier: Modifier = Modifier,
+    popUpBackStack: () -> Unit = {},
+    frames: List<MyFrame> = listOf(),
+    selectedFrame: MyFrame? = null,
+    selectFrame: (MyFrame) -> Unit = {},
+    sendTransaction: (String) -> Unit = {},
+) {
     val focusManager = LocalFocusManager.current
     val scrollState = rememberScrollState()
 
     var price by remember { mutableStateOf("") } // 판매가
     var showBottomSheet by remember { mutableStateOf(false) } // bottomSheet 보임 여부
     var selectedIndex by remember { mutableIntStateOf(0) } // bottomSheet 선택된 탭 index
-    var selectedFrame by remember { mutableIntStateOf(-1) } // 선택된 프레임
 
-    // 더미 데이터
-    val tags = listOf("플레이브", "도은호")
-    val tabs = listOf("1x1", "1x4", "2x2")
-
-    val frames1 =
-        listOf(
-            R.drawable.img_example,
-            R.drawable.img_example2,
-            R.drawable.img_example3,
-            R.drawable.img_example,
-            R.drawable.img_example2,
-            R.drawable.img_example3,
-        )
-
-    val frames2 =
-        listOf(
-            R.drawable.img_example3,
-            R.drawable.img_example2,
-            R.drawable.img_example,
-            R.drawable.img_example3,
-            R.drawable.img_example2,
-            R.drawable.img_example,
-            R.drawable.img_example3,
-            R.drawable.img_example2,
-            R.drawable.img_example,
-        )
-
-    val frames3 =
-        listOf(
-            R.drawable.img_example,
-            R.drawable.img_example2,
-            R.drawable.img_example3,
-        )
-
-    val frames = listOf(frames1, frames2, frames3)
+    val tabs = listOf("1x1", "2x2", "1x4")
 
     Surface(
         modifier =
-            Modifier
+            modifier
                 .fillMaxSize()
                 .background(color = Color.White)
                 .verticalScroll(state = scrollState),
@@ -141,12 +202,15 @@ fun FrameSaleScreen() {
                     ),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Text(
-                modifier = Modifier.fillMaxWidth(),
-                text = stringResource(R.string.frame_register_title),
-                style = Typography.bodyMedium.copy(fontSize = 20.sp),
-                textAlign = TextAlign.Center,
-            )
+            TopAppBar(modifier = Modifier, title = {
+                Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = stringResource(R.string.frame_register_title),
+                    style = Typography.bodyMedium.copy(fontSize = 20.sp),
+                    textAlign = TextAlign.Center,
+                )
+            }, onNavigationClick = popUpBackStack)
+
             Spacer(modifier = Modifier.height(30.dp))
             Surface(
                 modifier =
@@ -159,11 +223,12 @@ fun FrameSaleScreen() {
                     showBottomSheet = true
                 },
             ) {
-                if (selectedFrame != -1) {
-                    Image(
-                        painter = painterResource(id = selectedFrame),
-                        contentDescription = "img_example",
-                        contentScale = ContentScale.Crop,
+                if (selectedFrame != null) {
+                    GlideImage(
+                        imageModel =
+                            selectedFrame.nftInfo.data.image
+                                .urlToIpfs(),
+                        contentScale = ContentScale.Fit,
                     )
                 } else {
                     Column(
@@ -190,7 +255,7 @@ fun FrameSaleScreen() {
             Spacer(modifier = Modifier.height(30.dp))
             // 통신 성공인 경우
             AnimatedVisibility(
-                visible = selectedFrame != -1,
+                visible = selectedFrame != null,
                 enter = fadeIn() + expandVertically(),
                 exit = fadeOut() + shrinkVertically(),
             ) {
@@ -228,11 +293,13 @@ fun FrameSaleScreen() {
                                     .padding(start = 14.dp, end = 14.dp),
                             contentAlignment = Alignment.CenterStart,
                         ) {
-                            Text(
-                                text = "도은호 레전드 프레임",
-                                style = Typography.labelSmall.copy(fontSize = 13.sp),
-                                color = Gray01,
-                            )
+                            selectedFrame?.let {
+                                Text(
+                                    text = selectedFrame.nftInfo.data.title,
+                                    style = Typography.labelSmall.copy(fontSize = 13.sp),
+                                    color = Gray01,
+                                )
+                            }
                         }
                     }
                     Spacer(modifier = Modifier.height(15.dp))
@@ -264,11 +331,13 @@ fun FrameSaleScreen() {
                                     .padding(14.dp),
                             contentAlignment = Alignment.TopStart,
                         ) {
-                            Text(
-                                text = "도은호랑 같이 사진 찍을 수 있는 레전드 프레임 ㄷㄷ",
-                                style = Typography.labelSmall.copy(fontSize = 13.sp),
-                                color = Gray01,
-                            )
+                            selectedFrame?.let {
+                                Text(
+                                    text = selectedFrame.nftInfo.data.content,
+                                    style = Typography.labelSmall.copy(fontSize = 13.sp),
+                                    color = Gray01,
+                                )
+                            }
                         }
                     }
                     Spacer(modifier = Modifier.height(16.dp))
@@ -292,6 +361,10 @@ fun FrameSaleScreen() {
                                 .wrapContentHeight(),
                         horizontalArrangement = Arrangement.spacedBy(5.dp),
                         content = {
+                            val tags =
+                                selectedFrame?.let {
+                                    it.tags
+                                } ?: listOf()
                             items(tags.size) { index ->
                                 HashTag(
                                     keyword = tags[index],
@@ -328,14 +401,16 @@ fun FrameSaleScreen() {
             // 프레임 불러오기 Success면 LongBlackButton
             // 다른 상태면 LongUnableButton
             Spacer(modifier = Modifier.height(30.dp))
-            if (selectedFrame != -1) {
+            if (selectedFrame != null) {
                 LongBlackButton(
                     modifier =
                         Modifier
                             .fillMaxWidth(),
                     text = stringResource(R.string.register_btn_title),
                     icon = null,
-                    onClick = { },
+                    onClick = {
+                        sendTransaction(price)
+                    },
                 )
             } else {
                 LongUnableButton(
@@ -387,11 +462,14 @@ fun FrameSaleScreen() {
                             columns = GridCells.Fixed(4),
                             state = rememberLazyGridState(),
                         ) {
-                            items(frames[targetIndex].size) { index ->
-                                Image(
-                                    painter = painterResource(id = frames[targetIndex][index]),
-                                    contentDescription = null,
-                                    contentScale = ContentScale.Crop,
+                            val frameList = frames.filter { it.frameType == (selectedIndex + 1) }
+                            items(frameList.size) { index ->
+                                val frame = frameList[index]
+                                GlideImage(
+                                    imageModel =
+                                        frame.nftInfo.data.image
+                                            .urlToIpfs(),
+                                    contentScale = ContentScale.Fit,
                                     modifier =
                                         Modifier
                                             .fillMaxWidth()
@@ -402,9 +480,9 @@ fun FrameSaleScreen() {
                                                 width = 1.dp,
                                                 shape = RoundedCornerShape(10.dp),
                                                 color = Gray03,
-                                            ).clickable {
-                                                selectedFrame = frames[targetIndex][index]
+                                            ).noRippleClickable {
                                                 showBottomSheet = false
+                                                selectFrame(frame)
                                             },
                                 )
                             }

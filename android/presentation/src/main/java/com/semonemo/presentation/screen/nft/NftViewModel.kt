@@ -6,7 +6,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.semonemo.domain.datasource.AuthDataSource
 import com.semonemo.domain.model.Transaction
-import com.semonemo.presentation.BuildConfig
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.metamask.androidsdk.Dapp
 import io.metamask.androidsdk.ErrorType
@@ -25,7 +24,6 @@ import org.web3j.abi.FunctionReturnDecoder
 import org.web3j.abi.TypeReference
 import org.web3j.abi.datatypes.Address
 import org.web3j.abi.datatypes.Function
-import org.web3j.abi.datatypes.Utf8String
 import org.web3j.abi.datatypes.generated.Uint256
 import org.web3j.protocol.Web3j
 import org.web3j.protocol.core.DefaultBlockParameterName
@@ -178,19 +176,12 @@ class NftViewModel
         }
 
         fun sendTransaction(
-            data: String,
+            function: Function,
             onSuccess: (String) -> Unit,
             onError: (String) -> Unit,
+            contractAddress: String,
         ) {
-            val function =
-                Function(
-                    "mintNFT",
-                    listOf(Utf8String(data)),
-                    listOf<TypeReference<*>>(object : TypeReference<Uint256>() {}),
-                )
-
             val encodedFunction = FunctionEncoder.encode(function)
-            val contractAddress = BuildConfig.NFT_CONTRACT_ADDRESS
             val params: MutableMap<String, Any> =
                 mutableMapOf(
                     "from" to walletAddress.value,

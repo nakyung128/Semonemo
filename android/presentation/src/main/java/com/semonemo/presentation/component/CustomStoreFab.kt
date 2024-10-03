@@ -45,7 +45,11 @@ import kotlinx.coroutines.delay
  * @param modifier
  */
 @Composable
-fun CustomStoreFAB(modifier: Modifier = Modifier) {
+fun CustomStoreFAB(
+    modifier: Modifier = Modifier,
+    navigateToFrameSale: () -> Unit = {},
+    navigateToAssetSale: () -> Unit = {},
+) {
     var expanded by remember { mutableStateOf(false) }
 
     Box(
@@ -62,12 +66,14 @@ fun CustomStoreFAB(modifier: Modifier = Modifier) {
                 delayMillis = 100,
                 textLabel = stringResource(id = R.string.fab_label_sell_asset),
                 imgRes = R.drawable.ic_fab_asset,
+                onClick = navigateToAssetSale,
             )
             CustomStoreSubFAB(
                 visible = expanded,
                 delayMillis = 0,
                 textLabel = stringResource(id = R.string.fab_label_sell_frame),
                 imgRes = R.drawable.ic_fab_frame,
+                onClick = navigateToFrameSale,
             )
 
             // 메인 FAB 버튼
@@ -102,11 +108,9 @@ fun CustomStoreSubFAB(
     delayMillis: Int,
     textLabel: String,
     imgRes: Int,
+    onClick: () -> Unit,
 ) {
     var isVisible by remember { mutableStateOf(false) }
-    var test by remember {
-        mutableStateOf(false)
-    }
     // 애니메이션 지연
     LaunchedEffect(visible) {
         if (visible) {
@@ -115,10 +119,6 @@ fun CustomStoreSubFAB(
         } else {
             isVisible = false
         }
-    }
-
-    if (test) {
-        Text(textLabel)
     }
 
     AnimatedVisibility(
@@ -131,7 +131,7 @@ fun CustomStoreSubFAB(
                 modifier
                     .padding(end = 10.dp)
                     .noRippleClickable {
-                        test = true
+                        onClick()
                     },
             verticalAlignment = Alignment.CenterVertically,
         ) {
