@@ -27,7 +27,6 @@ import com.semonemo.presentation.screen.aiAsset.DrawAssetScreen
 import com.semonemo.presentation.screen.aiAsset.PromptAssetScreen
 import com.semonemo.presentation.screen.auction.AuctionProcessScreen
 import com.semonemo.presentation.screen.auction.AuctionScreen
-import com.semonemo.presentation.screen.camera.CameraRoute
 import com.semonemo.presentation.screen.frame.MomentGraph
 import com.semonemo.presentation.screen.imgAsset.ImageAssetScreen
 import com.semonemo.presentation.screen.imgAsset.ImageSelectRoute
@@ -36,7 +35,7 @@ import com.semonemo.presentation.screen.mypage.DetailScreen
 import com.semonemo.presentation.screen.mypage.FollowListScreen
 import com.semonemo.presentation.screen.mypage.MyPageRoute
 import com.semonemo.presentation.screen.mypage.setting.SettingRoute
-import com.semonemo.presentation.screen.picture.PictureMainRoute
+import com.semonemo.presentation.screen.picture.PictureGraph
 import com.semonemo.presentation.screen.search.SearchRoute
 import com.semonemo.presentation.screen.signup.SignUpRoute
 import com.semonemo.presentation.screen.store.StoreFullViewScreen
@@ -336,14 +335,6 @@ fun MainNavHost(
         }
 
         composable(
-            route = ScreenDestinations.PictureMain.route,
-        ) {
-            PictureMainRoute(modifier = modifier, navigateToCamera = { amount ->
-                navController.navigate(ScreenDestinations.Camera.createRoute(amount))
-            })
-        }
-
-        composable(
             route = ScreenDestinations.DrawAsset.route,
         ) {
             DrawAssetScreen(
@@ -401,15 +392,11 @@ fun MainNavHost(
             )
         }
 
-        composable(
-            route = ScreenDestinations.Camera.route,
-            arguments = ScreenDestinations.Camera.arguments,
-        ) {
-            CameraRoute(
-                modifier = modifier,
-                popUpBackStack = navController::popBackStack,
-                onShowSnackBar = onShowErrorSnackBar,
-            )
-        }
+        PictureGraph(
+            modifier = modifier,
+            navController = navController,
+            onErrorSnackBar = onShowErrorSnackBar,
+            graphRoute = "picture_graph",
+        )
     }
 }

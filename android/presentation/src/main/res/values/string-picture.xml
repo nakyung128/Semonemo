@@ -7,4 +7,6 @@
     <string name="frame_size2_script">크게 네 컷을 담고 싶을 때</string>
     <string name="frame_size3_title">1x1 사이즈</string>
     <string name="frame_size3_script">오로지 한 컷만!</string>
+    <string name="my_frame">내 프레임</string>
+    <string name="picture_date">촬영 일자 삽입</string>
 </resources>

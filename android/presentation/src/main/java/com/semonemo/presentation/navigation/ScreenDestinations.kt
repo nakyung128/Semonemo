@@ -160,6 +160,8 @@ sealed class ScreenDestinations(
 
         fun createRoute(amount: Int) = "camera/$amount"
     }
+
+    data object PictureSelect : ScreenDestinations(route = "pictureSelect")
 }
 
 // 팔로워 / 팔로잉 목록 전달 위한 NavType 정의

@@ -50,9 +50,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.semonemo.presentation.R
 import com.semonemo.presentation.component.TopAppBar
-import com.semonemo.presentation.screen.camera.subscreen.PicturesContent
 import com.semonemo.presentation.screen.camera.subscreen.CameraPreviewWithPermission
 import com.semonemo.presentation.screen.camera.subscreen.CircularCountdownTimer
+import com.semonemo.presentation.screen.camera.subscreen.PicturesContent
 import com.semonemo.presentation.theme.Gray01
 import com.semonemo.presentation.theme.Gray02
 import com.semonemo.presentation.theme.Gray03
@@ -68,6 +68,7 @@ fun CameraRoute(
     popUpBackStack: () -> Unit,
     onShowSnackBar: (String) -> Unit,
     viewModel: CameraViewModel = hiltViewModel(),
+    navigateToSelect: () -> Unit,
 ) {
     val bitmaps = viewModel.bitmaps.collectAsStateWithLifecycle()
     CameraContent(
@@ -76,6 +77,7 @@ fun CameraRoute(
         onShowSnackBar = onShowSnackBar,
         onTakePhoto = viewModel::takePhoto,
         bitmaps = bitmaps.value,
+        navigateToSelect = navigateToSelect
     )
 }
 
@@ -86,6 +88,7 @@ fun CameraContent(
     onShowSnackBar: (String) -> Unit,
     onTakePhoto: (Bitmap) -> Unit = {},
     bitmaps: List<Bitmap> = listOf(),
+    navigateToSelect: () -> Unit = {},
 ) {
     CameraScreen(
         modifier = modifier,
@@ -93,6 +96,7 @@ fun CameraContent(
         onShowSnackBar = onShowSnackBar,
         onTakePhoto = onTakePhoto,
         bitmaps = bitmaps,
+        navigateToSelect = navigateToSelect
     )
 }
 
@@ -103,6 +107,7 @@ fun CameraScreen(
     onShowSnackBar: (String) -> Unit = {},
     onTakePhoto: (Bitmap) -> Unit = {},
     bitmaps: List<Bitmap> = listOf(),
+    navigateToSelect: () -> Unit = {},
 ) {
     val context = LocalContext.current
     var selectedIndex by remember { mutableStateOf(0) }
