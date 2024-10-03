@@ -10,4 +10,5 @@ data class FrameUiState(
     val title: String = "",
     val content: String = "",
     val tags: List<String> = listOf(),
+    val frameType: FrameType = FrameType.OneByOne,
 )

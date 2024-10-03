@@ -56,8 +56,11 @@ class FrameViewModel
             }
         }
 
-        fun updateFrame(bitmap: Bitmap) {
-            _uiState.update { it.copy(bitmap = bitmap) }
+        fun updateFrame(
+            bitmap: Bitmap,
+            frameType: FrameType,
+        ) {
+            _uiState.update { it.copy(bitmap = bitmap, frameType = frameType) }
         }
 
         fun uploadImage(file: File) {
@@ -153,6 +156,7 @@ class FrameViewModel
                         PublishNftRequest(
                             txHash = imageHash,
                             tags = uiState.value.tags,
+                            frameType = uiState.value.frameType.idx,
                         ),
                     ).onStart {
                         _uiState.update { it.copy(isLoading = true) }
