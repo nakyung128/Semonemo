@@ -16,6 +16,8 @@ public interface NFTService {
 
     NFTMarketResponseDto sellNFT(NFTMarketServiceRequestDto nftMarketServiceRequestDto);
 
+    void cancelNFTMarket(Long userId, Long marketId);
+
     Page<NFTMarketResponseDto> getSellingNFTs(Long userId, String orderBy, int page, int size);
 
     Page<NFTMarketResponseDto> getUserSellingNFTs(Long seller, Long userId, String orderBy, int page, int size);

@@ -53,6 +53,10 @@ public enum ErrorCode {
     // BlockChain
     BLOCKCHAIN_ERROR("BC001", "트랜잭션 처리과정에서 오류가 발생했습니다.", HttpStatus.BAD_REQUEST),
 
+    // COIN
+    COIN_MINT_FAIL("CO001", "코인 발행에 실패하였습니다.", HttpStatus.BAD_REQUEST),
+    COIN_GET_FAIL("CO002", "코인 조회에 실패하였습니다.", HttpStatus.BAD_REQUEST),
+
 	// Asset
 	LIKE_NOT_FOUND_ERROR("AS001", "좋아요를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
 	LIKE_Already_exist("AS002", "이미 좋아요 눌렀습니다.", HttpStatus.ALREADY_REPORTED),
