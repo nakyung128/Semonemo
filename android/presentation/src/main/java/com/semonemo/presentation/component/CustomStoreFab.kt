@@ -108,7 +108,7 @@ fun CustomStoreSubFAB(
     delayMillis: Int,
     textLabel: String,
     imgRes: Int,
-    onClick: () -> Unit,
+    onClick: () -> Unit = {},
 ) {
     var isVisible by remember { mutableStateOf(false) }
     // 애니메이션 지연
@@ -144,14 +144,15 @@ fun CustomStoreSubFAB(
                         .background(GunMetal, shape = RoundedCornerShape(8.dp))
                         .padding(horizontal = 8.dp, vertical = 4.dp),
             )
-
             Spacer(modifier = Modifier.width(8.dp))
-
             Box(
                 modifier =
                     modifier
                         .size(32.dp)
-                        .background(GunMetal, shape = CircleShape),
+                        .background(GunMetal, shape = CircleShape)
+                        .noRippleClickable {
+                            onClick()
+                        },
                 contentAlignment = Alignment.Center,
             ) {
                 Icon(

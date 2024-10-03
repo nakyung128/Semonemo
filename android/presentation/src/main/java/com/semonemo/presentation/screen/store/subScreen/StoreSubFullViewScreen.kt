@@ -36,6 +36,7 @@ fun StoreSubFullViewScreen(
     modifier: Modifier = Modifier,
     isFrame: Boolean = false,
     popUpBackStack: () -> Unit = {},
+    navigateToSellAsset: () -> Unit = {},
 ) {
     val focusManager = LocalFocusManager.current
     var filterStates by remember {
@@ -100,5 +101,8 @@ fun StoreSubFullViewScreen(
             }
         }
     }
-    CustomStoreFAB(modifier = modifier)
+    CustomStoreFAB(
+        modifier = modifier,
+        navigateToAssetSale = navigateToSellAsset,
+    )
 }

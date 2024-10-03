@@ -1,7 +1,9 @@
 package com.semonemo.presentation.screen.frame
 
 import android.graphics.Bitmap
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.rememberTransformableState
 import androidx.compose.foundation.gestures.transformable
@@ -17,13 +19,18 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -48,6 +55,7 @@ import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntSize
@@ -68,6 +76,7 @@ import com.semonemo.presentation.theme.FrameOrange
 import com.semonemo.presentation.theme.FramePink
 import com.semonemo.presentation.theme.FramePurple
 import com.semonemo.presentation.theme.Gray01
+import com.semonemo.presentation.theme.Gray02
 import com.semonemo.presentation.theme.GreenGradient
 import com.semonemo.presentation.theme.GunMetal
 import com.semonemo.presentation.theme.PinkGradient
@@ -77,14 +86,17 @@ import com.semonemo.presentation.theme.SemonemoTheme
 import com.semonemo.presentation.theme.Typography
 import com.semonemo.presentation.theme.White
 import com.semonemo.presentation.theme.WhiteGray
+import com.semonemo.presentation.util.noRippleClickable
 import com.skydoves.landscapist.glide.GlideImage
 import dev.shreyaspatil.capturable.capturable
 import dev.shreyaspatil.capturable.controller.CaptureController
 import dev.shreyaspatil.capturable.controller.rememberCaptureController
 import kotlinx.coroutines.launch
+import java.util.UUID
 
 data class OverlayAsset(
-    val imageUrl: String,
+    val uuid: UUID = UUID.randomUUID(),
+    val imageUrl: Int,
     var scale: Float = 1f,
     var offsetX: Float = 0f,
     var offsetY: Float = 0f,
@@ -152,12 +164,19 @@ fun FrameScreen(
             Rainbow,
         )
 
+    val assets =
+        listOf(
+            R.drawable.asset_example,
+            R.drawable.asset_example2,
+            R.drawable.asset_example3,
+        )
+
     var frameType by remember { mutableStateOf(FrameType.OneByOne) }
     var selectedIndex by remember { mutableIntStateOf(0) }
     var selectedBtn by remember { mutableStateOf("1x1") }
     var selectedColor by remember { mutableStateOf<Color?>(Color.Black) }
     var selectedBrush by remember { mutableStateOf<Brush?>(null) }
-    val overlayAssets = remember { mutableStateListOf<OverlayAsset>() }
+    var overlayAssets = remember { mutableStateListOf<OverlayAsset>() }
 
     Surface(
         modifier =
@@ -194,6 +213,9 @@ fun FrameScreen(
                         overlayAssets = overlayAssets,
                         backgroundColor = selectedColor,
                         backgroundBrush = selectedBrush,
+                        onDeleteAsset = {
+                            overlayAssets.remove(it)
+                        },
                     )
                 }
                 Spacer(modifier = Modifier.height(10.dp))
@@ -284,21 +306,8 @@ fun FrameScreen(
                         state = rememberLazyGridState(),
                     ) {
                         items(assets.size) { index ->
-                            GlideImage(
-                                imageModel = assets[index].imageUrl,
-                                contentScale = ContentScale.Crop,
-                                modifier =
-                                    Modifier
-                                        .fillMaxWidth()
-                                        .aspectRatio(1f)
-                                        .padding(8.dp)
-                                        .clip(shape = RoundedCornerShape(10.dp))
-                                        .background(color = WhiteGray)
-                                        .clickable { overlayAssets.add(OverlayAsset(imageUrl = assets[index].imageUrl)) },
-                            )
-//                            Image(
-//                                painter = painterResource(id = assets[index]),
-//                                contentDescription = null,
+//                            GlideImage(
+//                                imageModel = assets[index].imageUrl,
 //                                contentScale = ContentScale.Crop,
 //                                modifier =
 //                                    Modifier
@@ -307,10 +316,23 @@ fun FrameScreen(
 //                                        .padding(8.dp)
 //                                        .clip(shape = RoundedCornerShape(10.dp))
 //                                        .background(color = WhiteGray)
-//                                        .clickable {
-//                                            overlayAssets.add(OverlayAsset(resourceId = assets[index]))
-//                                        },
+//                                        .clickable { overlayAssets.add(OverlayAsset(imageUrl = assets[index].imageUrl)) },
 //                            )
+                            Image(
+                                painter = painterResource(id = assets[index]),
+                                contentDescription = null,
+                                contentScale = ContentScale.Crop,
+                                modifier =
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .aspectRatio(1f)
+                                        .padding(8.dp)
+                                        .clip(shape = RoundedCornerShape(10.dp))
+                                        .background(color = WhiteGray)
+                                        .clickable {
+                                            overlayAssets.add(OverlayAsset(imageUrl = assets[index]))
+                                        },
+                            )
                         }
                     }
                 }
@@ -346,6 +368,7 @@ fun FramePreview(
     frameType: FrameType,
     backgroundColor: Color? = null,
     backgroundBrush: Brush? = null,
+    onDeleteAsset: (OverlayAsset) -> Unit,
 ) {
     var scale by remember { mutableFloatStateOf(1f) }
     var offsetX by remember { mutableFloatStateOf(0f) }
@@ -431,6 +454,7 @@ fun FramePreview(
                                 overlayAssets = overlayAssets,
                                 parentSize = parentSize,
                                 contentSize = contentSize,
+                                onDeleteAsset = onDeleteAsset,
                             )
                         }
                     }
@@ -515,6 +539,7 @@ fun FramePreview(
                                 overlayAssets = overlayAssets,
                                 parentSize = parentSize,
                                 contentSize = contentSize,
+                                onDeleteAsset = onDeleteAsset,
                             )
                         }
                     }
@@ -561,6 +586,7 @@ fun FramePreview(
                                 overlayAssets = overlayAssets,
                                 parentSize = parentSize,
                                 contentSize = contentSize,
+                                onDeleteAsset = onDeleteAsset,
                             )
                         }
                     }
@@ -575,12 +601,16 @@ fun ShowAssets(
     overlayAssets: List<OverlayAsset>,
     parentSize: IntSize,
     contentSize: IntSize,
+    onDeleteAsset: (OverlayAsset) -> Unit,
 ) {
+    var selectedAssetId by remember { mutableStateOf<UUID?>(null) }
+//    var selectedAssetId by remember { mutableStateOf<String?>(null) }
+
     overlayAssets.forEach { asset ->
         var imageScale by remember { mutableFloatStateOf(0.5f) }
-        var imageOffsetX by remember { mutableFloatStateOf(0f) }
-        var imageOffsetY by remember { mutableFloatStateOf(0f) }
-        var imageRotation by remember { mutableFloatStateOf(0f) }
+        var imageOffsetX by remember { mutableFloatStateOf(asset.offsetX) }
+        var imageOffsetY by remember { mutableFloatStateOf(asset.offsetY) }
+        var imageRotation by remember { mutableFloatStateOf(asset.rotation) }
         var assetSize by remember { mutableStateOf(IntSize.Zero) }
 
         val imageTransformableState =
@@ -602,7 +632,13 @@ fun ShowAssets(
 
                 imageOffsetX = newOffsetX.coerceIn(minX, maxX)
                 imageOffsetY = newOffsetY.coerceIn(minY, maxY)
+
+                asset.offsetX = imageOffsetX
+                asset.offsetY = imageOffsetY
             }
+
+        // 클릭 시 선택된 에셋으로 상태 업데이트
+        val isSelected = selectedAssetId == asset.uuid
 
         val assetModifier =
             Modifier
@@ -612,14 +648,58 @@ fun ShowAssets(
                     translationX = imageOffsetX,
                     translationY = imageOffsetY,
                     rotationZ = imageRotation,
-                ).onSizeChanged { assetSize = it }
-                .transformable(
+                ).transformable(
                     state = imageTransformableState,
+                ).onSizeChanged { assetSize = it }
+                .noRippleClickable {
+                    selectedAssetId =
+                        if (selectedAssetId == asset.uuid) null else asset.uuid
+                }
+
+        // 선택된 에셋에만 border와 버튼 표시
+        if (isSelected) {
+            Box(
+                modifier =
+                    assetModifier
+                        .wrapContentSize()
+                        .border(2.dp, Gray02),
+            ) {
+                GlideImage(
+                    modifier =
+                        Modifier
+                            .wrapContentSize(),
+                    imageModel = asset.imageUrl,
+                    contentScale = ContentScale.Fit,
                 )
-        GlideImage(
-            modifier = assetModifier.wrapContentSize(),
-            imageModel = asset.imageUrl,
-        )
+                // 삭제 버튼 (오른쪽 상단)
+                Box(
+                    modifier =
+                        Modifier
+                            .size(30.dp)
+                            .align(Alignment.TopEnd)
+                            .background(WhiteGray, shape = CircleShape)
+                            .noRippleClickable { onDeleteAsset(asset) },
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = "Delete Asset",
+                        tint = GunMetal,
+                    )
+                }
+            }
+        } else {
+            GlideImage(
+                modifier =
+                    assetModifier
+                        .noRippleClickable {
+                            selectedAssetId =
+                                if (selectedAssetId == asset.uuid) null else asset.uuid
+                        },
+                imageModel = asset.imageUrl,
+                contentScale = ContentScale.Inside,
+            )
+        }
     }
 }
 

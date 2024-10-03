@@ -1,5 +1,6 @@
 package com.semonemo.presentation.screen.store
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -18,9 +19,11 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -46,75 +49,95 @@ fun StoreScreen(
     navigateToFrameSale: () -> Unit = {},
 ) {
     val verticalScrollState = rememberScrollState()
-    Column(
+    Surface(
         modifier =
             modifier
                 .fillMaxSize()
-                .statusBarsPadding()
-                .navigationBarsPadding()
-                .verticalScroll(state = verticalScrollState),
+                .background(color = Color.White),
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
+        Column(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .statusBarsPadding()
+                    .navigationBarsPadding()
+                    .background(color = Color.White)
+                    .verticalScroll(state = verticalScrollState),
         ) {
-            SectionHeader(text = "최근 인기 프레임")
-            Spacer(modifier.weight(1f))
-            Icon(
-                modifier =
-                    Modifier
-                        .padding(end = 15.dp)
-                        .clickable {
-                            navigateToSearch()
-                        },
-                painter = painterResource(id = R.drawable.ic_search_magnifier),
-                contentDescription = null,
-                tint = GunMetal,
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                SectionHeader(
+                    modifier = Modifier.padding(10.dp),
+                    text = stringResource(R.string.recent_popular_frame_header),
+                )
+                Spacer(modifier.weight(1f))
+                Icon(
+                    modifier =
+                        Modifier
+                            .padding(10.dp)
+                            .clickable {
+                                navigateToSearch()
+                            },
+                    painter = painterResource(id = R.drawable.ic_search_magnifier),
+                    contentDescription = null,
+                    tint = GunMetal,
+                )
+            }
+            // 아마 리스트형태로 뷰페이저로 들어갈듯
+            HotRecentFrame(
+                imgUrl = "https://search.pstatic.net/common/?src=http%3A%2F%2Fblogfiles.naver.net%2FMjAyNDA3MjhfMjQ5%2FMDAxNzIyMTc0NDI3NTUx.2i13wuVFmNnbi_PAAaWFaMoH8dnfMCELiKLi3FzWDowg.Jpv5rH4kLAXvpQvH7ZSiFATG9sCXuZxNlSx-Ac3hXlEg.JPEG%2FIMG%25A3%25DF2672.JPG&type=a340",
             )
+            Spacer(modifier = Modifier.height(10.dp))
+            Row(
+                modifier = modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                SectionHeader(
+                    modifier = Modifier.padding(10.dp),
+                    text = stringResource(id = R.string.section_header_sell_frame),
+                )
+                SectionFullViewButton(onClick = {
+                    navigateToFullView(true)
+                })
+            }
+            StoreSubScreen(
+                modifier =
+                    modifier
+                        .height(300.dp)
+                        .fillMaxWidth(),
+                isFrame = true,
+            )
+            Spacer(modifier = Modifier.height(10.dp))
+            Row(
+                modifier =
+                    modifier
+                        .fillMaxWidth()
+                        .padding(10.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                SectionHeader(text = stringResource(id = R.string.section_header_sell_asset))
+                SectionFullViewButton(onClick = { navigateToFullView(false) })
+            }
+            StoreSubScreen(
+                modifier =
+                    modifier
+                        .height(400.dp)
+                        .fillMaxWidth(),
+                isFrame = false,
+            )
+            Spacer(modifier = Modifier.height(100.dp))
         }
-        // 아마 리스트형태로 뷰페이저로 들어갈듯
-        HotRecentFrame(
-            imgUrl = "https://search.pstatic.net/common/?src=http%3A%2F%2Fblogfiles.naver.net%2FMjAyNDA3MjhfMjQ5%2FMDAxNzIyMTc0NDI3NTUx.2i13wuVFmNnbi_PAAaWFaMoH8dnfMCELiKLi3FzWDowg.Jpv5rH4kLAXvpQvH7ZSiFATG9sCXuZxNlSx-Ac3hXlEg.JPEG%2FIMG%25A3%25DF2672.JPG&type=a340",
+        CustomStoreFAB(
+            modifier = modifier,
+            navigateToAssetSale = navigateToAssetSale,
+            navigateToFrameSale = navigateToFrameSale,
         )
-        Row(
-            modifier = modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            SectionHeader(text = stringResource(id = R.string.section_header_sell_frame))
-            SectionFullViewButton(onClick = {
-                navigateToFullView(true)
-            })
-        }
-
-        StoreSubScreen(
-            modifier =
-                modifier
-                    .height(300.dp)
-                    .fillMaxWidth(),
-            isFrame = true,
-        )
-        Row(
-            modifier = modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            SectionHeader(text = stringResource(id = R.string.section_header_sell_asset))
-            SectionFullViewButton(onClick = { navigateToFullView(false) })
-        }
-        StoreSubScreen(
-            modifier =
-                modifier
-                    .height(400.dp)
-                    .fillMaxWidth(),
-            isFrame = false,
-        )
-        Spacer(modifier = Modifier.height(100.dp))
     }
-    CustomStoreFAB(
-        modifier = modifier,
-        navigateToAssetSale = navigateToAssetSale,
-        navigateToFrameSale = navigateToFrameSale,
-    )
 }
 
 @Composable
@@ -150,6 +173,6 @@ fun HotRecentFrame(
 @Composable
 fun preview() {
     SemonemoTheme {
-        HotRecentFrame()
+//        StoreScreen()
     }
 }
