@@ -1,11 +1,9 @@
 package com.semonemo.spring_server.domain.nft.controller;
 
+import com.semonemo.spring_server.domain.blockchain.dto.event.MarketEvent;
 import com.semonemo.spring_server.domain.blockchain.service.BlockChainService;
 import com.semonemo.spring_server.domain.blockchain.dto.event.NFTEvent;
-import com.semonemo.spring_server.domain.nft.dto.request.NFTMarketRequestDto;
-import com.semonemo.spring_server.domain.nft.dto.request.NFTMarketServiceRequestDto;
-import com.semonemo.spring_server.domain.nft.dto.request.NFTRequestDto;
-import com.semonemo.spring_server.domain.nft.dto.request.NFTServiceRequestDto;
+import com.semonemo.spring_server.domain.nft.dto.request.*;
 import com.semonemo.spring_server.domain.nft.dto.response.NFTMarketHistoryResponseDto;
 import com.semonemo.spring_server.domain.nft.dto.response.NFTMarketResponseDto;
 import com.semonemo.spring_server.domain.nft.dto.response.NFTResponseDto;
@@ -50,8 +48,6 @@ public class NFTController implements NFTApi {
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestBody NFTRequestDto NFTRequestDto) {
         try {
-
-            log.info(NFTRequestDto.getTxHash());
             TransactionReceipt transactionResult = blockChainService.waitForTransactionReceipt(NFTRequestDto.getTxHash());
 
             BigInteger tokenId = null;
@@ -74,15 +70,6 @@ public class NFTController implements NFTApi {
                             tokenId = (BigInteger) indexedValues.get(0).getValue();
                             creator = (String) indexedValues.get(1).getValue();
                             tokenURI = (String) nonIndexedValues.get(0).getValue();
-
-                            // 디코딩된 값들 사용
-                            log.info("NFT Minted Event Detected:");
-                            log.info(tokenId);
-                            log.info(creator);
-                            log.info(tokenURI);
-
-                            // 여기에서 추가적인 비즈니스 로직을 수행할 수 있습니다.
-                            // 예: 데이터베이스에 저장, 다른 서비스 호출 등
                         } else {
                             throw new CustomException(ErrorCode.MINT_NFT_FAIL);
                         }
@@ -118,17 +105,69 @@ public class NFTController implements NFTApi {
         @AuthenticationPrincipal UserDetails userDetails,
         @RequestBody NFTMarketRequestDto nftMarketRequestDto) {
         try {
+            TransactionReceipt transactionResult = blockChainService.waitForTransactionReceipt(nftMarketRequestDto.getTxHash());
+
+            BigInteger nftId = null;
+            BigInteger price = null;
+
+            if (Objects.equals(transactionResult.getStatus(), "0x1")) {
+                for (org.web3j.protocol.core.methods.response.Log txLog : transactionResult.getLogs()) {
+                    String eventHash = EventEncoder.encode(MarketEvent.MARKET_CREATED_EVENT);
+
+                    if (txLog.getTopics().get(0).equals(eventHash)) {
+                        EventValues eventValues = Contract.staticExtractEventParameters(
+                            MarketEvent.MARKET_CREATED_EVENT, txLog
+                        );
+
+                        if (eventValues != null) {
+                            List<Type> indexedValues = eventValues.getIndexedValues();
+                            List<Type> nonIndexedValues = eventValues.getNonIndexedValues();
+
+                            nftId = (BigInteger) indexedValues.get(0).getValue();
+                            price = (BigInteger) nonIndexedValues.get(0).getValue();
+
+                            log.info(nftId);
+                            log.info(price);
+                        } else {
+                            throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
+                        }
+                    }
+                }
+            } else {
+                throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
+            }
+
             if (nftService.checkMarket(nftMarketRequestDto.getNftId())) {
                 throw new CustomException(ErrorCode.NFT_ALREADY_ON_SALE);
             }
+
             Users users = userService.findByAddress(userDetails.getUsername());
             NFTMarketServiceRequestDto nftMarketServiceRequestDto = new NFTMarketServiceRequestDto();
             nftMarketServiceRequestDto.setNftId(nftMarketRequestDto.getNftId());
             nftMarketServiceRequestDto.setSeller(users.getId());
             nftMarketServiceRequestDto.setPrice(nftMarketRequestDto.getPrice());
-            log.info(nftMarketServiceRequestDto);
             NFTMarketResponseDto nftMarketResponseDto = nftService.sellNFT(nftMarketServiceRequestDto);
             return CommonResponse.success(nftMarketResponseDto, "NFT 판매 등록 성공");
+        } catch (Exception e) {
+            throw new CustomException(ErrorCode.MARKET_CREATE_FAIL);
+        }
+    }
+
+    // NFT 판매 취소
+    @DeleteMapping(value = "/sell")
+    public CommonResponse<NFTMarketResponseDto> cancelNFTSell(
+        @AuthenticationPrincipal UserDetails userDetails,
+        @RequestBody NFTMarketCancelDto nftMarketCancelDto) {
+        try {
+            TransactionReceipt transactionResult = blockChainService.waitForTransactionReceipt(nftMarketCancelDto.getTxHash());
+
+            if (!Objects.equals(transactionResult.getStatus(), "0x1")) {
+                throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
+            }
+
+            Users users = userService.findByAddress(userDetails.getUsername());
+            nftService.cancelNFTMarket(users.getId(), nftMarketCancelDto.getMarketId());
+            return CommonResponse.success("NFT 판매 취소 성공");
         } catch (Exception e) {
             throw new CustomException(ErrorCode.MARKET_CREATE_FAIL);
         }

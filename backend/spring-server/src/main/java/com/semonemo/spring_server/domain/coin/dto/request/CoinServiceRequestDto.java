@@ -6,12 +6,12 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.math.BigInteger;
-import java.util.List;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @ToString
-public class CoinRequestDto {
+public class CoinServiceRequestDto {
+    private Long userId;
     private BigInteger amount;
 }

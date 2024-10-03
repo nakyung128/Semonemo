@@ -138,7 +138,7 @@ public class NFTServiceImpl implements NFTService {
 
 		// 본인 소유의 NFT만 판매 가능
 		if (!user.getId().equals(nft.getOwner().getId())) {
-			throw new CustomException(ErrorCode.NFT_ALREADY_ON_SALE);
+			throw new CustomException(ErrorCode.OWNER_NOT_MATCH);
 		}
 
 		// 이미 판매중이면 판매등록 안됨
@@ -185,6 +185,33 @@ public class NFTServiceImpl implements NFTService {
 			throw new CustomException(ErrorCode.NFT_NOT_FOUND_ERROR);
 		}
 	}
+
+    @Transactional
+    @Override
+    public void cancelNFTMarket(Long userId, Long marketId) {
+        Users user = userRepository.findById(userId)
+            .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND_ERROR));
+
+        NFTMarket market = nftMarketRepository.findById(marketId)
+            .orElseThrow(() -> new CustomException(ErrorCode.NFT_MARKET_NOT_FOUND_ERROR));
+
+        // 본인 소유의 판매글이 아님
+        if (!user.getId().equals(market.getSeller().getId())) {
+            throw new CustomException(ErrorCode.OWNER_NOT_MATCH);
+        }
+
+        // 이미 판매완료된 항목임
+        if (market.getIsSold()) {
+            throw new CustomException(ErrorCode.NFT_ALREADY_ON_SALE);
+        }
+
+        NFTs nft = nftRepository.findById(market.getNftId().getNftId())
+            .orElseThrow(() -> new CustomException(ErrorCode.NFT_NOT_FOUND_ERROR));
+
+        nft.toggleOnSale(false);
+
+        nftMarketRepository.delete(market);
+    }
 
 	// 마켓에 판매중인 모든 NFT 조회
 	@Transactional
