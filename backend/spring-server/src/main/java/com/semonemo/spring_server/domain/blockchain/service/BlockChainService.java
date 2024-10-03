@@ -1,6 +1,7 @@
 package com.semonemo.spring_server.domain.blockchain.service;
 
 import com.semonemo.spring_server.domain.blockchain.dto.NFTInfoDto;
+import com.semonemo.spring_server.domain.coin.dto.response.CoinResponseDto;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 
 import java.math.BigInteger;
@@ -13,5 +14,12 @@ public interface BlockChainService {
 
     List<NFTInfoDto> getNFTsByIds(List<BigInteger> tokenIds) throws Exception;
 
+    BigInteger getBalanceOf(String address) throws Exception;
+
     TransactionReceipt waitForTransactionReceipt(String transactionHash) throws Exception;
+
+    BigInteger convertToSmallestUnit(BigInteger amount);
+
+    BigInteger convertFromSmallestUnit(BigInteger amount);
 }
+

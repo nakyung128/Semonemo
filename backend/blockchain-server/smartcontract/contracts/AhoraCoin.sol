@@ -12,6 +12,9 @@ contract AhoraCoin is ERC20, Ownable, ReentrancyGuard {
     // main contract 주소 설정 함수
     address public mainContractAddress;
 
+    // Minting 이벤트 정의
+    event TokensMinted(address indexed to, uint256 amount, uint256 newBalance);
+
     // main contract 주소 설정 함수
     function setMainContractAddress(address _mainContractAddress) public {
         require(mainContractAddress == address(0), "Main contract address can only be set once");
@@ -33,6 +36,8 @@ contract AhoraCoin is ERC20, Ownable, ReentrancyGuard {
     // 코인 발행 (Owner만)
     function mint(address to, uint256 amount) public onlyOwner {
         _mint(to, amount);
+        uint256 newBalance = balanceOf(to);
+        emit TokensMinted(to, amount, newBalance);
     }
 
     // 본인 코인 소각
