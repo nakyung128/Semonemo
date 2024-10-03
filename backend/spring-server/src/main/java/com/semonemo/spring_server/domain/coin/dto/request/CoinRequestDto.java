@@ -1,4 +1,4 @@
-package com.semonemo.spring_server.domain.nft.dto.request;
+package com.semonemo.spring_server.domain.coin.dto.request;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,8 +12,7 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @ToString
-public class NFTRequestDto {
-    private String txHash;
-    private List<String> tags;
-    private int frameType;
+public class CoinRequestDto {
+    private Long userId;
+    private Long amount;
 }

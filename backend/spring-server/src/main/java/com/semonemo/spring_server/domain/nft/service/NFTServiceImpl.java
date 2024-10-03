@@ -6,19 +6,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.semonemo.spring_server.domain.asset.dto.AssetSellResponseDto;
-import com.semonemo.spring_server.domain.asset.model.AssetSell;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
-import com.semonemo.spring_server.domain.blockchain.dto.NFTInfo;
 import com.semonemo.spring_server.domain.blockchain.dto.NFTInfoDto;
 import com.semonemo.spring_server.domain.elasticsearch.service.ElasticsearchSyncService;
-import com.semonemo.spring_server.domain.nft.dto.request.NFTMarketRequestDto;
 import com.semonemo.spring_server.domain.nft.dto.request.NFTMarketServiceRequestDto;
 import com.semonemo.spring_server.domain.nft.dto.response.NFTMarketHistoryResponseDto;
 import com.semonemo.spring_server.domain.nft.dto.response.NFTMarketResponseDto;
@@ -34,7 +29,6 @@ import org.springframework.stereotype.Service;
 
 import com.semonemo.spring_server.domain.blockchain.service.BlockChainService;
 
-import com.semonemo.spring_server.global.common.CursorResult;
 import com.semonemo.spring_server.domain.user.entity.Users;
 import com.semonemo.spring_server.domain.user.repository.UserRepository;
 import com.semonemo.spring_server.domain.nft.repository.nfts.NFTRepository;
@@ -71,6 +65,7 @@ public class NFTServiceImpl implements NFTService {
 			.creator(user)
 			.owner(user)
 			.tokenId(nftServiceRequestDto.getTokenId())
+            .frameType(nftServiceRequestDto.getFrameType())
 			.isOpen(true)
 			.isOnSale(false)
 			.build();
@@ -121,6 +116,7 @@ public class NFTServiceImpl implements NFTService {
 				nft.getCreator().getId(),
 				nft.getOwner().getId(),
 				nft.getTokenId(),
+                nft.getFrameType(),
 				tagNames,
 				nft.getIsOpen(),
 				nft.getIsOnSale(),
@@ -544,6 +540,42 @@ public class NFTServiceImpl implements NFTService {
 		return market.getIsSold();
 	}
 
+    @Transactional
+    @Override
+    public Page<NFTResponseDto> getOwnedNFTsByType(Long userId, int type, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<NFTs> userNFTs = nftRepository.findOwnedByUserAndType(userId, type, pageable);
+
+        List<NFTResponseDto> dtos = new ArrayList<>();
+
+        List<BigInteger> tokenIds = userNFTs.getContent().stream()
+            .map(NFTs::getTokenId)
+            .toList();
+
+        List<NFTInfoDto> allNFTInfo;
+        try {
+            allNFTInfo = blockChainService.getNFTsByIds(tokenIds);
+            log.info(allNFTInfo);
+        } catch (Exception e) {
+            throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
+        }
+
+        Map<BigInteger, NFTInfoDto> nftInfoMap = allNFTInfo.stream()
+            .collect(Collectors.toMap(
+                NFTInfoDto::getTokenId,
+                info -> info
+            ));
+
+        for (NFTs userNFT : userNFTs.getContent()) {
+            NFTInfoDto nftInfo = nftInfoMap.get(userNFT.getTokenId());
+            NFTResponseDto dto = nftConvertToDto(userNFT, nftInfo);
+            dtos.add(dto);
+        }
+
+        return new PageImpl<>(dtos, pageable, userNFTs.getTotalElements());
+    }
+
 	// Utils
 	private NFTMarketResponseDto nftMarketConvertToDto(Long userId, NFTMarket sellingNFT, NFTInfoDto nftInfo) {
 		// 좋아요 여부 확인
@@ -572,6 +604,7 @@ public class NFTServiceImpl implements NFTService {
 			nft.getCreator().getId(),
 			nft.getOwner().getId(),
 			nft.getTokenId(),
+            nft.getFrameType(),
 			tagNames,
 			nft.getIsOpen(),
 			nft.getIsOnSale(),

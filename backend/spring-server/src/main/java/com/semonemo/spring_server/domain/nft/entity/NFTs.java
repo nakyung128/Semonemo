@@ -36,6 +36,9 @@ public class NFTs extends BaseTimeEntity {
     @Column(name = "token_id", unique = true)
     private BigInteger tokenId;
 
+    @Column(name = "frame_type")
+    private int frameType;
+
     @Column(name = "is_open")
     private Boolean isOpen;
 

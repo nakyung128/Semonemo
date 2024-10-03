@@ -14,4 +14,6 @@ public interface NFTRepositoryCustom {
     Page<NFTs> findPublicByUser(Long userId, Pageable pageable);
 
     boolean existsByTokenId(BigInteger tokenId);
+
+    Page<NFTs> findOwnedByUserAndType(Long userId, int type, Pageable pageable);
 }
