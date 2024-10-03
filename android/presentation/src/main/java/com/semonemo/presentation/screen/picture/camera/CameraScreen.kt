@@ -50,6 +50,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.semonemo.presentation.R
 import com.semonemo.presentation.component.TopAppBar
+import com.semonemo.presentation.screen.frame.FrameType
 import com.semonemo.presentation.screen.picture.PictureUiEvent
 import com.semonemo.presentation.screen.picture.camera.subscreen.CameraPreviewWithPermission
 import com.semonemo.presentation.screen.picture.camera.subscreen.CircularCountdownTimer
@@ -68,13 +69,14 @@ import kotlinx.coroutines.flow.collectLatest
 @Composable
 fun CameraRoute(
     modifier: Modifier,
-    amount: Int,
+    frameIdx: Int,
     popUpBackStack: () -> Unit,
     onShowSnackBar: (String) -> Unit,
     viewModel: CameraViewModel = hiltViewModel(),
-    navigateToSelect: () -> Unit,
+    navigateToSelect: (Int) -> Unit,
 ) {
     val uiState = viewModel.uiState.collectAsStateWithLifecycle()
+    val frameType = FrameType.fromIdx(frameIdx) ?: FrameType.OneByOne
     CameraContent(
         modifier = modifier,
         popUpBackStack = popUpBackStack,
@@ -82,8 +84,9 @@ fun CameraRoute(
         onTakePhoto = viewModel::takePhoto,
         navigateToSelect = navigateToSelect,
         uiEvent = viewModel.uiEvent,
-        amount = amount,
         bitmaps = uiState.value.bitmaps,
+        amount = frameType.amount,
+        idx = frameType.idx,
     )
 }
 
@@ -95,14 +98,15 @@ fun CameraContent(
     onTakePhoto: (Bitmap, Int) -> Unit = { _, _ -> },
     uiEvent: SharedFlow<PictureUiEvent>,
     bitmaps: List<Bitmap> = listOf(),
-    navigateToSelect: () -> Unit = {},
+    navigateToSelect: (Int) -> Unit = {},
     amount: Int,
+    idx: Int,
 ) {
     LaunchedEffect(uiEvent) {
         uiEvent.collectLatest { event ->
             when (event) {
                 is PictureUiEvent.Error -> onShowSnackBar(event.errorMessage)
-                PictureUiEvent.NavigateToSelect -> navigateToSelect()
+                PictureUiEvent.NavigateToSelect -> navigateToSelect(idx)
             }
         }
     }
@@ -111,7 +115,6 @@ fun CameraContent(
         popUpBackStack = popUpBackStack,
         onShowSnackBar = onShowSnackBar,
         onTakePhoto = onTakePhoto,
-        navigateToSelect = navigateToSelect,
         amount = amount,
         bitmaps = bitmaps,
     )
@@ -123,7 +126,6 @@ fun CameraScreen(
     popUpBackStack: () -> Unit = {},
     onShowSnackBar: (String) -> Unit = {},
     onTakePhoto: (Bitmap, Int) -> Unit = { _, _ -> },
-    navigateToSelect: () -> Unit = {},
     amount: Int = 4,
     bitmaps: List<Bitmap> = listOf(),
 ) {
@@ -229,7 +231,7 @@ fun CameraScreen(
             ) {
                 Spacer(modifier = Modifier.weight(1f))
                 Text(
-                    modifier = Modifier.noRippleClickable { navigateToSelect() },
+                    modifier = Modifier.noRippleClickable { popUpBackStack() },
                     text = stringResource(id = R.string.mypage_cancel_tag),
                     style = Typography.bodyMedium.copy(color = White),
                 )

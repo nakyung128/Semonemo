@@ -152,16 +152,25 @@ sealed class ScreenDestinations(
 
     data object Camera : ScreenDestinations(route = "camera") {
         override val route: String
-            get() = "camera/{amount}"
+            get() = "camera/{type}"
         val arguments =
             listOf(
-                navArgument(name = "amount") { type = NavType.IntType },
+                navArgument(name = "type") { type = NavType.IntType },
             )
 
-        fun createRoute(amount: Int) = "camera/$amount"
+        fun createRoute(type: Int) = "camera/$type"
     }
 
-    data object PictureSelect : ScreenDestinations(route = "pictureSelect")
+    data object PictureSelect : ScreenDestinations(route = "pictureSelect") {
+        override val route: String
+            get() = "pictureSelect/{type}"
+        val arguments =
+            listOf(
+                navArgument(name = "type") { type = NavType.IntType },
+            )
+
+        fun createRoute(type: Int) = "pictureSelect/$type"
+    }
 }
 
 // 팔로워 / 팔로잉 목록 전달 위한 NavType 정의

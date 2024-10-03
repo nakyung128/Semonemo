@@ -33,7 +33,7 @@ fun NavGraphBuilder.PictureGraph(
             route = ScreenDestinations.Camera.route,
             arguments = ScreenDestinations.Camera.arguments,
         ) {
-            val amount = it.arguments?.getInt("amount") ?: -1
+            val type = it.arguments?.getInt("type") ?: 1
             val viewModel =
                 hiltViewModel<CameraViewModel>(
                     navController.getBackStackEntry(graphRoute),
@@ -41,12 +41,12 @@ fun NavGraphBuilder.PictureGraph(
 
             CameraRoute(
                 modifier = modifier,
-                amount = amount,
+                frameIdx = type,
                 popUpBackStack = navController::popBackStack,
                 onShowSnackBar = onErrorSnackBar,
                 viewModel = viewModel,
-                navigateToSelect = {
-                    navController.navigate(ScreenDestinations.PictureSelect.route) {
+                navigateToSelect = { type ->
+                    navController.navigate(ScreenDestinations.PictureSelect.createRoute(type)) {
                         popUpTo(ScreenDestinations.PictureMain.route) { inclusive = false }
                     }
                 },
@@ -55,7 +55,9 @@ fun NavGraphBuilder.PictureGraph(
 
         composable(
             route = ScreenDestinations.PictureSelect.route,
+            arguments = ScreenDestinations.PictureSelect.arguments,
         ) {
+            val type = it.arguments?.getInt("type") ?: 1
             val viewModel =
                 hiltViewModel<CameraViewModel>(
                     navController.getBackStackEntry(graphRoute),
@@ -65,6 +67,7 @@ fun NavGraphBuilder.PictureGraph(
                 popUpBackStack = navController::popBackStack,
                 viewModel = viewModel,
                 onShowSnackBar = onErrorSnackBar,
+                type = type,
             )
         }
     }

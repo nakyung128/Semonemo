@@ -52,32 +52,30 @@ class CameraViewModel
             }
         }
 
-        fun loadMyFrames() {
+        fun loadAvailableFrames(type: Int) {
             viewModelScope.launch {
-                authDataSource.getUserId()?.let { userId ->
-                    nftRepository
-                        .getUserNft(userId.toLong())
-                        .onStart {
-                            _uiState.update {
-                                it.copy(isLoading = true)
-                            }
-                        }.onCompletion {
-                            _uiState.update {
-                                it.copy(isLoading = false)
-                            }
-                        }.collectLatest { response ->
-                            when (response) {
-                                is ApiResponse.Error -> _uiEvent.emit(PictureUiEvent.Error(response.errorMessage))
-                                is ApiResponse.Success -> {
-                                    _uiState.update {
-                                        it.copy(
-                                            frames = response.data,
-                                        )
-                                    }
+                nftRepository
+                    .getAvailableNft(type)
+                    .onStart {
+                        _uiState.update {
+                            it.copy(isLoading = true)
+                        }
+                    }.onCompletion {
+                        _uiState.update {
+                            it.copy(isLoading = false)
+                        }
+                    }.collectLatest { response ->
+                        when (response) {
+                            is ApiResponse.Error -> _uiEvent.emit(PictureUiEvent.Error(response.errorMessage))
+                            is ApiResponse.Success -> {
+                                _uiState.update {
+                                    it.copy(
+                                        frames = response.data,
+                                    )
                                 }
                             }
                         }
-                }
+                    }
             }
         }
 

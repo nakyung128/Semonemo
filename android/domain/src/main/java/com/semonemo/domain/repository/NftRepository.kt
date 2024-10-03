@@ -10,4 +10,6 @@ interface NftRepository {
     suspend fun publishNft(request: PublishNftRequest): Flow<ApiResponse<Nft>>
 
     suspend fun getUserNft(userId: Long): Flow<ApiResponse<List<MyFrame>>>
+
+    suspend fun getAvailableNft(type: Int): Flow<ApiResponse<List<MyFrame>>>
 }

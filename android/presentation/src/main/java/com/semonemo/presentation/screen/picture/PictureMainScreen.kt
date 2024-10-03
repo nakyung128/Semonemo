@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.sp
 import com.semonemo.presentation.R
 import com.semonemo.presentation.component.BoldTextWithKeywords
 import com.semonemo.presentation.component.FrameSizeBox
+import com.semonemo.presentation.screen.frame.FrameType
 import com.semonemo.presentation.theme.Main01
 import com.semonemo.presentation.theme.SemonemoTheme
 import com.semonemo.presentation.theme.Typography
@@ -92,7 +93,7 @@ fun PictureMainScreen(
                         title = stringResource(R.string.frame_size1_title),
                         script = stringResource(R.string.frame_size1_script),
                         frameImg = R.drawable.img_frame_size_one_by_four,
-                        onClick = { navigateToCamera(4) },
+                        onClick = { navigateToCamera(FrameType.OneByFour.idx) },
                     )
                     FrameSizeBox(
                         modifier =
@@ -102,7 +103,7 @@ fun PictureMainScreen(
                         title = stringResource(R.string.frame_size2_title),
                         script = stringResource(R.string.frame_size2_script),
                         frameImg = R.drawable.img_frame_size_two_by_two,
-                        onClick = { navigateToCamera(4) },
+                        onClick = { navigateToCamera(FrameType.TwoByTwo.idx) },
                     )
                     FrameSizeBox(
                         modifier =
@@ -112,7 +113,7 @@ fun PictureMainScreen(
                         title = stringResource(R.string.frame_size3_title),
                         script = stringResource(R.string.frame_size3_script),
                         frameImg = R.drawable.img_frame_size_one_by_one,
-                        onClick = { navigateToCamera(1) },
+                        onClick = { navigateToCamera(FrameType.OneByOne.idx) },
                     )
                 }
             }

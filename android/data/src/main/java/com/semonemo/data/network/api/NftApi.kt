@@ -8,6 +8,7 @@ import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface NftApi {
     @POST("api/nft")
@@ -18,5 +19,10 @@ interface NftApi {
     @GET("api/nft/users/{userId}/owned")
     suspend fun getUserNft(
         @Path("userId") userId: Long,
+    ): BaseResponse<GetMyFrameResponse>
+
+    @GET("api/nft/available")
+    suspend fun getAvailableNft(
+        @Query("type") type: Int
     ): BaseResponse<GetMyFrameResponse>
 }

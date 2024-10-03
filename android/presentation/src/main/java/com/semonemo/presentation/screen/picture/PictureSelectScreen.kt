@@ -61,6 +61,7 @@ fun PictureSelectRoute(
     popUpBackStack: () -> Unit,
     viewModel: CameraViewModel = hiltViewModel(),
     onShowSnackBar: (String) -> Unit = {},
+    type: Int,
 ) {
     val uiState = viewModel.uiState.collectAsStateWithLifecycle()
     PictureSelectContent(
@@ -69,7 +70,8 @@ fun PictureSelectRoute(
         uiState = uiState.value,
         uiEvent = viewModel.uiEvent,
         onShowSnackBar = onShowSnackBar,
-        loadMyFrame = viewModel::loadMyFrames,
+        loadMyFrame = viewModel::loadAvailableFrames,
+        type = type,
     )
 
     DisposableEffect(Unit) {
@@ -86,10 +88,11 @@ fun PictureSelectContent(
     uiState: PictureUiState,
     uiEvent: SharedFlow<PictureUiEvent>,
     onShowSnackBar: (String) -> Unit,
-    loadMyFrame: () -> Unit,
+    loadMyFrame: (Int) -> Unit,
+    type: Int,
 ) {
     LaunchedEffect(Unit) {
-        loadMyFrame()
+        loadMyFrame(type)
     }
     LaunchedEffect(uiEvent) {
         uiEvent.collectLatest { event ->
