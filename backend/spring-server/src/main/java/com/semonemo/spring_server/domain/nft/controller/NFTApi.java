@@ -192,4 +192,18 @@ public interface NFTApi {
         @AuthenticationPrincipal UserDetails userDetails,
         @RequestParam() Long marketId
     );
+
+    @Operation(summary = "유저 사용가능 NFT 리스트 조회", description = "유저 사용가능 NFT 리스트 조회")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "조회 성공",
+            content = @Content(schema = @Schema(implementation = Page.class))),
+        @ApiResponse(responseCode = "500", description = "서버 내부 오류",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    CommonResponse<?> availableNFTList(
+        @AuthenticationPrincipal UserDetails userDetails,
+        @RequestParam() int type,
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "15") int size
+    );
 }

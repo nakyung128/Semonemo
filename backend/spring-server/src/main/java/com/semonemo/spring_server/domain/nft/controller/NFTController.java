@@ -1,7 +1,7 @@
 package com.semonemo.spring_server.domain.nft.controller;
 
 import com.semonemo.spring_server.domain.blockchain.service.BlockChainService;
-import com.semonemo.spring_server.domain.blockchain.event.NFTEvent;
+import com.semonemo.spring_server.domain.blockchain.dto.event.NFTEvent;
 import com.semonemo.spring_server.domain.nft.dto.request.NFTMarketRequestDto;
 import com.semonemo.spring_server.domain.nft.dto.request.NFTMarketServiceRequestDto;
 import com.semonemo.spring_server.domain.nft.dto.request.NFTRequestDto;
@@ -9,12 +9,10 @@ import com.semonemo.spring_server.domain.nft.dto.request.NFTServiceRequestDto;
 import com.semonemo.spring_server.domain.nft.dto.response.NFTMarketHistoryResponseDto;
 import com.semonemo.spring_server.domain.nft.dto.response.NFTMarketResponseDto;
 import com.semonemo.spring_server.domain.nft.dto.response.NFTResponseDto;
-import com.semonemo.spring_server.domain.nft.entity.NFTMarket;
 import com.semonemo.spring_server.domain.user.entity.Users;
 import com.semonemo.spring_server.domain.nft.service.NFTService;
 import com.semonemo.spring_server.domain.user.service.UserService;
 import com.semonemo.spring_server.global.common.CommonResponse;
-import com.semonemo.spring_server.global.common.CursorResult;
 import com.semonemo.spring_server.global.exception.CustomException;
 import com.semonemo.spring_server.global.exception.ErrorCode;
 
@@ -106,6 +104,7 @@ public class NFTController implements NFTApi {
             nftServiceRequestDto.setUserId(users.getId());
             nftServiceRequestDto.setTokenId(tokenId);
             nftServiceRequestDto.setTags(NFTRequestDto.getTags());
+            nftServiceRequestDto.setFrameType(NFTRequestDto.getFrameType());
             NFTResponseDto nftResponseDto = nftService.mintNFT(nftServiceRequestDto);
             return CommonResponse.success(nftResponseDto, "NFT 발행 성공");
         } catch (Exception e) {
@@ -312,6 +311,24 @@ public class NFTController implements NFTApi {
             Users users = userService.findByAddress(userDetails.getUsername());
             nftService.marketBuy(users.getId(), marketId);
             return CommonResponse.success("NFT 시세 조회 성공");
+        } catch (Exception e) {
+            throw new CustomException(ErrorCode.MARKET_BUY_FAIL);
+        }
+    }
+
+    // 타입별 사용가능한 NFT 조회 (보유중
+    @GetMapping("/available")
+    public CommonResponse<?> availableNFTList(
+        @AuthenticationPrincipal UserDetails userDetails,
+        @RequestParam() int type,
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "15") int size) {
+        try {
+            Users users = userService.findByAddress(userDetails.getUsername());
+
+            Page<NFTResponseDto> availableNFT;
+            availableNFT = nftService.getOwnedNFTsByType(users.getId(), type, page, size);
+            return CommonResponse.success(availableNFT, "유저 NFT 조회 성공");
         } catch (Exception e) {
             throw new CustomException(ErrorCode.MARKET_BUY_FAIL);
         }

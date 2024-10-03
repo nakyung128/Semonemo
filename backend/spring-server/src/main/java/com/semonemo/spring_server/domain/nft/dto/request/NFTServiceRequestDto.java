@@ -16,4 +16,5 @@ public class NFTServiceRequestDto {
     private Long userId;
     private BigInteger tokenId;
     private List<String> tags;
+    private int frameType;
 }
