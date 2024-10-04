@@ -24,6 +24,8 @@ public interface NFTService {
 
     Page<NFTMarketResponseDto> getCreatorSellingNFTs(Long creator, Long userId, String orderBy, int page, int size);
 
+    Page<NFTMarketResponseDto> getLikedSellingNFTs(Long userId, int page, int size);
+
     NFTMarketResponseDto getSellingNFTDetails(Long userId, Long marketId);
 
     List<NFTMarketHistoryResponseDto> getMarketHistory(Long nftId);
@@ -36,13 +38,13 @@ public interface NFTService {
 
     Page<NFTResponseDto> getOwnedNFTsByType(Long userId, int type, int page, int size);
 
-    void marketLike(Long userId, Long marketId);
+    int marketLike(Long userId, Long marketId);
 
-    void marketDislike(Long userId, Long marketId);
+    int marketDislike(Long userId, Long marketId);
 
     void nftToggleOpen(Long nftId);
 
-    void marketBuy(Long userId, Long marketId);
+    void marketBuy(Long userId, Long marketId, BigInteger tradeId);
 
     boolean checkTokenId(BigInteger tokenId);
 
