@@ -1,5 +1,6 @@
 package com.semonemo.spring_server.domain.user.entity;
 
+import java.math.BigInteger;
 import java.util.Set;
 
 import com.semonemo.spring_server.domain.nft.entity.NFTs;
@@ -38,6 +39,7 @@ public class Users extends BaseTimeEntity {
 	private String password;
 	private String nickname;
 	private String profileImage;
+    private BigInteger balance;
 
 	@OneToMany(mappedBy = "fromUser")
 	private Set<Follow> following;
@@ -66,4 +68,12 @@ public class Users extends BaseTimeEntity {
 		this.nickname = nickname;
 		this.profileImage = profileImage;
 	}
+
+    public void plusBalance(BigInteger amount) {
+        this.balance = this.balance.add(amount);
+    }
+
+    public void minusBalance(BigInteger amount) {
+        this.balance = this.balance.subtract(amount);
+    }
 }

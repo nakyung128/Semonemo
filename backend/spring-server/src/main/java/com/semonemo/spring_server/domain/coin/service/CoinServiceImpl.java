@@ -82,7 +82,8 @@ public class CoinServiceImpl implements CoinService {
 
             return new CoinResponseDto(
                 coinRequestDto.getUserId(),
-                blockChainService.convertFromSmallestUnit(value)
+                blockChainService.convertFromSmallestUnit(value),
+                user.getBalance()
             );
         } catch (Exception e) {
             throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
@@ -95,13 +96,45 @@ public class CoinServiceImpl implements CoinService {
             .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND_ERROR));
 
         try {
-            BigInteger value = blockChainService.getBalanceOf(user.getAddress());
+            BigInteger coinBalance = blockChainService.getBalanceOf(user.getAddress());
+
+            BigInteger payableBalance = user.getBalance();
+
             return new CoinResponseDto(
                 userId,
-                blockChainService.convertFromSmallestUnit(value)
+                blockChainService.convertFromSmallestUnit(coinBalance),
+                payableBalance
             );
         } catch (Exception e) {
             throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
+        }
+    }
+
+    @Override
+    public BigInteger payableToCoin(Long userId, BigInteger amount) {
+        Users user = userRepository.findById(userId)
+            .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND_ERROR));
+
+        try {
+            user.minusBalance(amount);
+
+            return user.getBalance();
+        } catch (Exception e) {
+            throw new CustomException(ErrorCode.COIN_EXCHANGE_FAIL);
+        }
+    }
+
+    @Override
+    public BigInteger coinToPayable(Long userId, BigInteger amount) {
+        Users user = userRepository.findById(userId)
+            .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND_ERROR));
+
+        try {
+            user.plusBalance(amount);
+
+            return user.getBalance();
+        } catch (Exception e) {
+            throw new CustomException(ErrorCode.COIN_EXCHANGE_FAIL);
         }
     }
 }
