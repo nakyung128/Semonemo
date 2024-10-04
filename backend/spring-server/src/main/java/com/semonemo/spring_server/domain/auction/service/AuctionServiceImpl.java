@@ -135,13 +135,11 @@ public class AuctionServiceImpl implements AuctionService {
 						.build();
 					addBidLog(auctionId, logDTO);
 
-					String endTimeStr = (String) hashOps.get(auctionKey, "endTime");
-					LocalDateTime endTime = LocalDateTime.parse(endTimeStr, formatter);
 					AuctionResponseDTO response = new AuctionResponseDTO(
 						auctionId,
 						bidRequest.getBidAmount(),
 						bidRequest.getUserId(),
-						endTime
+						(String) hashOps.get(auctionKey, "endTime")
 					);
 
 					messagingTemplate.convertAndSend("/topic/auction/" + auctionId, response);
@@ -194,7 +192,7 @@ public class AuctionServiceImpl implements AuctionService {
 			.auctionId(auctionId)
 			.finalPrice(lastBid != null ? lastBid.getBidAmount() : auction.getStartPrice())
 			.winner(lastBid != null ? lastBid.getUserId() : null)
-			.endTime(LocalDateTime.now())
+			.endTime(LocalDateTime.now().format(formatter))
 			.build();
 
 		messagingTemplate.convertAndSend("/topic/auction/" + auctionId + "/end", response);
