@@ -11,5 +11,5 @@ public class AuctionResponseDTO {
 	private long auctionId;
 	private int currentBid;
 	private long currentBidder;
-	private LocalDateTime endTime;
+	private String endTime;
 }
