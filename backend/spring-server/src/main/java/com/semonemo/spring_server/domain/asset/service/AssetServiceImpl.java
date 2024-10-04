@@ -265,7 +265,7 @@ public class AssetServiceImpl implements AssetService {
 	}
 
 	@Override
-	public List<AssetSellResponseDto> getLikeAsset(Users users, int page, int size) {
+	public Page<AssetSellResponseDto> getLikeAsset(Users users, int page, int size) {
 		Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
 		Page<AssetLike> likedAssets = assetLikeRepository.findAllByUserId(users.getId(), pageable);
 
@@ -275,7 +275,7 @@ public class AssetServiceImpl implements AssetService {
 			dtos.add(dto);
 		}
 
-		return dtos;
+		return new PageImpl<>(dtos, pageable, likedAssets.getTotalElements());
 	}
 
 	@Override
