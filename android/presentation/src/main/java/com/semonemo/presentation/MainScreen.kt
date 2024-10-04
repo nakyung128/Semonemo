@@ -235,10 +235,10 @@ fun MainNavHost(
 
             MyPageRoute(
                 modifier = modifier,
-                navigateToDetail = { imgUrl ->
+                navigateToDetail = { nftId ->
                     navController.navigate(
                         ScreenDestinations.Detail.createRoute(
-                            imgUrl,
+                            nftId,
                         ),
                     )
                 },
@@ -377,7 +377,7 @@ fun MainNavHost(
         ) {
             DetailScreen(
                 modifier = modifier,
-                imgUrl = it.arguments?.getString("imgUrl"),
+                nftId = it.arguments?.getLong("nftId"),
             )
         }
 

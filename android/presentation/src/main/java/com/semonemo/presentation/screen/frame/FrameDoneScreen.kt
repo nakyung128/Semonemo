@@ -191,8 +191,8 @@ fun FrameDoneScreen(
         modifier =
             modifier
                 .fillMaxSize()
-                .background(color = Color.White)
                 .verticalScroll(state = scrollState),
+        color = Color.White
     ) {
         Column(
             modifier =
@@ -202,7 +202,7 @@ fun FrameDoneScreen(
                     .statusBarsPadding(),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Spacer(modifier = Modifier.height(40.dp))
+            Spacer(modifier = Modifier.height(30.dp))
             Row(
                 modifier = Modifier.wrapContentSize(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -302,6 +302,7 @@ fun FrameDoneScreen(
                 style = Typography.bodySmall.copy(fontSize = 13.sp),
                 color = Gray02,
             )
+            Spacer(modifier = Modifier.height(15.dp))
         }
     }
 }

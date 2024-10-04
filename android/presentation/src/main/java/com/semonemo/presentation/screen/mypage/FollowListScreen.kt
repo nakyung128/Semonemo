@@ -43,10 +43,8 @@ fun FollowListScreen(
     var selectedIndex by remember { mutableIntStateOf(0) }
 
     Surface(
-        modifier =
-            modifier
-                .fillMaxSize()
-                .background(color = Color.White),
+        modifier = modifier.fillMaxSize(),
+        color = Color.White
     ) {
         Column(
             modifier =

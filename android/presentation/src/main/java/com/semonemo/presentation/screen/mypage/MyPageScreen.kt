@@ -65,6 +65,7 @@ import com.semonemo.domain.model.Asset
 import com.semonemo.domain.model.FrameDetail
 import com.semonemo.domain.model.User
 import com.semonemo.domain.model.myFrame.MyFrame
+import com.semonemo.presentation.BuildConfig
 import com.semonemo.presentation.R
 import com.semonemo.presentation.component.CustomDropdownMenu
 import com.semonemo.presentation.component.CustomDropdownMenuStyles
@@ -77,6 +78,7 @@ import com.semonemo.presentation.component.TopAppBarNavigationType
 import com.semonemo.presentation.theme.Blue3
 import com.semonemo.presentation.theme.Gray03
 import com.semonemo.presentation.theme.Main01
+import com.semonemo.presentation.theme.Main02
 import com.semonemo.presentation.theme.SemonemoTheme
 import com.semonemo.presentation.theme.Typography
 import com.semonemo.presentation.util.noRippleClickable
@@ -89,7 +91,7 @@ import java.io.File
 @Composable
 fun MyPageRoute(
     modifier: Modifier = Modifier,
-    navigateToDetail: (String) -> Unit,
+    navigateToDetail: (Long) -> Unit,
     navigateToFollowList: (String, List<User>, List<User>) -> Unit,
     navigateToSetting: () -> Unit,
     viewModel: MyPageViewModel = hiltViewModel(),
@@ -142,7 +144,7 @@ fun HandleMyPageEvent(
 fun HandleMyPageUi(
     modifier: Modifier = Modifier,
     uiState: MyPageUiState,
-    navigateToDetail: (String) -> Unit,
+    navigateToDetail: (Long) -> Unit,
     navigateToFollowList: (String, List<User>, List<User>) -> Unit,
     navigateToSetting: () -> Unit,
     updateProfileImage: (Uri) -> Unit,
@@ -177,7 +179,7 @@ fun HandleMyPageUi(
 @Composable
 fun MyPageScreen(
     modifier: Modifier = Modifier,
-    navigateToDetail: (String) -> Unit = {},
+    navigateToDetail: (Long) -> Unit = {},
     navigateToFollowList: (String, List<User>, List<User>) -> Unit = { _, _, _ -> },
     navigateToSetting: () -> Unit = {},
     nickname: String = "짜이한",
@@ -401,26 +403,28 @@ fun MyPageScreen(
             ) { targetIndex ->
                 when (targetIndex) {
                     0 -> {
-                        Box(
-                            modifier =
-                                Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 15.dp),
-                            contentAlignment = Alignment.CenterEnd,
-                        ) {
-                            CustomDropdownMenu(
-                                menuItems =
-                                    listOf(
-                                        "보유중" to {
-                                            isSell = false
-                                        },
-                                        "판매중" to {
-                                            isSell = true
-                                        },
-                                    ),
-                                styles =
-                                    CustomDropdownMenuStyles(),
-                            )
+                        Column(modifier = Modifier.fillMaxWidth()) {
+                            Box(
+                                modifier =
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 15.dp),
+                                contentAlignment = Alignment.CenterEnd,
+                            ) {
+                                CustomDropdownMenu(
+                                    menuItems =
+                                        listOf(
+                                            "보유중" to {
+                                                isSell = false
+                                            },
+                                            "판매중" to {
+                                                isSell = true
+                                            },
+                                        ),
+                                    styles =
+                                        CustomDropdownMenuStyles(),
+                                )
+                            }
                             if (isSell) {
                                 LazyVerticalGrid(
                                     modifier =
@@ -433,6 +437,8 @@ fun MyPageScreen(
                                 ) {
                                     items(sellFrameList.size) { index ->
                                         val frame = sellFrameList[index]
+                                        val ipfsUrl = BuildConfig.IPFS_READ_URL
+                                        val imgUrl = ipfsUrl + "ipfs/" + frame.nftInfo.data.image
 
                                         GlideImage(
                                             modifier =
@@ -446,9 +452,9 @@ fun MyPageScreen(
                                                         shape = RoundedCornerShape(10.dp),
                                                         color = Gray03,
                                                     ).noRippleClickable {
-                                                        navigateToDetail(frame.nftInfo.data.image)
+                                                        navigateToDetail(frame.marketId)
                                                     },
-                                            imageModel = frame.nftInfo.data.image,
+                                            imageModel = imgUrl,
                                             contentScale = ContentScale.Inside,
                                         )
                                     }
@@ -465,6 +471,8 @@ fun MyPageScreen(
                                 ) {
                                     items(frameList.size) { index ->
                                         val frame = frameList[index]
+                                        val ipfsUrl = BuildConfig.IPFS_READ_URL
+                                        val imgUrl = ipfsUrl + "ipfs/" + frame.nftInfo.data.image
 
                                         GlideImage(
                                             modifier =
@@ -478,9 +486,9 @@ fun MyPageScreen(
                                                         shape = RoundedCornerShape(10.dp),
                                                         color = Gray03,
                                                     ).noRippleClickable {
-                                                        navigateToDetail(frame.nftInfo.data.image)
+                                                        navigateToDetail(frame.nftId)
                                                     },
-                                            imageModel = frame.nftInfo.data.image,
+                                            imageModel = imgUrl,
                                             contentScale = ContentScale.Inside,
                                         )
                                     }

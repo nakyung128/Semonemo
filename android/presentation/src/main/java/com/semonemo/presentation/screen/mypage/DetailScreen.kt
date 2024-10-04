@@ -61,7 +61,7 @@ enum class DialogType {
 @Composable
 fun DetailScreen(
     modifier: Modifier = Modifier,
-    imgUrl: String? = null,
+    nftId: Long? = null,
     onPublicClicked: () -> Unit = {},
     onSaleClicked: () -> Unit = {},
 ) {
@@ -103,7 +103,7 @@ fun DetailScreen(
 
     Column(
         modifier =
-            Modifier
+            modifier
                 .fillMaxSize()
                 .background(brush = Main01)
                 .verticalScroll(state = scrollState)
