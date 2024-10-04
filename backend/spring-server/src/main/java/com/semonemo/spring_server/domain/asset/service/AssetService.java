@@ -1,5 +1,7 @@
 package com.semonemo.spring_server.domain.asset.service;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -9,6 +11,7 @@ import com.semonemo.spring_server.domain.asset.dto.AssetResponseDto;
 import com.semonemo.spring_server.domain.asset.dto.AssetSellRequestDto;
 import com.semonemo.spring_server.domain.asset.dto.AssetSellResponseDto;
 import com.semonemo.spring_server.domain.asset.model.AssetImage;
+import com.semonemo.spring_server.domain.user.entity.Users;
 import com.semonemo.spring_server.global.common.CursorResult;
 
 public interface AssetService {
@@ -35,4 +38,6 @@ public interface AssetService {
 	void registSale(Long nowid, AssetSellRequestDto assetSellRequestDto);
 
 	boolean exist(Long assetId);
+
+	List<AssetSellResponseDto> getLikeAsset(Users users, int page, int size);
 }
