@@ -92,7 +92,7 @@ public class ElasticsearchController implements ElasticSearchApi {
 		HttpEntity<Map<String, String>> request = new HttpEntity<>(body, headers);
 
 		try {
-			ResponseEntity<String> response = restTemplate.postForEntity("http://localhost:5000", request,
+			ResponseEntity<String> response = restTemplate.postForEntity("http://43.201.33.160:5000", request,
 				String.class);
 			System.out.println("Logstash response: " + response.getStatusCode());
 		} catch (Exception e) {
