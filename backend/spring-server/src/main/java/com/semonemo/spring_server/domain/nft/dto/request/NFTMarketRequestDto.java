@@ -5,6 +5,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.math.BigInteger;
+
 @Getter
 @Setter
 @NoArgsConstructor

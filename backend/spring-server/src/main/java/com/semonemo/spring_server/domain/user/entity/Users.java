@@ -3,6 +3,7 @@ package com.semonemo.spring_server.domain.user.entity;
 import java.math.BigInteger;
 import java.util.Set;
 
+import com.semonemo.spring_server.domain.coin.entity.TradeLog;
 import com.semonemo.spring_server.domain.nft.entity.NFTs;
 import com.semonemo.spring_server.domain.nft.entity.NFTMarket;
 import com.semonemo.spring_server.domain.nft.entity.NFTMarketLike;
@@ -39,7 +40,7 @@ public class Users extends BaseTimeEntity {
 	private String password;
 	private String nickname;
 	private String profileImage;
-    private BigInteger balance;
+    private Long balance;
 
 	@OneToMany(mappedBy = "fromUser")
 	private Set<Follow> following;
@@ -59,6 +60,12 @@ public class Users extends BaseTimeEntity {
 	@OneToMany(mappedBy = "likedUserId")
 	private Set<NFTMarketLike> createdNFTMarketLikes;
 
+    @OneToMany(mappedBy = "fromUser")
+    private Set<TradeLog> tradeFrom;
+
+    @OneToMany(mappedBy = "toUser")
+    private Set<TradeLog> tradeTo;
+
 	public void modify(String nickname) {
 		this.nickname = nickname;
 		this.profileImage = profileImage;
@@ -69,11 +76,11 @@ public class Users extends BaseTimeEntity {
 		this.profileImage = profileImage;
 	}
 
-    public void plusBalance(BigInteger amount) {
-        this.balance = this.balance.add(amount);
+    public void plusBalance(Long amount) {
+        this.balance += amount;
     }
 
-    public void minusBalance(BigInteger amount) {
-        this.balance = this.balance.subtract(amount);
+    public void minusBalance(Long amount) {
+        this.balance -= amount;
     }
 }

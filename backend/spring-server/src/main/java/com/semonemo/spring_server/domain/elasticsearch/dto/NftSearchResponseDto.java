@@ -1,5 +1,6 @@
 package com.semonemo.spring_server.domain.elasticsearch.dto;
 
+import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.List;
 

@@ -4,6 +4,7 @@ import com.semonemo.spring_server.domain.nft.dto.request.NFTMarketCancelDto;
 import com.semonemo.spring_server.domain.nft.dto.request.NFTMarketRequestDto;
 import com.semonemo.spring_server.domain.nft.dto.request.NFTRequestDto;
 import com.semonemo.spring_server.domain.nft.dto.response.NFTMarketHistoryResponseDto;
+import com.semonemo.spring_server.domain.nft.dto.response.NFTMarketLikedResponseDto;
 import com.semonemo.spring_server.domain.nft.dto.response.NFTMarketResponseDto;
 import com.semonemo.spring_server.global.common.CommonResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -108,6 +109,19 @@ public interface NFTApi {
         @RequestParam(defaultValue = "15") int size
     );
 
+    @Operation(summary = "좋아요한 마켓 NFT 조회", description = "좋아요한 마켓 NFT 조회")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "조회 성공",
+            content = @Content(schema = @Schema(implementation = Page.class))),
+        @ApiResponse(responseCode = "500", description = "서버 내부 오류",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    CommonResponse<?> getLikedSellingNFTs(
+        @AuthenticationPrincipal UserDetails userDetails,
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "15") int size
+    );
+
     @Operation(summary = "특정 마켓 판매 NFT 상세 조회", description = "마켓에 판매중인 특정 NFT 상세 조회")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "조회 성공",
@@ -173,11 +187,11 @@ public interface NFTApi {
     @Operation(summary = "NFT 판매 좋아요", description = "NFT 판매 좋아요 등록")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "조회 성공",
-            content = @Content(schema = @Schema(implementation = NFTResponseDto.class))),
+            content = @Content(schema = @Schema(implementation = NFTMarketLikedResponseDto.class))),
         @ApiResponse(responseCode = "500", description = "서버 내부 오류",
             content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    CommonResponse<NFTResponseDto> marketLike(
+    CommonResponse<NFTMarketLikedResponseDto> marketLike(
         @AuthenticationPrincipal UserDetails userDetails,
         @PathVariable Long marketId
     );
@@ -185,11 +199,11 @@ public interface NFTApi {
     @Operation(summary = "NFT 판매 좋아요 취소", description = "NFT 판매 좋아요 취소")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "조회 성공",
-            content = @Content(schema = @Schema(implementation = NFTResponseDto.class))),
+            content = @Content(schema = @Schema(implementation = NFTMarketLikedResponseDto.class))),
         @ApiResponse(responseCode = "500", description = "서버 내부 오류",
             content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    CommonResponse<NFTResponseDto> marketDisLike(
+    CommonResponse<NFTMarketLikedResponseDto> marketDisLike(
         @AuthenticationPrincipal UserDetails userDetails,
         @PathVariable Long marketId
     );
@@ -203,7 +217,8 @@ public interface NFTApi {
     })
     CommonResponse<NFTResponseDto> buyNFT(
         @AuthenticationPrincipal UserDetails userDetails,
-        @RequestParam() Long marketId
+        @RequestBody String txHash,
+        @RequestBody Long marketId
     );
 
     @Operation(summary = "유저 사용가능 NFT 리스트 조회", description = "유저 사용가능 NFT 리스트 조회")

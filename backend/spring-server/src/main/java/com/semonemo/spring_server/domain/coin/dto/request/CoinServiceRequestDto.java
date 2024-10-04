@@ -13,5 +13,5 @@ import java.math.BigInteger;
 @ToString
 public class CoinServiceRequestDto {
     private Long userId;
-    private BigInteger amount;
+    private Long amount;
 }

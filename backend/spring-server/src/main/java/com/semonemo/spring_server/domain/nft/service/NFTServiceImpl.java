@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.semonemo.spring_server.domain.coin.entity.TradeLog;
+import com.semonemo.spring_server.domain.coin.repository.TradeLogRepository;
 import com.semonemo.spring_server.domain.user.dto.response.UserInfoResponseDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -53,6 +55,7 @@ public class NFTServiceImpl implements NFTService {
 	private final UserRepository userRepository;
 	private final NTagRepository nTagRepository;
 	private final NFTTagRepository nftTagRepository;
+    private final TradeLogRepository tradeLogRepository;
 	private final ElasticsearchSyncService syncService;
 	private final BlockChainService blockChainService;
 
@@ -328,8 +331,7 @@ public class NFTServiceImpl implements NFTService {
 	// 마켓에 판매중인 특정 제작자 NFT 조회
 	@Transactional
 	@Override
-	public Page<NFTMarketResponseDto> getCreatorSellingNFTs(Long creator, Long userId, String orderBy, int page,
-		int size) {
+	public Page<NFTMarketResponseDto> getCreatorSellingNFTs(Long creator, Long userId, String orderBy, int page, int size) {
 		Pageable pageable = null;
 
 		pageable = switch (orderBy) {
@@ -370,6 +372,43 @@ public class NFTServiceImpl implements NFTService {
 
 		return new PageImpl<>(dtos, pageable, sellingNFTs.getTotalElements());
 	}
+
+    // 좋아요한 NFT 마켓 조회
+    @Transactional
+    @Override
+    public Page<NFTMarketResponseDto> getLikedSellingNFTs(Long userId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<NFTMarket> likedNFTs = nftMarketRepository.findByLiked(userId, pageable);
+
+        List<NFTMarketResponseDto> dtos = new ArrayList<>();
+
+        List<BigInteger> tokenIds = likedNFTs.getContent().stream()
+            .map(likedNFT -> likedNFT.getNftId().getTokenId())
+            .toList();
+
+        List<NFTInfoDto> allNFTInfo;
+        try {
+            allNFTInfo = blockChainService.getNFTsByIds(tokenIds);
+            log.info(allNFTInfo);
+        } catch (Exception e) {
+            throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
+        }
+
+        Map<BigInteger, NFTInfoDto> nftInfoMap = allNFTInfo.stream()
+            .collect(Collectors.toMap(
+                NFTInfoDto::getTokenId,
+                info -> info
+            ));
+
+        for (NFTMarket likedNFT : likedNFTs.getContent()) {
+            NFTInfoDto nftInfo = nftInfoMap.get(likedNFT.getNftId().getTokenId());
+            NFTMarketResponseDto dto = nftMarketConvertToDto(userId, likedNFT, nftInfo);
+            dtos.add(dto);
+        }
+
+        return new PageImpl<>(dtos, pageable, likedNFTs.getTotalElements());
+    }
 
 	// 판매 NFT 상세 조회
 	@Transactional
@@ -510,7 +549,7 @@ public class NFTServiceImpl implements NFTService {
 	// 마켓 좋아요
 	@Transactional
 	@Override
-	public void marketLike(Long userId, Long marketId) {
+	public int marketLike(Long userId, Long marketId) {
 		NFTMarket market = nftMarketRepository.findById(marketId)
 			.orElseThrow(() -> new CustomException(ErrorCode.NFT_MARKET_NOT_FOUND_ERROR));
 		Users user = userRepository.findById(userId)
@@ -521,24 +560,26 @@ public class NFTServiceImpl implements NFTService {
 			.likedUserId(user)
 			.build();
 		nftMarketLikeRepository.save(like);
-		market.updateLikeCount(1);
+		int afterLikedCount = market.updateLikeCount(1);
 		syncService.syncNftData(marketId, "like");
+
+        return afterLikedCount;
 	}
 
 	// 마켓 좋아요 취소
 	@Transactional
 	@Override
-	public void marketDislike(Long userId, Long marketId) {
+	public int marketDislike(Long userId, Long marketId) {
 		NFTMarket market = nftMarketRepository.findById(marketId)
 			.orElseThrow(() -> new CustomException(ErrorCode.NFT_MARKET_NOT_FOUND_ERROR));
 		NFTMarketLike like = nftMarketLikeRepository.findByUserIdAndMarketId(userId, marketId);
 
 		nftMarketLikeRepository.delete(like);
 
-		if (market.getLikeCount() > 0) {
-			market.updateLikeCount(-1);
-		}
+        int afterLikedCount = market.updateLikeCount(-1);
 		syncService.syncNftData(marketId, "like");
+
+        return afterLikedCount;
 	}
 
 	// 공개, 비공개 전환
@@ -553,7 +594,7 @@ public class NFTServiceImpl implements NFTService {
 
 	@Transactional
 	@Override
-	public void marketBuy(Long userId, Long marketId) {
+	public void marketBuy(Long userId, Long marketId, BigInteger tradeId) {
 		NFTMarket market = nftMarketRepository.findById(marketId)
 			.orElseThrow(() -> new CustomException(ErrorCode.NFT_MARKET_NOT_FOUND_ERROR));
 
@@ -565,6 +606,18 @@ public class NFTServiceImpl implements NFTService {
 		nft.toggleOnSale(false);
 		nft.changeOwner(user);
 		market.markAsSold();
+
+        user.minusBalance(market.getPrice());
+        market.getSeller().plusBalance(market.getPrice());
+
+        TradeLog tradeLog = TradeLog.builder()
+            .tradeId(tradeId)
+            .fromUser(user)
+            .toUser(market.getSeller())
+            .amount(market.getPrice())
+            .tradeType("NFT 거래")
+            .build();
+        tradeLogRepository.save(tradeLog);
 	}
 
 	@Transactional
