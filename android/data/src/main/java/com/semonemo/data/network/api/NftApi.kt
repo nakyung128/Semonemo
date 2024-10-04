@@ -6,6 +6,7 @@ import com.semonemo.domain.model.FrameDetail
 import com.semonemo.domain.model.Nft
 import com.semonemo.domain.model.SearchFrame
 import com.semonemo.domain.model.myFrame.GetMyFrameResponse
+import com.semonemo.domain.model.myFrame.MyFrame
 import com.semonemo.domain.request.PublishNftRequest
 import com.semonemo.domain.request.SellNftRequest
 import retrofit2.http.Body
@@ -44,7 +45,7 @@ interface NftApi {
     ): BaseResponse<SearchFrame>
 
     @GET("api/nft/{marketId}")
-    suspend fun getNftDetail(
+    suspend fun getSaleNftDetail(
         @Path("marketId") marketId: Long,
     ): BaseResponse<FrameDetail>
 
@@ -57,4 +58,14 @@ interface NftApi {
     suspend fun disLikeNft(
         @Path("marketId") marketId: Long,
     ): BaseResponse<LikeResponse>
+
+    @POST("api/nft/{nftId}/open")
+    suspend fun open(
+        @Path("nftId") nftId: Long,
+    ): BaseResponse<Unit>
+
+    @GET("api/nft/users/{nftId}")
+    suspend fun getNftDetail(
+        @Path("nftId") nftId: Long,
+    ): BaseResponse<MyFrame>
 }

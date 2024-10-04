@@ -30,13 +30,13 @@ class FrameDetailViewModel
         val uiEvent = _uiEvent.asSharedFlow()
 
         init {
-            getFrameDetail(savedStateHandle["marketId"] ?: -1L)
+            getSaleNftDetail(savedStateHandle["marketId"] ?: -1L)
         }
 
-        private fun getFrameDetail(marketId: Long) {
+        private fun getSaleNftDetail(marketId: Long) {
             viewModelScope.launch {
                 nftRepository
-                    .getFrameDetail(marketId)
+                    .getSaleNftDetail(marketId)
                     .onStart {
                         _uiState.update {
                             it.copy(isLoading = true)

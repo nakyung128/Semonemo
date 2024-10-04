@@ -76,11 +76,11 @@ class NftRepositoryImpl
                 }
             }
 
-        override suspend fun getFrameDetail(marketId: Long): Flow<ApiResponse<FrameDetail>> =
+        override suspend fun getSaleNftDetail(marketId: Long): Flow<ApiResponse<FrameDetail>> =
             flow {
                 emit(
                     emitApiResponse(
-                        apiResponse = { api.getNftDetail(marketId) },
+                        apiResponse = { api.getSaleNftDetail(marketId) },
                         default = FrameDetail(),
                     ),
                 )
@@ -107,5 +107,15 @@ class NftRepositoryImpl
                     is ApiResponse.Success -> emit(ApiResponse.Success(response.data.likedCount))
                     is ApiResponse.Error -> emit(response)
                 }
+            }
+
+        override suspend fun openNft(nftId: Long): Flow<ApiResponse<Unit>> =
+            flow {
+                emit(emitApiResponse(apiResponse = { api.open(nftId) }, default = Unit))
+            }
+
+        override suspend fun getNftDetail(nftId: Long): Flow<ApiResponse<MyFrame>> =
+            flow {
+                emit(emitApiResponse(apiResponse = { api.getNftDetail(nftId) }, default = MyFrame()))
             }
     }

@@ -19,9 +19,13 @@ interface NftRepository {
 
     suspend fun getAllSaleNft(): Flow<ApiResponse<List<FrameDetail>>>
 
-    suspend fun getFrameDetail(marketId: Long): Flow<ApiResponse<FrameDetail>>
+    suspend fun getSaleNftDetail(marketId: Long): Flow<ApiResponse<FrameDetail>>
 
     suspend fun likeNft(marketId: Long): Flow<ApiResponse<Long>>
 
     suspend fun disLikeNft(marketId: Long): Flow<ApiResponse<Long>>
+
+    suspend fun openNft(nftId: Long): Flow<ApiResponse<Unit>>
+
+    suspend fun getNftDetail(nftId: Long): Flow<ApiResponse<MyFrame>>
 }
