@@ -21,12 +21,15 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.semonemo.spring_server.config.s3.S3Service;
 import com.semonemo.spring_server.domain.asset.dto.AssetDetailResponseDto;
+import com.semonemo.spring_server.domain.asset.dto.AssetLikeDto;
 import com.semonemo.spring_server.domain.asset.dto.AssetRequestDto;
 import com.semonemo.spring_server.domain.asset.dto.AssetResponseDto;
 import com.semonemo.spring_server.domain.asset.dto.AssetSellRequestDto;
 import com.semonemo.spring_server.domain.asset.dto.AssetSellResponseDto;
 import com.semonemo.spring_server.domain.asset.model.AssetImage;
+import com.semonemo.spring_server.domain.asset.model.AssetSell;
 import com.semonemo.spring_server.domain.asset.service.AssetService;
+import com.semonemo.spring_server.domain.nft.dto.response.NFTMarketLikedResponseDto;
 import com.semonemo.spring_server.domain.user.entity.Users;
 import com.semonemo.spring_server.domain.user.service.UserService;
 import com.semonemo.spring_server.global.common.CommonResponse;
@@ -183,7 +186,12 @@ public class AssetController implements AssetApi {
 				throw new CustomException(ErrorCode.LIKE_ALREADY_EXIST);
 			}
 			assetService.like(users.getId(), assetSellId);
-			return CommonResponse.success("좋아요 성공");
+			AssetDetailResponseDto assetSell = assetService.getAssetSellDetail(users.getId(),assetSellId);
+			AssetLikeDto likeDto = new AssetLikeDto(
+				assetSellId,
+				assetSell.likeCount()
+			);
+			return CommonResponse.success(likeDto,"좋아요 성공");
 		} catch (CustomException e) {
 			throw e;
 		} catch (Exception e) {
@@ -202,8 +210,12 @@ public class AssetController implements AssetApi {
 				throw new CustomException(ErrorCode.LIKE_NOT_FOUND_ERROR);
 			}
 			assetService.dislike(users.getId(), assetSellId);
-
-			return CommonResponse.success("좋아요 취소 성공");
+			AssetDetailResponseDto assetSell = assetService.getAssetSellDetail(users.getId(),assetSellId);
+			AssetLikeDto likeDto = new AssetLikeDto(
+				assetSellId,
+				assetSell.likeCount()-1L
+			);
+			return CommonResponse.success(likeDto,"좋아요 취소 성공");
 		} catch (CustomException e) {
 			throw e;
 		} catch (Exception e) {
