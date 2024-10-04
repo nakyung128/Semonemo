@@ -32,6 +32,7 @@ public class NFTMarketRepositoryImpl implements NFTMarketRepositoryCustom {
                 .and(nftMarket.marketId.eq(nftId))
             )
             .orderBy(nftMarket.marketId.desc())
+            .limit(30)
             .fetch();
     }
 
