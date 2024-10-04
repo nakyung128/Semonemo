@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.semonemo.spring_server.domain.blockchain.dto.IPFSHashDto;
 import com.semonemo.spring_server.domain.blockchain.dto.NFTInfoDto;
+import com.semonemo.spring_server.domain.coin.dto.response.CoinResponseDto;
 import com.semonemo.spring_server.domain.nft.service.NFTServiceImpl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -31,7 +32,7 @@ import org.web3j.protocol.core.methods.response.*;
 import org.web3j.abi.FunctionEncoder;
 import org.web3j.utils.Numeric;
 
-import com.semonemo.spring_server.domain.blockchain.dto.NFTInfo;
+import com.semonemo.spring_server.domain.blockchain.dto.decoded.NFTInfo;
 import com.semonemo.spring_server.global.exception.CustomException;
 import com.semonemo.spring_server.global.exception.ErrorCode;
 
@@ -40,6 +41,7 @@ public class BlockChainServiceImpl implements BlockChainService {
     private static final Log log = LogFactory.getLog(NFTServiceImpl.class);
 
     private static final String BASE_IPFS_URL = "http://j11d109.p.ssafy.io:8088/ipfs/";
+    private static final BigInteger UNIT_CONVERSION_FACTOR = BigInteger.TEN.pow(18);
 
     private final Web3j web3j;
     private final RestTemplate restTemplate;
@@ -53,9 +55,9 @@ public class BlockChainServiceImpl implements BlockChainService {
     public BlockChainServiceImpl(Web3j web3j, RestTemplate restTemplate) {
         this.web3j = web3j;
         this.restTemplate = restTemplate;
-        this.coinContractAddress = "0x7dC302d7D99273Cab00C3046599108F605CCB55c";
-        this.nftContractAddress = "0x7dC302d7D99273Cab00C3046599108F605CCB55c";
-        this.systemContractAddress = "0x503932fFA68504646FebC302aedFEBd7f64CcAd8";
+        this.coinContractAddress = "0x7eB7C5213cbccEC6cd651D3376bC19787d9CCAd2";
+        this.nftContractAddress = "0x6ac2b137f6F264B2D822E2f957AF04032B0c841c";
+        this.systemContractAddress = "0x97Ec0C64999266A3253224E3d92FEe5e5964c62F";
         this.adminAddress = "0xF17ce10D8c13f97Fd6Db4fCB05F7877512098337";
         this.adminPrivateKey = "0x746b86dcdb199524b77523d43bfb56f0e1b73cae738e66a6bfce4748072ee95c";
     }
@@ -150,9 +152,8 @@ public class BlockChainServiceImpl implements BlockChainService {
 
             DynamicArray<NFTInfo> nftArray = (DynamicArray<NFTInfo>) decoded.get(0);
 
-
             for (NFTInfo nft : nftArray.getValue()) {
-                log.info(1);
+                log.info(new String(nft.tokenURI.getValue(), StandardCharsets.UTF_8));
                 JsonNode tokenData = fetchTokenURIData(new String(nft.tokenURI.getValue(), StandardCharsets.UTF_8));
 
                 log.info(tokenData);
@@ -181,6 +182,36 @@ public class BlockChainServiceImpl implements BlockChainService {
         return result;
     }
 
+    @Override
+    public BigInteger getBalanceOf(String address) throws Exception {
+        Function function = new Function(
+            "balanceOf",
+            List.of(new Address(address)),
+            List.of(new TypeReference<Uint256>() {
+            })
+        );
+
+        String encodedFunction = FunctionEncoder.encode(function);
+
+        EthCall ethCall = web3j.ethCall(
+            Transaction.createEthCallTransaction(
+                null, coinContractAddress, encodedFunction
+            ),
+            DefaultBlockParameterName.LATEST
+        ).send();
+
+        if (ethCall.hasError()) {
+            throw new Exception("Error calling contract: " + ethCall.getError().getMessage());
+        }
+
+        List<Type> decoded = FunctionReturnDecoder.decode(ethCall.getValue(), function.getOutputParameters());
+
+        if (!decoded.isEmpty()) {
+            return ((Uint256) decoded.get(0)).getValue();
+        } else {
+            throw new Exception("Unexpected empty response");
+        }
+    }
 
     // 1초마다 트랜잭션 확인, 40초까지. 결과 확인을 위한 함수
     @Override
@@ -205,6 +236,17 @@ public class BlockChainServiceImpl implements BlockChainService {
         log.info("end");
         throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
     }
+
+    @Override
+    public BigInteger convertToSmallestUnit(BigInteger amount) {
+        return amount.multiply(UNIT_CONVERSION_FACTOR);
+    }
+
+    @Override
+    public BigInteger convertFromSmallestUnit(BigInteger amount) {
+        return amount.divide(UNIT_CONVERSION_FACTOR);
+    }
+
 
     public JsonNode fetchTokenURIData(String tokenURI) {
         String fullUrl = UriComponentsBuilder.fromUriString(BASE_IPFS_URL)

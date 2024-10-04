@@ -81,29 +81,9 @@ contract NFTFrame is ERC721, ERC721URIStorage, Ownable {
         return tokenId;
     }
 
-    // NFT 업데이트 (소유자)
-    function updateOwnTokenURI(uint256 tokenId, string memory newTokenURI) public {
-        require(ownerOf(tokenId) != address(0), "Token does not exist");
-        require(ownerOf(tokenId) == msg.sender, "You are not the owner of this token");
-        _setTokenURI(tokenId, newTokenURI);
-        emit TokenURIUpdated(tokenId, newTokenURI);
-    }
-
-    // NFT 소유권 이전
-    function transferNFT(uint256 tokenId, address to) public returns (bool) {
-        require(ownerOf(tokenId) != address(0), "Token does not exist");
-        require(ownerOf(tokenId) == msg.sender, "You are not the owner of this token");
-        address from = ownerOf(tokenId);
-        _removeTokenFromOwner(from, tokenId);
-        _transfer(from, to, tokenId);
-        _addTokenToOwner(to, tokenId);
-        emit NFTTransferred(tokenId, from, to);
-
-        return true;
-    }
-
     // 특정 유저 NFT 이동 (메인 컨트랙트에서만 호출가능)
-    function transferNFTUserToSystem(uint256 tokenId, address from, address to) public onlyMainContract {
+    function transferNFTByAdmin(uint256 tokenId, address from, address to) public onlyMainContract {
+        require(ownerOf(tokenId) != address(0), "Token does not exist");
         require(ownerOf(tokenId) != address(0), "Token does not exist");
         
         _removeTokenFromOwner(from, tokenId);

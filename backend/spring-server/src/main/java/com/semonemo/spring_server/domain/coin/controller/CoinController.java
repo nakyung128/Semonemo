@@ -1,0 +1,71 @@
+package com.semonemo.spring_server.domain.coin.controller;
+
+import com.semonemo.spring_server.domain.blockchain.dto.event.NFTEvent;
+import com.semonemo.spring_server.domain.coin.dto.request.CoinRequestDto;
+import com.semonemo.spring_server.domain.coin.dto.request.CoinServiceRequestDto;
+import com.semonemo.spring_server.domain.coin.dto.response.CoinResponseDto;
+import com.semonemo.spring_server.domain.coin.service.CoinService;
+import com.semonemo.spring_server.domain.nft.controller.NFTController;
+import com.semonemo.spring_server.domain.nft.dto.request.NFTRequestDto;
+import com.semonemo.spring_server.domain.nft.dto.request.NFTServiceRequestDto;
+import com.semonemo.spring_server.domain.nft.dto.response.NFTResponseDto;
+import com.semonemo.spring_server.domain.user.entity.Users;
+import com.semonemo.spring_server.domain.user.service.UserService;
+import com.semonemo.spring_server.global.common.CommonResponse;
+import com.semonemo.spring_server.global.exception.CustomException;
+import com.semonemo.spring_server.global.exception.ErrorCode;
+import lombok.RequiredArgsConstructor;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.*;
+import org.web3j.abi.EventEncoder;
+import org.web3j.abi.EventValues;
+import org.web3j.abi.datatypes.Type;
+import org.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.web3j.tx.Contract;
+
+import java.math.BigInteger;
+import java.util.List;
+import java.util.Objects;
+
+@RestController
+@RequestMapping("/api/coin")
+@RequiredArgsConstructor
+public class CoinController implements CoinApi{
+    private static final Log log = LogFactory.getLog(CoinController.class);
+
+    private final UserService userService;
+    private final CoinService coinService;
+
+    // 코인 발행
+    @PostMapping(value = "/buy")
+    public CommonResponse<CoinResponseDto> mintCoin(
+        @AuthenticationPrincipal UserDetails userDetails,
+        @RequestBody CoinRequestDto coinRequestDto) {
+        try {
+            Users users = userService.findByAddress(userDetails.getUsername());
+            CoinServiceRequestDto coinServiceRequestDto = new CoinServiceRequestDto();
+            coinServiceRequestDto.setAmount(coinRequestDto.getAmount());
+            coinServiceRequestDto.setUserId(users.getId());
+            CoinResponseDto coinResponseDto = coinService.mintCoin(coinServiceRequestDto);
+            return CommonResponse.success(coinResponseDto, "코인 구매 성공");
+        } catch (Exception e) {
+            throw new CustomException(ErrorCode.COIN_MINT_FAIL);
+        }
+    }
+
+    // 코인 조회
+    @GetMapping(value = "")
+    public CommonResponse<CoinResponseDto> getCoin(
+        @AuthenticationPrincipal UserDetails userDetails) {
+        try {
+            Users users = userService.findByAddress(userDetails.getUsername());
+            CoinResponseDto coinResponseDto = coinService.getCoin(users.getId());
+            return CommonResponse.success(coinResponseDto, "코인 조회 성공");
+        } catch (Exception e) {
+            throw new CustomException(ErrorCode.COIN_GET_FAIL);
+        }
+    }
+}

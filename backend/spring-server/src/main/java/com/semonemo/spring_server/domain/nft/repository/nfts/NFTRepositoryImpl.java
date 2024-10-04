@@ -78,4 +78,30 @@ public class NFTRepositoryImpl implements NFTRepositoryCustom {
             .where(nfts.tokenId.eq(tokenId))
             .fetchOne() != null;
     }
+
+    @Override
+    public Page<NFTs> findOwnedByUserAndType(Long userId, int type, Pageable pageable) {
+        List<NFTs> content = queryFactory
+            .selectFrom(nfts)
+            .where(
+                nfts.owner.id.eq(userId)
+                    .and(nfts.isOnSale.isFalse())
+                    .and(nfts.frameType.eq(type))
+            )
+            .offset(pageable.getOffset())
+            .limit(pageable.getPageSize())
+            .fetch();
+
+        long total = Optional.ofNullable(queryFactory
+            .select(nfts.count())
+            .from(nfts)
+            .where(
+                nfts.owner.id.eq(userId)
+                    .and(nfts.isOnSale.isFalse())
+                    .and(nfts.frameType.eq(type))
+            )
+            .fetchOne()).orElse(0L);
+
+        return new PageImpl<>(content, pageable, total);
+    }
 }

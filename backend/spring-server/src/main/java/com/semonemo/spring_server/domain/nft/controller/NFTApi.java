@@ -1,5 +1,6 @@
 package com.semonemo.spring_server.domain.nft.controller;
 
+import com.semonemo.spring_server.domain.nft.dto.request.NFTMarketCancelDto;
 import com.semonemo.spring_server.domain.nft.dto.request.NFTMarketRequestDto;
 import com.semonemo.spring_server.domain.nft.dto.request.NFTRequestDto;
 import com.semonemo.spring_server.domain.nft.dto.response.NFTMarketHistoryResponseDto;
@@ -49,6 +50,18 @@ public interface NFTApi {
     CommonResponse<NFTMarketResponseDto> sellNFT(
         @AuthenticationPrincipal UserDetails userDetails,
         @RequestBody NFTMarketRequestDto nftMarketRequestDto
+    );
+
+    @Operation(summary = "NFT 판매 취소", description = "NFT 판매 취소")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "판매 등록 성공",
+            content = @Content(schema = @Schema(implementation = NFTMarketResponseDto.class))),
+        @ApiResponse(responseCode = "500", description = "서버 내부 오류",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    CommonResponse<NFTMarketResponseDto> cancelNFTSell(
+        @AuthenticationPrincipal UserDetails userDetails,
+        @RequestBody NFTMarketCancelDto nftMarketCancelDto
     );
 
     @Operation(summary = "마켓 판매 NFT 조회", description = "마켓에 판매중인 모든 NFT 조회")
@@ -191,5 +204,19 @@ public interface NFTApi {
     CommonResponse<NFTResponseDto> buyNFT(
         @AuthenticationPrincipal UserDetails userDetails,
         @RequestParam() Long marketId
+    );
+
+    @Operation(summary = "유저 사용가능 NFT 리스트 조회", description = "유저 사용가능 NFT 리스트 조회")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "조회 성공",
+            content = @Content(schema = @Schema(implementation = Page.class))),
+        @ApiResponse(responseCode = "500", description = "서버 내부 오류",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    CommonResponse<?> availableNFTList(
+        @AuthenticationPrincipal UserDetails userDetails,
+        @RequestParam() int type,
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "15") int size
     );
 }

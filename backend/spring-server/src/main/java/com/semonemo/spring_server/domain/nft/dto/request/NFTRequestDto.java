@@ -15,4 +15,5 @@ import java.util.List;
 public class NFTRequestDto {
     private String txHash;
     private List<String> tags;
+    private int frameType;
 }

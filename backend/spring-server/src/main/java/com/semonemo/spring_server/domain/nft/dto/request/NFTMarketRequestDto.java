@@ -10,6 +10,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @ToString
 public class NFTMarketRequestDto {
+    private String txHash;
     private Long nftId;
     private Long price;
 }
