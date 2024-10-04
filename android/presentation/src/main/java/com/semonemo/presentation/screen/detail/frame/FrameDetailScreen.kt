@@ -46,6 +46,7 @@ import com.semonemo.presentation.component.LongBlackButton
 import com.semonemo.presentation.component.NameWithBadge
 import com.semonemo.presentation.component.TopAppBar
 import com.semonemo.presentation.theme.GunMetal
+import com.semonemo.presentation.theme.Red
 import com.semonemo.presentation.theme.SemonemoTheme
 import com.semonemo.presentation.theme.Typography
 import com.semonemo.presentation.util.noRippleClickable
@@ -69,6 +70,7 @@ fun FrameDetailRoute(
         onShowSnackBar = onShowSnackBar,
         uiState = uiState.value,
         uiEvent = viewModel.uiEvent,
+        onClickedLikeNft = viewModel::onClickedLikeNft,
     )
 }
 
@@ -79,6 +81,7 @@ fun FrameDetailContent(
     onShowSnackBar: (String) -> Unit = {},
     uiEvent: SharedFlow<FrameDetailUiEvent>,
     uiState: FrameDetailUiState,
+    onClickedLikeNft: (Boolean) -> Unit = {},
 ) {
     LaunchedEffect(uiEvent) {
         uiEvent.collectLatest { event ->
@@ -103,10 +106,11 @@ fun FrameDetailContent(
         hasBadge = true,
         nickname = frame.seller.nickname,
         frameContent = frame.nftInfo.data.content,
-        isHeart = frame.isLiked,
+        isLiked = uiState.isLiked,
         heartCount = frame.likeCount,
         price = frame.price.toDouble(),
         profileImageUrl = frame.seller.profileImage,
+        onClickedLikeNft = onClickedLikeNft,
     )
 }
 
@@ -121,18 +125,15 @@ fun FrameDetailScreen(
     nickname: String = "짜이한",
     hasBadge: Boolean = true,
     frameContent: String = "아이유와 한컷! 아이유와 한컷! 아이유와 한컷! 아이유와 한컷! 아이유와 한컷!  123123123123123123123123123121231231",
-    isHeart: Boolean = true,
+    isLiked: Boolean = true,
     heartCount: Long = 100000,
     price: Double = 100.1,
+    onClickedLikeNft: (Boolean) -> Unit = {},
 ) {
     val scrollState = rememberScrollState()
     val (expanded, isExpanded) =
         remember {
             mutableStateOf(false)
-        }
-    val (heart, isHeart) =
-        remember {
-            mutableStateOf(isHeart)
         }
     val maxLines = 2 // 2줄 이상일 때 아이콘 표시
     Surface(
@@ -243,28 +244,28 @@ fun FrameDetailScreen(
             ) {
                 Spacer(modifier = Modifier.weight(0.05f))
                 Column(modifier = Modifier, horizontalAlignment = Alignment.CenterHorizontally) {
-                    if (heart) {
-                        Icon(
-                            modifier =
-                                Modifier
-                                    .size(25.dp)
-                                    .noRippleClickable { isHeart(heart.not()) },
-                            painter =
-                                painterResource(id = R.drawable.ic_toggle_heart_off),
-                            contentDescription = "",
-                        )
-                    } else {
-                        Icon(
-                            modifier =
-                                Modifier
-                                    .size(25.dp)
-                                    .noRippleClickable { isHeart(heart.not()) },
-                            painter =
-                                painterResource(id = R.drawable.ic_toggle_heart_on),
-                            contentDescription = "",
-                            tint = Color.Red,
-                        )
-                    }
+                    Icon(
+                        modifier =
+                            Modifier
+                                .size(25.dp)
+                                .noRippleClickable {
+                                    if (isLiked.not()) {
+                                        onClickedLikeNft(true)
+                                    } else {
+                                        onClickedLikeNft(false)
+                                    }
+                                },
+                        painter =
+                            if (isLiked.not()) {
+                                painterResource(id = R.drawable.ic_toggle_heart_off)
+                            } else {
+                                painterResource(
+                                    id = R.drawable.ic_toggle_heart_on,
+                                )
+                            },
+                        contentDescription = "",
+                        tint = if (isLiked.not()) GunMetal else Red,
+                    )
                     Text(
                         text = String.format(Locale.KOREAN, "%,.0f", heartCount.toDouble()),
                         style = Typography.bodySmall,

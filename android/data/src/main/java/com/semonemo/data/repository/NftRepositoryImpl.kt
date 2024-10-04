@@ -2,6 +2,7 @@ package com.semonemo.data.repository
 
 import android.util.Log
 import com.semonemo.data.network.api.NftApi
+import com.semonemo.data.network.response.LikeResponse
 import com.semonemo.data.network.response.emitApiResponse
 import com.semonemo.domain.model.ApiResponse
 import com.semonemo.domain.model.FrameDetail
@@ -77,6 +78,34 @@ class NftRepositoryImpl
 
         override suspend fun getFrameDetail(marketId: Long): Flow<ApiResponse<FrameDetail>> =
             flow {
-                emit(emitApiResponse(apiResponse = { api.getNftDetail(marketId) }, default = FrameDetail()))
+                emit(
+                    emitApiResponse(
+                        apiResponse = { api.getNftDetail(marketId) },
+                        default = FrameDetail(),
+                    ),
+                )
+            }
+
+        override suspend fun likeNft(marketId: Long): Flow<ApiResponse<Long>> =
+            flow {
+                val response =
+                    emitApiResponse(apiResponse = { api.likeNft(marketId) }, default = LikeResponse())
+                when (response) {
+                    is ApiResponse.Success -> emit(ApiResponse.Success(response.data.likedCount))
+                    is ApiResponse.Error -> emit(response)
+                }
+            }
+
+        override suspend fun disLikeNft(marketId: Long): Flow<ApiResponse<Long>> =
+            flow {
+                val response =
+                    emitApiResponse(
+                        apiResponse = { api.disLikeNft(marketId) },
+                        default = LikeResponse(),
+                    )
+                when (response) {
+                    is ApiResponse.Success -> emit(ApiResponse.Success(response.data.likedCount))
+                    is ApiResponse.Error -> emit(response)
+                }
             }
     }

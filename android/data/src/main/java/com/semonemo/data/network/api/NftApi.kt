@@ -1,6 +1,7 @@
 package com.semonemo.data.network.api
 
 import com.semonemo.data.network.response.BaseResponse
+import com.semonemo.data.network.response.LikeResponse
 import com.semonemo.domain.model.FrameDetail
 import com.semonemo.domain.model.Nft
 import com.semonemo.domain.model.SearchFrame
@@ -8,6 +9,7 @@ import com.semonemo.domain.model.myFrame.GetMyFrameResponse
 import com.semonemo.domain.request.PublishNftRequest
 import com.semonemo.domain.request.SellNftRequest
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
@@ -45,4 +47,14 @@ interface NftApi {
     suspend fun getNftDetail(
         @Path("marketId") marketId: Long,
     ): BaseResponse<FrameDetail>
+
+    @POST("api/nft/{marketId}/like")
+    suspend fun likeNft(
+        @Path("marketId") marketId: Long,
+    ): BaseResponse<LikeResponse>
+
+    @DELETE("api/nft/{marketId}/like")
+    suspend fun disLikeNft(
+        @Path("marketId") marketId: Long,
+    ): BaseResponse<LikeResponse>
 }

@@ -50,10 +50,56 @@ class FrameDetailViewModel
                             }
 
                             is ApiResponse.Success -> {
-                                _uiState.update { it.copy(frame = response.data) }
+                                _uiState.update {
+                                    it.copy(
+                                        frame = response.data,
+                                        isLiked = response.data.isLiked,
+                                        likedCount = response.data.likeCount,
+                                    )
+                                }
                             }
                         }
                     }
+            }
+        }
+
+        fun onClickedLikeNft(isLiked: Boolean) {
+            _uiState.update { it.copy(isLiked = isLiked) }
+            val marketId = uiState.value.frame.marketId
+            viewModelScope.launch {
+                if (isLiked) {
+                    likeNft(marketId)
+                } else {
+                    disLikeNft(marketId)
+                }
+            }
+        }
+
+        private suspend fun likeNft(marketId: Long) {
+            nftRepository.likeNft(marketId).collectLatest { response ->
+                when (response) {
+                    is ApiResponse.Error -> {
+                        _uiEvent.emit(FrameDetailUiEvent.Error(response.errorMessage))
+                    }
+
+                    is ApiResponse.Success -> {
+                        _uiState.update { it.copy(likedCount = response.data) }
+                    }
+                }
+            }
+        }
+
+        private suspend fun disLikeNft(marketId: Long) {
+            nftRepository.disLikeNft(marketId).collectLatest { response ->
+                when (response) {
+                    is ApiResponse.Error -> {
+                        _uiEvent.emit(FrameDetailUiEvent.Error(response.errorMessage))
+                    }
+
+                    is ApiResponse.Success -> {
+                        _uiState.update { it.copy(likedCount = response.data) }
+                    }
+                }
             }
         }
     }
