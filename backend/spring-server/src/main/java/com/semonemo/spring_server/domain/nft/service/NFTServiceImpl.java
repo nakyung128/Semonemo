@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.semonemo.spring_server.domain.user.dto.response.UserInfoResponseDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -110,11 +111,25 @@ public class NFTServiceImpl implements NFTService {
 
 		List<String> tagNames = nftTagRepository.findTagNamesByNFT(nft.getNftId());
 
+        UserInfoResponseDTO creatorInfo = new UserInfoResponseDTO(
+            nft.getCreator().getId(),
+            nft.getCreator().getAddress(),
+            nft.getCreator().getNickname(),
+            nft.getCreator().getProfileImage()
+        );
+
+        UserInfoResponseDTO ownerInfo = new UserInfoResponseDTO(
+            nft.getCreator().getId(),
+            nft.getCreator().getAddress(),
+            nft.getCreator().getNickname(),
+            nft.getCreator().getProfileImage()
+        );
+
 		if (!allNFTInfo.isEmpty()) {
 			return new NFTResponseDto(
 				nft.getNftId(),
-				nft.getCreator().getId(),
-				nft.getOwner().getId(),
+                creatorInfo,
+                ownerInfo,
 				nft.getTokenId(),
                 nft.getFrameType(),
 				tagNames,
@@ -170,11 +185,18 @@ public class NFTServiceImpl implements NFTService {
 		List<String> tagNames = nftTagRepository.findTagNamesByNFT(nft.getNftId());
 
 		if (!allNFTInfo.isEmpty()) {
+            UserInfoResponseDTO sellerInfo = new UserInfoResponseDTO(
+                market.getSeller().getId(),
+                market.getSeller().getAddress(),
+                market.getSeller().getNickname(),
+                market.getSeller().getProfileImage()
+            );
+
 			syncService.syncNFTMarket(nft, market, nft.getTags());
 			return new NFTMarketResponseDto(
 				market.getMarketId(),
 				market.getNftId().getNftId(),
-				market.getSeller().getId(),
+                sellerInfo,
 				market.getPrice(),
 				market.getLikeCount(),
 				false,
@@ -379,7 +401,12 @@ public class NFTServiceImpl implements NFTService {
 		return market.stream()
 			.map(m -> new NFTMarketHistoryResponseDto(
 				nftId,
-				m.getSeller().getId(),
+                new UserInfoResponseDTO(
+                    m.getSeller().getId(),
+                    m.getSeller().getAddress(),
+                    m.getSeller().getNickname(),
+                    m.getSeller().getProfileImage()
+                ),
 				m.getPrice(),
 				m.getSoldAt()
 			))
@@ -610,11 +637,18 @@ public class NFTServiceImpl implements NFTService {
 
 		List<String> tagNames = nftTagRepository.findTagNamesByNFT(sellingNFT.getNftId().getNftId());
 
+        UserInfoResponseDTO sellerInfo = new UserInfoResponseDTO(
+            sellingNFT.getSeller().getId(),
+            sellingNFT.getSeller().getAddress(),
+            sellingNFT.getSeller().getNickname(),
+            sellingNFT.getSeller().getProfileImage()
+        );
+
 		// 외부 API 호출
 		return new NFTMarketResponseDto(
 			sellingNFT.getMarketId(),
 			sellingNFT.getNftId().getNftId(),
-			sellingNFT.getSeller().getId(),
+            sellerInfo,
 			sellingNFT.getPrice(),
 			sellingNFT.getLikeCount(),
 			isLiked,
@@ -626,10 +660,24 @@ public class NFTServiceImpl implements NFTService {
 	private NFTResponseDto nftConvertToDto(NFTs nft, NFTInfoDto nftInfo) {
 		List<String> tagNames = nftTagRepository.findTagNamesByNFT(nft.getNftId());
 
+        UserInfoResponseDTO creatorInfo = new UserInfoResponseDTO(
+            nft.getCreator().getId(),
+            nft.getCreator().getAddress(),
+            nft.getCreator().getNickname(),
+            nft.getCreator().getProfileImage()
+        );
+
+        UserInfoResponseDTO ownerInfo = new UserInfoResponseDTO(
+            nft.getOwner().getId(),
+            nft.getOwner().getAddress(),
+            nft.getOwner().getNickname(),
+            nft.getOwner().getProfileImage()
+        );
+
 		return new NFTResponseDto(
 			nft.getNftId(),
-			nft.getCreator().getId(),
-			nft.getOwner().getId(),
+            creatorInfo,
+            ownerInfo,
 			nft.getTokenId(),
             nft.getFrameType(),
 			tagNames,

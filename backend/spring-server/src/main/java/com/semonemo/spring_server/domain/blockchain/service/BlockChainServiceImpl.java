@@ -55,9 +55,9 @@ public class BlockChainServiceImpl implements BlockChainService {
     public BlockChainServiceImpl(Web3j web3j, RestTemplate restTemplate) {
         this.web3j = web3j;
         this.restTemplate = restTemplate;
-        this.coinContractAddress = "0x81441aF1958E2D18B49A5e10BC143532E679A9c7";
-        this.nftContractAddress = "0x62d920896AA502E853cB47d02ca9E89f6b72D220";
-        this.systemContractAddress = "0x25309874E535b3BB1c1543A91AB8EFf2AFCa4b9F";
+        this.coinContractAddress = "0xc0D3a02b64CB5edb22828160B8d4B86fab8fE57B";
+        this.nftContractAddress = "0x3852813e666A7bff9ceBD98b59af141011859b74";
+        this.systemContractAddress = "0xB95AFE1Cd8ff2702f1E7D785D24010a14EdD3F02";
         this.adminAddress = "0xF17ce10D8c13f97Fd6Db4fCB05F7877512098337";
         this.adminPrivateKey = "0x746b86dcdb199524b77523d43bfb56f0e1b73cae738e66a6bfce4748072ee95c";
     }
