@@ -71,7 +71,7 @@ public interface ElasticSearchApi {
 		@ApiResponse(responseCode = "500", description = "서버 내부 오류",
 			content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 	})
-	CommonResponse<?> getPopularSearches(
+	CommonResponse<?> getHotSearches(
 		@RequestParam(defaultValue = "7") int days,
 		@RequestParam(defaultValue = "10") int size
 	);

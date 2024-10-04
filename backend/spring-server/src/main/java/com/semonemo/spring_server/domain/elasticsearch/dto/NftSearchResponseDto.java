@@ -8,16 +8,17 @@ import com.semonemo.spring_server.domain.blockchain.dto.NFTInfoDto;
 import com.semonemo.spring_server.domain.elasticsearch.document.AssetSellDocument;
 import com.semonemo.spring_server.domain.elasticsearch.document.NFTSellDocument;
 import com.semonemo.spring_server.domain.nft.entity.NFTMarket;
+import com.semonemo.spring_server.domain.user.dto.response.UserInfoResponseDTO;
 
 public record NftSearchResponseDto(
 	Long marketId,
 	Long nftId,
-	Long seller,
-    Long price,
+	UserInfoResponseDTO seller,
+	Long price,
 	int likeCount,
 	boolean isLiked,
 	NFTInfoDto nftInfo,
-	List<NFTSellDocument.Tag> tags
+	List<String> tags
 
 ) {
 }
