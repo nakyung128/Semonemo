@@ -13,6 +13,20 @@ data class SellAsset(
     val tags: List<String>,
 )
 
+data class AllSellAssets(
+    val content: List<SellAssetDetail> = emptyList(),
+    val pageable: Pageable = Pageable(),
+    val last: Boolean = false,
+    val totalElements: Long = 0,
+    val totalPages: Long = 0,
+    val size: Long = 0,
+    val number: Long = 0,
+    val sort: Sort = Sort(),
+    val first: Boolean = false,
+    val numberOfElements: Long = 0,
+    val empty: Boolean = false,
+)
+
 data class SellAssetDetail(
     val assetId: Long = 0,
     val assetSellId: Long = 0,

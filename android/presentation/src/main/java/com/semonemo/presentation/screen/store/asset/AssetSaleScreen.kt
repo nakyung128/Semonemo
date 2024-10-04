@@ -1,4 +1,4 @@
-package com.semonemo.presentation.screen.store.assetSale
+package com.semonemo.presentation.screen.store.asset
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
@@ -37,6 +37,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -72,46 +73,53 @@ import com.semonemo.presentation.theme.SemonemoTheme
 import com.semonemo.presentation.theme.Typography
 import com.semonemo.presentation.util.addFocusCleaner
 import com.skydoves.landscapist.glide.GlideImage
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun AssetSaleRoute(
     modifier: Modifier,
     viewModel: AssetSaleViewModel = hiltViewModel(),
     navigateToStore: () -> Unit,
+    onShowSnackBar: (String) -> Unit,
 ) {
-    val assetState by viewModel.assetState.collectAsStateWithLifecycle()
-    HandleAssetSaleUi(
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    AssetSaleContent(
         modifier = modifier,
-        assetState = assetState,
+        uiState = uiState,
+        uiEvent = viewModel.uiEvent,
         onSaleButtonClick = viewModel::sellAsset,
+        onShowSnackBar = onShowSnackBar,
         navigateToStore = navigateToStore,
     )
 }
 
 @Composable
-fun HandleAssetSaleUi(
+fun AssetSaleContent(
     modifier: Modifier,
-    assetState: AssetSaleState,
+    uiState: AssetSaleUiState,
+    uiEvent: SharedFlow<AssetSaleUiEvent>,
     onSaleButtonClick: (SellAsset) -> Unit,
+    onShowSnackBar: (String) -> Unit,
     navigateToStore: () -> Unit,
 ) {
-    when (assetState) {
-        AssetSaleState.Init -> LoadingDialog()
-
-        is AssetSaleState.LoadSuccess -> {
-            AssetSaleScreen(
-                modifier = modifier,
-                assets = assetState.assets,
-                onSaleButtonClick = onSaleButtonClick,
-            )
+    LaunchedEffect(uiEvent) {
+        uiEvent.collectLatest { event ->
+            when (event) {
+                is AssetSaleUiEvent.Error -> onShowSnackBar(event.message)
+                AssetSaleUiEvent.SellSuccess -> navigateToStore()
+            }
         }
-
-        AssetSaleState.SellSuccess -> {
-            navigateToStore()
-        }
-
-        else -> {}
     }
+    if (uiState.isLoading) {
+        LoadingDialog()
+    }
+    AssetSaleScreen(
+        modifier = modifier,
+        assets = uiState.assets,
+        onSaleButtonClick = onSaleButtonClick,
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

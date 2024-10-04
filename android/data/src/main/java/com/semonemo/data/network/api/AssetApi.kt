@@ -2,6 +2,7 @@ package com.semonemo.data.network.api
 
 import com.semonemo.data.network.response.BaseResponse
 import com.semonemo.data.network.response.GetAssetsResponse
+import com.semonemo.domain.model.AllSellAssets
 import com.semonemo.domain.model.Asset
 import com.semonemo.domain.model.CreateAsset
 import com.semonemo.domain.model.SellAsset
@@ -45,6 +46,12 @@ interface AssetApi {
     suspend fun getSellAssetDetail(
         @Path("assetSellId") assetSellId: Long,
     ): BaseResponse<SellAssetDetail>
+
+    // 판매 중 에셋 전체 조회
+    @GET("api/asset/sort")
+    suspend fun getAllSellAssets(
+        @Query("orderBy") option: String,
+    ): BaseResponse<AllSellAssets>
 
     // 유저 제작 에셋 조회
     @GET("api/asset/creator")

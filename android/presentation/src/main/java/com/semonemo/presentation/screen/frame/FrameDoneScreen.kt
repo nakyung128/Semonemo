@@ -164,7 +164,7 @@ fun FrameDoneContent(
         )
         LoadingDialog(
             lottieRes = R.raw.normal_load,
-            loadingMessage = stringResource(R.string.loading_message),
+            loadingMessage = stringResource(R.string.frame_loading_title),
             subMessage = stringResource(R.string.loading_sub_message),
         )
     }

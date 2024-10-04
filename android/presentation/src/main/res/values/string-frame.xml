@@ -14,4 +14,5 @@
     <string name="frame_save_btn_title">저장하고 홈으로 돌아가기</string>
     <string name="frame_save_btn_script">제작된 프레임은 마이페이지에서 확인할 수 있어요.</string>
     <string name="frame_done_btn_title">완성했어요!</string>
+    <string name="frame_loading_title">프레임을 열심히 제작하고 있어요!</string>
 </resources>

@@ -21,6 +21,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -32,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.semonemo.domain.model.FrameDetail
+import com.semonemo.domain.model.SellAssetDetail
 import com.semonemo.presentation.R
 import com.semonemo.presentation.component.CustomStoreFAB
 import com.semonemo.presentation.component.LoadingDialog
@@ -42,6 +44,8 @@ import com.semonemo.presentation.theme.GunMetal
 import com.semonemo.presentation.theme.SemonemoTheme
 import com.semonemo.presentation.theme.White
 import com.skydoves.landscapist.glide.GlideImage
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun StoreRoute(
@@ -60,6 +64,7 @@ fun StoreRoute(
         navigateToFullView = navigateToFullView,
         navigateToSearch = navigateToSearch,
         uiState = uiState.value,
+        uiEvent = viewModel.uiEvent,
     )
 }
 
@@ -71,7 +76,16 @@ fun StoreContent(
     navigateToAssetSale: () -> Unit = {},
     navigateToFrameSale: () -> Unit = {},
     uiState: StoreUiState,
+    uiEvent: SharedFlow<StoreUiEvent>,
+    onShowError: (String) -> Unit = {},
 ) {
+    LaunchedEffect(uiEvent) {
+        uiEvent.collectLatest { event ->
+            when (event) {
+                is StoreUiEvent.Error -> onShowError(event.errorMessage)
+            }
+        }
+    }
     if (uiState.isLoading) {
         LoadingDialog()
     }
@@ -82,6 +96,7 @@ fun StoreContent(
         navigateToFullView = navigateToFullView,
         navigateToSearch = navigateToSearch,
         saleFrames = uiState.saleFrame,
+        saleAssets = uiState.saleAsset,
     )
 }
 
@@ -93,8 +108,13 @@ fun StoreScreen(
     navigateToAssetSale: () -> Unit = {},
     navigateToFrameSale: () -> Unit = {},
     saleFrames: List<FrameDetail> = listOf(),
+    saleAssets: List<SellAssetDetail> = listOf(),
 ) {
     val verticalScrollState = rememberScrollState()
+
+    val frameHeight = if (saleFrames.isEmpty()) 0.dp else 300.dp
+    val assetHeight = if (saleAssets.isEmpty()) 0.dp else 400.dp
+
     Surface(
         modifier =
             modifier
@@ -119,7 +139,7 @@ fun StoreScreen(
                     modifier = Modifier.padding(10.dp),
                     text = stringResource(R.string.recent_popular_frame_header),
                 )
-                Spacer(modifier.weight(1f))
+                Spacer(Modifier.weight(1f))
                 Icon(
                     modifier =
                         Modifier
@@ -138,7 +158,7 @@ fun StoreScreen(
             )
             Spacer(modifier = Modifier.height(10.dp))
             Row(
-                modifier = modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
@@ -150,10 +170,11 @@ fun StoreScreen(
                     navigateToFullView(true)
                 })
             }
+
             StoreSubScreen(
                 modifier =
-                    modifier
-                        .height(300.dp)
+                    Modifier
+                        .height(frameHeight)
                         .fillMaxWidth(),
                 isFrame = true,
                 saleFrames,
@@ -161,7 +182,7 @@ fun StoreScreen(
             Spacer(modifier = Modifier.height(10.dp))
             Row(
                 modifier =
-                    modifier
+                    Modifier
                         .fillMaxWidth()
                         .padding(10.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -172,10 +193,11 @@ fun StoreScreen(
             }
             StoreSubScreen(
                 modifier =
-                    modifier
-                        .height(400.dp)
+                    Modifier
+                        .height(assetHeight)
                         .fillMaxWidth(),
                 isFrame = false,
+                saleAssets = saleAssets,
             )
             Spacer(modifier = Modifier.height(100.dp))
         }
@@ -184,41 +206,6 @@ fun StoreScreen(
             navigateToAssetSale = navigateToAssetSale,
             navigateToFrameSale = navigateToFrameSale,
         )
-        Row(
-            modifier = modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            SectionHeader(text = stringResource(id = R.string.section_header_sell_frame))
-            SectionFullViewButton(onClick = {
-                navigateToFullView(true)
-            })
-        }
-
-        StoreSubScreen(
-            modifier =
-                modifier
-                    .height(300.dp)
-                    .fillMaxWidth(),
-            isFrame = true,
-            saleFrames = saleFrames,
-        )
-        Row(
-            modifier = modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            SectionHeader(text = stringResource(id = R.string.section_header_sell_asset))
-            SectionFullViewButton(onClick = { navigateToFullView(false) })
-        }
-        StoreSubScreen(
-            modifier =
-                modifier
-                    .height(400.dp)
-                    .fillMaxWidth(),
-            isFrame = false,
-        )
-        Spacer(modifier = Modifier.height(100.dp))
     }
 }
 
@@ -235,7 +222,7 @@ fun HotRecentFrame(
     ) {
         Column(
             modifier =
-                modifier
+                Modifier
                     .fillMaxWidth()
                     .wrapContentHeight(),
         ) {

@@ -35,7 +35,6 @@ import com.skydoves.landscapist.glide.GlideImage
 @Composable
 fun StoreItemCard(
     modifier: Modifier = Modifier,
-    title: String,
     author: String,
     imgUrl: String,
     price: Int,
@@ -110,7 +109,6 @@ fun StoreItemCard(
 @Composable
 fun StoreItemCardPreview() {
     StoreItemCard(
-        title = "Sample Title",
         author = "Sample Author",
         imgUrl = "https://example.com/sample_image.jpg",
         price = 100,

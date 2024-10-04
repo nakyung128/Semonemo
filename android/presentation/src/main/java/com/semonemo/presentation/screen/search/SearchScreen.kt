@@ -1,6 +1,5 @@
 package com.semonemo.presentation.screen.search
 
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -66,7 +65,6 @@ import com.semonemo.presentation.theme.SemonemoTheme
 import com.semonemo.presentation.theme.Typography
 import com.semonemo.presentation.util.noRippleClickable
 import com.skydoves.landscapist.glide.GlideImage
-import kotlinx.coroutines.launch
 
 @Composable
 fun SearchRoute(
@@ -289,8 +287,7 @@ fun SearchSuccessScreen(
                 Modifier
                     .fillMaxWidth()
                     .wrapContentHeight()
-                    .padding(horizontal = 10.dp)
-                    .aspectRatio(1f / 2f),
+                    .padding(horizontal = 10.dp),
             columns = GridCells.Fixed(2),
             state = rememberLazyGridState(),
         ) {
@@ -303,6 +300,7 @@ fun SearchSuccessScreen(
                     modifier =
                         Modifier
                             .fillMaxWidth()
+                            .aspectRatio(3f / 4f)
                             .padding(8.dp)
                             .clip(shape = RoundedCornerShape(10.dp))
                             .border(
@@ -311,7 +309,7 @@ fun SearchSuccessScreen(
                                 color = Gray03,
                             ),
                     imageModel = imgUrl.toUri(),
-                    contentScale = ContentScale.Crop,
+                    contentScale = ContentScale.Fit,
                 )
             }
         }

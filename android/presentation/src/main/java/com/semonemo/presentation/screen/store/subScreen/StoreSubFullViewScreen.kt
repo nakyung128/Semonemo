@@ -42,7 +42,6 @@ fun StoreSubFullViewScreen(
     var filterStates by remember {
         mutableStateOf(StoreFilter.entries.associateWith { null as Boolean? })
     }
-    val frameDataList = getSampleFrameData(5)
     var keyword by remember { mutableStateOf("") }
 
     Column(
@@ -86,19 +85,19 @@ fun StoreSubFullViewScreen(
             verticalArrangement = Arrangement.spacedBy(8.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            items(frameDataList) { storeItem ->
-                StoreItemCard(
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .aspectRatio(if (isFrame) 0.6f else 0.8f),
-                    title = storeItem.title,
-                    author = storeItem.author,
-                    imgUrl = storeItem.imgUrl,
-                    price = storeItem.price,
-                    isLiked = storeItem.isLiked,
-                )
-            }
+//            items(frameDataList) { storeItem ->
+//                StoreItemCard(
+//                    modifier =
+//                        Modifier
+//                            .fillMaxWidth()
+//                            .aspectRatio(if (isFrame) 0.6f else 0.8f),
+//                    title = storeItem.title,
+//                    author = storeItem.author,
+//                    imgUrl = storeItem.imgUrl,
+//                    price = storeItem.price,
+//                    isLiked = storeItem.isLiked,
+//                )
+//            }
         }
     }
     CustomStoreFAB(

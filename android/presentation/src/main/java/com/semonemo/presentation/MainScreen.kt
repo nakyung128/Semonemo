@@ -40,7 +40,7 @@ import com.semonemo.presentation.screen.search.SearchRoute
 import com.semonemo.presentation.screen.signup.SignUpRoute
 import com.semonemo.presentation.screen.store.StoreFullViewScreen
 import com.semonemo.presentation.screen.store.StoreRoute
-import com.semonemo.presentation.screen.store.assetSale.AssetSaleRoute
+import com.semonemo.presentation.screen.store.asset.AssetSaleRoute
 import com.semonemo.presentation.screen.store.frame.FrameSaleRoute
 import com.semonemo.presentation.screen.wallet.WalletScreen
 import com.semonemo.presentation.theme.Gray01
@@ -425,6 +425,7 @@ fun MainNavHost(
                 navigateToStore = {
                     navController.navigate(ScreenDestinations.Shop.route)
                 },
+                onShowSnackBar = onShowErrorSnackBar,
             )
         }
     }

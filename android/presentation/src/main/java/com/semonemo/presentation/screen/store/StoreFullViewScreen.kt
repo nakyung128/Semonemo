@@ -14,9 +14,10 @@ fun StoreFullViewScreen(
     isFrame: Boolean,
 ) {
     Column(
-        modifier = modifier
-            .navigationBarsPadding()
-            .statusBarsPadding(),
+        modifier =
+            modifier
+                .navigationBarsPadding()
+                .statusBarsPadding(),
     ) {
         StoreSubFullViewScreen(
             modifier = Modifier,

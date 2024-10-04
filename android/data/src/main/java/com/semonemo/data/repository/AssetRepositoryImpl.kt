@@ -4,6 +4,7 @@ import com.semonemo.data.network.api.AssetApi
 import com.semonemo.data.network.response.GetAssetsResponse
 import com.semonemo.data.network.response.emitApiResponse
 import com.semonemo.data.util.toMultiPart
+import com.semonemo.domain.model.AllSellAssets
 import com.semonemo.domain.model.ApiResponse
 import com.semonemo.domain.model.Asset
 import com.semonemo.domain.model.CreateAsset
@@ -70,6 +71,16 @@ class AssetRepositoryImpl
                     emitApiResponse(
                         apiResponse = { api.getSellAssetDetail(assetSellId) },
                         default = SellAssetDetail(),
+                    )
+                emit(response)
+            }
+
+        override suspend fun getAllSellAssets(option: String): Flow<ApiResponse<AllSellAssets>> =
+            flow {
+                val response =
+                    emitApiResponse(
+                        apiResponse = { api.getAllSellAssets(option) },
+                        default = AllSellAssets(),
                     )
                 emit(response)
             }

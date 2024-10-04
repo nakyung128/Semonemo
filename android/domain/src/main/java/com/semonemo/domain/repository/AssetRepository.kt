@@ -1,5 +1,6 @@
 package com.semonemo.domain.repository
 
+import com.semonemo.domain.model.AllSellAssets
 import com.semonemo.domain.model.ApiResponse
 import com.semonemo.domain.model.Asset
 import com.semonemo.domain.model.CreateAsset
@@ -18,6 +19,8 @@ interface AssetRepository {
     suspend fun getAssetDetail(assetId: Long): Flow<ApiResponse<Asset>>
 
     suspend fun getSellAssetDetail(assetSellId: Long): Flow<ApiResponse<SellAssetDetail>>
+
+    suspend fun getAllSellAssets(option: String): Flow<ApiResponse<AllSellAssets>>
 
     suspend fun getCreateAssets(userId: Long): Flow<ApiResponse<CreateAsset>>
 
