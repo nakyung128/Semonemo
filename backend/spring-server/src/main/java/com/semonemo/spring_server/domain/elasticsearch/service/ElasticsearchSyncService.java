@@ -1,7 +1,6 @@
 package com.semonemo.spring_server.domain.elasticsearch.service;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -20,7 +19,7 @@ import com.semonemo.spring_server.domain.asset.repository.atags.ATagsRepository;
 import com.semonemo.spring_server.domain.elasticsearch.document.AssetSellDocument;
 import com.semonemo.spring_server.domain.elasticsearch.document.NFTSellDocument;
 import com.semonemo.spring_server.domain.elasticsearch.document.UserDocument;
-import com.semonemo.spring_server.domain.elasticsearch.repository.NftSearchRepository;
+import com.semonemo.spring_server.domain.elasticsearch.repository.nft.NftSearchRepository;
 import com.semonemo.spring_server.domain.elasticsearch.repository.asset.AssetElasticsearchRepository;
 import com.semonemo.spring_server.domain.elasticsearch.repository.user.UserSearchRepository;
 import com.semonemo.spring_server.domain.nft.entity.NFTMarket;
