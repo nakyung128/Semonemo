@@ -7,6 +7,7 @@ import com.semonemo.spring_server.domain.blockchain.service.BlockChainService;
 import com.semonemo.spring_server.domain.coin.dto.request.CoinRequestDto;
 import com.semonemo.spring_server.domain.coin.dto.request.CoinServiceRequestDto;
 import com.semonemo.spring_server.domain.coin.dto.response.CoinResponseDto;
+import com.semonemo.spring_server.domain.coin.dto.response.TradeLogResponseDto;
 import com.semonemo.spring_server.domain.coin.service.CoinService;
 import com.semonemo.spring_server.domain.nft.controller.NFTController;
 import com.semonemo.spring_server.domain.nft.dto.request.NFTRequestDto;
@@ -20,6 +21,7 @@ import com.semonemo.spring_server.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.data.domain.Page;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
@@ -70,6 +72,21 @@ public class CoinController implements CoinApi{
             return CommonResponse.success(coinResponseDto, "코인 조회 성공");
         } catch (Exception e) {
             throw new CustomException(ErrorCode.COIN_GET_FAIL);
+        }
+    }
+
+    // 거래 내역 조회
+    @GetMapping(value = "/history")
+    public CommonResponse<?> getTradeLog(
+        @AuthenticationPrincipal UserDetails userDetails,
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "15") int size) {
+        try {
+            Users users = userService.findByAddress(userDetails.getUsername());
+            Page<TradeLogResponseDto> tradeLogs = coinService.getTradeLog(users.getId(), page, size);
+            return CommonResponse.success(tradeLogs, "코인 거래내역 조회 성공");
+        } catch (Exception e) {
+            throw new CustomException(ErrorCode.GET_LOG_FAIL);
         }
     }
 
