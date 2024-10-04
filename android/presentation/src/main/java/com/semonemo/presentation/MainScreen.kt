@@ -27,6 +27,7 @@ import com.semonemo.presentation.screen.aiAsset.DrawAssetScreen
 import com.semonemo.presentation.screen.aiAsset.PromptAssetScreen
 import com.semonemo.presentation.screen.auction.AuctionProcessScreen
 import com.semonemo.presentation.screen.auction.AuctionScreen
+import com.semonemo.presentation.screen.detail.asset.AssetDetailRoute
 import com.semonemo.presentation.screen.detail.frame.FrameDetailRoute
 import com.semonemo.presentation.screen.frame.MomentGraph
 import com.semonemo.presentation.screen.imgAsset.ImageAssetScreen
@@ -187,6 +188,9 @@ fun MainNavHost(
                 },
                 navigateToFrameDetail = { marketId ->
                     navController.navigate(ScreenDestinations.FrameDetail.createRoute(marketId))
+                },
+                navigateToAssetDetail = { assetSellId ->
+                    navController.navigate(ScreenDestinations.AssetDetail.createRoute(assetSellId))
                 },
             )
         }
@@ -438,6 +442,17 @@ fun MainNavHost(
             arguments = ScreenDestinations.FrameDetail.arguments,
         ) {
             FrameDetailRoute(
+                modifier = modifier,
+                popUpBackStack = navController::popBackStack,
+                onShowSnackBar = onShowErrorSnackBar,
+            )
+        }
+
+        composable(
+            route = ScreenDestinations.AssetDetail.route,
+            arguments = ScreenDestinations.AssetDetail.arguments,
+        ) {
+            AssetDetailRoute(
                 modifier = modifier,
                 popUpBackStack = navController::popBackStack,
                 onShowSnackBar = onShowErrorSnackBar,

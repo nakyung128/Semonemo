@@ -158,6 +158,14 @@ sealed class ScreenDestinations(
         fun createRoute(marketId: Long) = "frameDetail/$marketId"
     }
 
+    data object AssetDetail : ScreenDestinations(route = "assetDetail") {
+        override val route: String
+            get() = "assetDetail/{assetSellId}"
+        val arguments = listOf(navArgument(name = "assetSellId") { type = NavType.LongType })
+
+        fun createRoute(assetSellId: Long) = "assetDetail/$assetSellId"
+    }
+
     data object FrameDone : ScreenDestinations(route = "frameDone")
 
     data object Search : ScreenDestinations(route = "search")

@@ -2,7 +2,10 @@ package com.semonemo.presentation.screen.mypage
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
+import com.semonemo.domain.model.Asset
+import com.semonemo.domain.model.FrameDetail
 import com.semonemo.domain.model.User
+import com.semonemo.domain.model.myFrame.MyFrame
 
 @Stable
 sealed interface MyPageUiState {
@@ -19,5 +22,8 @@ sealed interface MyPageUiState {
         val volume: Int = 0,
         val amount: Int = 0,
         val isFollow: Boolean? = null,
+        val frameList: List<MyFrame> = listOf(),
+        val sellFrameList: List<FrameDetail> = listOf(),
+        val assetList: List<Asset> = listOf(),
     ) : MyPageUiState
 }

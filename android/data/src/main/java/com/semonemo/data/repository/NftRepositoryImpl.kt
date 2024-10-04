@@ -43,6 +43,19 @@ class NftRepositoryImpl
                 }
             }
 
+        override suspend fun getSellNft(userId: Long): Flow<ApiResponse<List<FrameDetail>>> =
+            flow {
+                val response =
+                    emitApiResponse(
+                        apiResponse = { api.getSellNft(userId) },
+                        default = SearchFrame(),
+                    )
+                when (response) {
+                    is ApiResponse.Error -> emit(response)
+                    is ApiResponse.Success -> emit(ApiResponse.Success(response.data.content))
+                }
+            }
+
         override suspend fun getAvailableNft(type: Int): Flow<ApiResponse<List<MyFrame>>> =
             flow {
                 val response =

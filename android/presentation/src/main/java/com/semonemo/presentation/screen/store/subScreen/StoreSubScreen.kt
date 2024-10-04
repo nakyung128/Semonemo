@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.dp
 import com.semonemo.domain.model.FrameDetail
 import com.semonemo.domain.model.SellAssetDetail
 import com.semonemo.presentation.component.StoreItemCard
+import com.semonemo.presentation.util.noRippleClickable
 import com.semonemo.presentation.util.urlToIpfs
 
 @Preview(showBackground = true)
@@ -26,6 +27,7 @@ fun StoreSubScreen(
     saleFrames: List<FrameDetail> = listOf(),
     saleAssets: List<SellAssetDetail> = listOf(),
     navigateToFrameDetail: (Long) -> Unit = {},
+    navigateToAssetDetail: (Long) -> Unit = {},
 ) {
     LazyHorizontalGrid(
         modifier = modifier.wrapContentHeight(),
@@ -42,7 +44,7 @@ fun StoreSubScreen(
                             .fillMaxHeight()
                             .aspectRatio(3f / 4f)
                             .clickable { navigateToFrameDetail(storeItem.marketId) },
-                    author = storeItem.nftInfo.data.title,
+                    author = storeItem.seller.nickname,
                     imgUrl =
                         storeItem.nftInfo.data.image
                             .urlToIpfs(),
@@ -56,8 +58,11 @@ fun StoreSubScreen(
                     modifier =
                         Modifier
                             .fillMaxHeight()
-                            .aspectRatio(1f),
-                    author = storeItem.nickname,
+                            .aspectRatio(1f)
+                            .noRippleClickable {
+                                navigateToAssetDetail(storeItem.assetSellId)
+                            },
+                    author = storeItem.creator.nickname,
                     imgUrl = storeItem.imageUrl,
                     price = storeItem.price.toInt(),
                     isLiked = storeItem.isLiked,

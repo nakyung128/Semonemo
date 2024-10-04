@@ -1,13 +1,14 @@
-package com.semonemo.presentation.screen.detail.frame
+package com.semonemo.presentation.screen.detail.asset
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
@@ -17,6 +18,7 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
@@ -32,7 +34,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -49,44 +50,44 @@ import com.semonemo.presentation.theme.GunMetal
 import com.semonemo.presentation.theme.Red
 import com.semonemo.presentation.theme.SemonemoTheme
 import com.semonemo.presentation.theme.Typography
+import com.semonemo.presentation.theme.WhiteGray
 import com.semonemo.presentation.util.noRippleClickable
-import com.semonemo.presentation.util.urlToIpfs
 import com.skydoves.landscapist.glide.GlideImage
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.collectLatest
 import java.util.Locale
 
 @Composable
-fun FrameDetailRoute(
+fun AssetDetailRoute(
     modifier: Modifier = Modifier,
     popUpBackStack: () -> Unit = {},
     onShowSnackBar: (String) -> Unit = {},
-    viewModel: FrameDetailViewModel = hiltViewModel(),
+    viewModel: AssetDetailViewModel = hiltViewModel(),
 ) {
     val uiState = viewModel.uiState.collectAsStateWithLifecycle()
-    FrameDetailContent(
+    AssetDetailContent(
         modifier = modifier,
         popUpBackStack = popUpBackStack,
         onShowSnackBar = onShowSnackBar,
         uiState = uiState.value,
         uiEvent = viewModel.uiEvent,
-        onClickedLikeNft = viewModel::onClickedLikeNft,
+        onClickedLikeAsset = viewModel::onLikedAsset,
     )
 }
 
 @Composable
-fun FrameDetailContent(
+fun AssetDetailContent(
     modifier: Modifier = Modifier,
     popUpBackStack: () -> Unit = {},
     onShowSnackBar: (String) -> Unit = {},
-    uiEvent: SharedFlow<FrameDetailUiEvent>,
-    uiState: FrameDetailUiState,
-    onClickedLikeNft: (Boolean) -> Unit = {},
+    uiEvent: SharedFlow<AssetDetailUiEvent>,
+    uiState: AssetDetailUiState,
+    onClickedLikeAsset: (Boolean) -> Unit = {},
 ) {
     LaunchedEffect(uiEvent) {
         uiEvent.collectLatest { event ->
             when (event) {
-                is FrameDetailUiEvent.Error -> onShowSnackBar(event.errorMessage)
+                is AssetDetailUiEvent.Error -> onShowSnackBar(event.errorMessage)
             }
         }
     }
@@ -94,41 +95,35 @@ fun FrameDetailContent(
     if (uiState.isLoading) {
         LoadingDialog()
     }
-    val frame = uiState.frame
-    FrameDetailScreen(
+    val asset = uiState.asset
+    AssetDetailScreen(
         modifier = modifier,
         popUpBackStack = popUpBackStack,
-        frameTitle = frame.nftInfo.data.title,
-        frameUrl =
-            frame.nftInfo.data.image
-                .urlToIpfs(),
-        hashTag = frame.tags,
+        assetUrl = asset.imageUrl,
+        hashTag = asset.tags,
         hasBadge = true,
-        nickname = frame.seller.nickname,
-        frameContent = frame.nftInfo.data.content,
+        nickname = asset.creator.nickname,
         isLiked = uiState.isLiked,
         heartCount = uiState.likedCount,
-        price = frame.price.toDouble(),
-        profileImageUrl = frame.seller.profileImage,
-        onClickedLikeNft = onClickedLikeNft,
+        price = asset.price.toDouble(),
+        profileImageUrl = asset.creator.profileImage,
+        onClickedAsset = onClickedLikeAsset,
     )
 }
 
 @Composable
-fun FrameDetailScreen(
+fun AssetDetailScreen(
     modifier: Modifier = Modifier,
     popUpBackStack: () -> Unit = {},
-    frameTitle: String = "아이유와 한컷",
-    frameUrl: String = "",
+    assetUrl: String = "",
     hashTag: List<String> = listOf(),
     profileImageUrl: String = "",
     nickname: String = "짜이한",
     hasBadge: Boolean = true,
-    frameContent: String = "아이유와 한컷! 아이유와 한컷! 아이유와 한컷! 아이유와 한컷! 아이유와 한컷!  123123123123123123123123123121231231",
     isLiked: Boolean = true,
     heartCount: Long = 100000,
     price: Double = 100.1,
-    onClickedLikeNft: (Boolean) -> Unit = {},
+    onClickedAsset: (Boolean) -> Unit = {},
 ) {
     val scrollState = rememberScrollState()
     val (expanded, isExpanded) =
@@ -147,31 +142,31 @@ fun FrameDetailScreen(
             modifier =
                 modifier
                     .statusBarsPadding()
-                    .navigationBarsPadding()
-                    .padding(horizontal = 10.dp),
+                    .navigationBarsPadding(),
+//                    .padding(horizontal = 10.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(20.dp),
         ) {
             Spacer(modifier = Modifier.height(10.dp))
             TopAppBar(
                 modifier = Modifier,
-                title = {
-                    Text(text = frameTitle, style = Typography.bodyLarge.copy(fontSize = 20.sp))
-                },
                 onNavigationClick = popUpBackStack,
             )
             GlideImage(
-                imageModel = frameUrl.toUri(),
+                imageModel = assetUrl.toUri(),
                 contentScale = ContentScale.Fit,
                 modifier =
                     Modifier
+                        .fillMaxWidth(0.8f)
                         .padding(horizontal = 20.dp)
-                        .size(width = 265.dp, height = 365.dp),
+                        .aspectRatio(1f)
+                        .background(color = WhiteGray, shape = RoundedCornerShape(10.dp)),
             )
             LazyRow(
                 modifier =
                     Modifier
                         .wrapContentHeight()
+                        .padding(horizontal = 10.dp)
                         .align(Alignment.Start),
                 horizontalArrangement = Arrangement.spacedBy(5.dp),
                 content = {
@@ -183,7 +178,10 @@ fun FrameDetailScreen(
                 },
             )
             Row(
-                modifier = Modifier.align(Alignment.Start),
+                modifier =
+                    Modifier
+                        .align(Alignment.Start)
+                        .padding(horizontal = 10.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(5.dp),
             ) {
@@ -208,19 +206,11 @@ fun FrameDetailScreen(
                     )
                 }
             }
-            Row(modifier = Modifier) {
-                Text(
-                    modifier =
-                        Modifier
-                            .weight(1f)
-                            .clickable { isExpanded(expanded.not()) },
-                    text = frameContent,
-                    maxLines = if (expanded) Int.MAX_VALUE else maxLines, // expanded 상태에 따라 줄 수 제한
-                    overflow = TextOverflow.Ellipsis,
-                )
-            }
             Row(
-                modifier = Modifier.align(Alignment.Start),
+                modifier =
+                    Modifier
+                        .align(Alignment.Start)
+                        .padding(horizontal = 10.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Image(
@@ -237,7 +227,7 @@ fun FrameDetailScreen(
                 painter = painterResource(id = R.drawable.price_graph),
                 contentDescription = "",
             )
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.weight(1f))
             Row(
                 modifier = Modifier.align(Alignment.Start),
                 verticalAlignment = Alignment.Bottom,
@@ -250,9 +240,9 @@ fun FrameDetailScreen(
                                 .size(25.dp)
                                 .noRippleClickable {
                                     if (isLiked.not()) {
-                                        onClickedLikeNft(true)
+                                        onClickedAsset(true)
                                     } else {
-                                        onClickedLikeNft(false)
+                                        onClickedAsset(false)
                                     }
                                 },
                         painter =
@@ -276,7 +266,8 @@ fun FrameDetailScreen(
                     modifier =
                         Modifier
                             .weight(1f)
-                            .height(45.dp),
+                            .padding(end = 10.dp)
+                            .height(50.dp),
                     icon = R.drawable.ic_color_sene_coin,
                     text =
                         String.format(
@@ -286,18 +277,19 @@ fun FrameDetailScreen(
                         ) + stringResource(id = R.string.buy_price_message),
                 )
             }
+            Spacer(modifier = Modifier.height(0.dp))
         }
     }
 }
 
 @Preview(showSystemUi = true, showBackground = true)
 @Composable
-fun FrameDetailScreenPreview() {
+fun AssetDetailScreenPreview() {
     SemonemoTheme {
         val hashTag = listOf("아이유", "인사이드 아웃", "단발")
-        FrameDetailScreen(
+        AssetDetailScreen(
             hashTag = hashTag,
-            frameUrl = "https://flexible.img.hani.co.kr/flexible/normal/800/534/imgdb/original/2024/0318/20240318500152.jpg",
+            assetUrl = "https://flexible.img.hani.co.kr/flexible/normal/800/534/imgdb/original/2024/0318/20240318500152.jpg",
             profileImageUrl = "https://flexible.img.hani.co.kr/flexible/normal/800/534/imgdb/original/2024/0318/20240318500152.jpg",
         )
     }

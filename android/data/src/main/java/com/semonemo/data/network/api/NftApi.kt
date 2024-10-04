@@ -27,6 +27,11 @@ interface NftApi {
         @Path("userId") userId: Long,
     ): BaseResponse<GetMyFrameResponse>
 
+    @GET("api/nft/users/{seller}/seller")
+    suspend fun getSellNft(
+        @Path("seller") seller: Long,
+    ): BaseResponse<SearchFrame>
+
     @GET("api/nft/available")
     suspend fun getAvailableNft(
         @Query("type") type: Int,

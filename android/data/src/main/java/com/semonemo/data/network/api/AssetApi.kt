@@ -2,6 +2,7 @@ package com.semonemo.data.network.api
 
 import com.semonemo.data.network.response.BaseResponse
 import com.semonemo.data.network.response.GetAssetsResponse
+import com.semonemo.data.network.response.LikeResponse
 import com.semonemo.domain.model.AllSellAssets
 import com.semonemo.domain.model.Asset
 import com.semonemo.domain.model.CreateAsset
@@ -63,11 +64,16 @@ interface AssetApi {
     @POST("api/asset/{assetSellId}/like")
     suspend fun likeAsset(
         @Path("assetSellId") assetSellId: Long,
-    ): BaseResponse<Unit>
+    ): BaseResponse<LikeResponse>
 
     // 에셋 좋아요 삭제
     @DELETE("api/asset/{assetSellId}/like")
     suspend fun unlikeAsset(
         @Path("assetSellId") assetSellId: Long,
-    ): BaseResponse<Unit>
+    ): BaseResponse<LikeResponse>
+
+    @GET("api/asset/sell/{assetSellId}/detail")
+    suspend fun getSaleAssetDetail(
+        @Path("assetSellId") assetSellId: Long,
+    ): BaseResponse<SellAssetDetail>
 }

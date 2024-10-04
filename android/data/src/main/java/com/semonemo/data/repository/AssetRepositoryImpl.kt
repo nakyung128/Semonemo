@@ -2,6 +2,7 @@ package com.semonemo.data.repository
 
 import com.semonemo.data.network.api.AssetApi
 import com.semonemo.data.network.response.GetAssetsResponse
+import com.semonemo.data.network.response.LikeResponse
 import com.semonemo.data.network.response.emitApiResponse
 import com.semonemo.data.util.toMultiPart
 import com.semonemo.domain.model.AllSellAssets
@@ -95,23 +96,39 @@ class AssetRepositoryImpl
                 emit(response)
             }
 
-        override suspend fun likeAsset(assetSellId: Long): Flow<ApiResponse<Unit>> =
+        override suspend fun likeAsset(assetSellId: Long): Flow<ApiResponse<Long>> =
             flow {
                 val response =
                     emitApiResponse(
                         apiResponse = { api.likeAsset(assetSellId) },
-                        default = Unit,
+                        default = LikeResponse(),
                     )
-                emit(response)
+                when (response) {
+                    is ApiResponse.Error -> emit(response)
+                    is ApiResponse.Success -> emit(ApiResponse.Success(response.data.likedCount))
+                }
             }
 
-        override suspend fun unlikeAsset(assetSellId: Long): Flow<ApiResponse<Unit>> =
+        override suspend fun unlikeAsset(assetSellId: Long): Flow<ApiResponse<Long>> =
             flow {
                 val response =
                     emitApiResponse(
                         apiResponse = { api.unlikeAsset(assetSellId) },
-                        default = Unit,
+                        default = LikeResponse(),
                     )
-                emit(response)
+                when (response) {
+                    is ApiResponse.Error -> emit(response)
+                    is ApiResponse.Success -> emit(ApiResponse.Success(response.data.likedCount))
+                }
+            }
+
+        override suspend fun getSaleAssetDetail(assetSellId: Long): Flow<ApiResponse<SellAssetDetail>> =
+            flow {
+                emit(
+                    emitApiResponse(
+                        apiResponse = { api.getSaleAssetDetail(assetSellId) },
+                        default = SellAssetDetail(),
+                    ),
+                )
             }
     }
