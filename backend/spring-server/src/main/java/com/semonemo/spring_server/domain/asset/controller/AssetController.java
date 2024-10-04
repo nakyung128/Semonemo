@@ -210,5 +210,15 @@ public class AssetController implements AssetApi {
 			throw new CustomException(ErrorCode.DISLIKE_FAIL);
 		}
 	}
+	@GetMapping("/like")
+	public CommonResponse<?> getLikeAsset(
+		@AuthenticationPrincipal UserDetails userDetails,
+		@RequestParam(defaultValue = "0") int page,
+		@RequestParam(defaultValue = "40") int size
+	){
+		Users users = userService.findByAddress(userDetails.getUsername());
+		List<AssetSellResponseDto> result = assetService.getLikeAsset(users,page,size);
+		return CommonResponse.success(result,"좋아요 에셋목록 조회 성공");
+	}
 
 }

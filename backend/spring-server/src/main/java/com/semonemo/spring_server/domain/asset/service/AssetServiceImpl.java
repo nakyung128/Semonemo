@@ -117,6 +117,8 @@ public class AssetServiceImpl implements AssetService {
 		return assetSellRepository.existsByAssetId(assetId);
 	}
 
+
+
 	@Transactional
 	@Override
 	public CursorResult<AssetSellResponseDto> getAllAsset(Long nowId, Long cursorId, int size) {
@@ -260,6 +262,20 @@ public class AssetServiceImpl implements AssetService {
 	@Override
 	public boolean checkLike(Long nowid, Long assetSellId) {
 		return assetLikeRepository.existsByUserIdAndAssetSellId(nowid, assetSellId);
+	}
+
+	@Override
+	public List<AssetSellResponseDto> getLikeAsset(Users users, int page, int size) {
+		Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+		Page<AssetLike> likedAssets = assetLikeRepository.findAllByUserId(users.getId(), pageable);
+
+		List<AssetSellResponseDto> dtos = new ArrayList<>();
+		for (AssetLike like : likedAssets.getContent()) {
+			AssetSellResponseDto dto = convertToDto(users.getId(), like.getAssetSellId());
+			dtos.add(dto);
+		}
+
+		return dtos;
 	}
 
 	@Override
