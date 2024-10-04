@@ -71,9 +71,8 @@ public class ElasticsearchController implements ElasticSearchApi {
 		@RequestParam(defaultValue = "40") int size) {
 		Users users = userService.findByAddress(userDetails.getUsername());
 		Page<NftSearchResponseDto> result = searchService.findNft(users.getId(), orderBy, keyword, page, size);
-		List<NftSearchResponseDto> nftList = result.getContent(); // Page
 		sendSearchQuery(keyword);
-		return CommonResponse.success(nftList, "NFT 키워드 검색 성공");
+		return CommonResponse.success(result, "NFT 키워드 검색 성공");
 	}
 
 	private void sendSearchQuery(String keyword) {
@@ -94,9 +93,7 @@ public class ElasticsearchController implements ElasticSearchApi {
 		try {
 			ResponseEntity<String> response = restTemplate.postForEntity("http://localhost:5000", request,
 				String.class);
-			System.out.println("Logstash response: " + response.getStatusCode());
 		} catch (Exception e) {
-			System.err.println("Error sending log to Logstash: " + e.getMessage());
 			e.printStackTrace();
 		}
 	}
