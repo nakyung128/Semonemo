@@ -40,7 +40,9 @@ public class CoinServiceImpl implements CoinService {
         Users user = userRepository.findById(coinRequestDto.getUserId())
             .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND_ERROR));
 
-        BigInteger amountInSmallestUnit = blockChainService.convertToSmallestUnit(coinRequestDto.getAmount());
+        BigInteger amountToBigInteger = BigInteger.valueOf(coinRequestDto.getAmount());
+
+        BigInteger amountInSmallestUnit = blockChainService.convertToSmallestUnit(amountToBigInteger);
 
         // 결제 후에 작업
         try {
@@ -98,7 +100,7 @@ public class CoinServiceImpl implements CoinService {
         try {
             BigInteger coinBalance = blockChainService.getBalanceOf(user.getAddress());
 
-            BigInteger payableBalance = user.getBalance();
+            Long payableBalance = user.getBalance();
 
             return new CoinResponseDto(
                 userId,
@@ -111,7 +113,7 @@ public class CoinServiceImpl implements CoinService {
     }
 
     @Override
-    public BigInteger payableToCoin(Long userId, BigInteger amount) {
+    public Long payableToCoin(Long userId, Long amount) {
         Users user = userRepository.findById(userId)
             .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND_ERROR));
 
@@ -125,7 +127,7 @@ public class CoinServiceImpl implements CoinService {
     }
 
     @Override
-    public BigInteger coinToPayable(Long userId, BigInteger amount) {
+    public Long coinToPayable(Long userId, Long amount) {
         Users user = userRepository.findById(userId)
             .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND_ERROR));
 

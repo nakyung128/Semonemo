@@ -13,5 +13,5 @@ import java.util.List;
 @NoArgsConstructor
 @ToString
 public class CoinRequestDto {
-    private BigInteger amount;
+    private Long amount;
 }

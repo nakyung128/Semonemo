@@ -4,6 +4,7 @@ import com.semonemo.spring_server.domain.user.dto.response.UserInfoResponseDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+import java.math.BigInteger;
 import java.util.List;
 import java.util.Optional;
 

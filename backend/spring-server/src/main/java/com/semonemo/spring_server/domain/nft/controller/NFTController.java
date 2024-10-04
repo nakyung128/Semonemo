@@ -1,10 +1,12 @@
 package com.semonemo.spring_server.domain.nft.controller;
 
 import com.semonemo.spring_server.domain.blockchain.dto.event.MarketEvent;
+import com.semonemo.spring_server.domain.blockchain.dto.event.TradeEvent;
 import com.semonemo.spring_server.domain.blockchain.service.BlockChainService;
 import com.semonemo.spring_server.domain.blockchain.dto.event.NFTEvent;
 import com.semonemo.spring_server.domain.nft.dto.request.*;
 import com.semonemo.spring_server.domain.nft.dto.response.NFTMarketHistoryResponseDto;
+import com.semonemo.spring_server.domain.nft.dto.response.NFTMarketLikedResponseDto;
 import com.semonemo.spring_server.domain.nft.dto.response.NFTMarketResponseDto;
 import com.semonemo.spring_server.domain.nft.dto.response.NFTResponseDto;
 import com.semonemo.spring_server.domain.user.entity.Users;
@@ -226,6 +228,22 @@ public class NFTController implements NFTApi {
         }
     }
 
+    // 좋아요한 마켓 NFT 조회
+    @GetMapping("/users/liked")
+    public CommonResponse<?> getLikedSellingNFTs(
+        @AuthenticationPrincipal UserDetails userDetails,
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "15") int size) {
+        try {
+            Users users = userService.findByAddress(userDetails.getUsername());
+            Page<NFTMarketResponseDto> sellingNFT;
+            sellingNFT = nftService.getLikedSellingNFTs(users.getId(), page, size);
+            return CommonResponse.success(sellingNFT, "좋아요 NFT 조회 성공");
+        } catch (Exception e) {
+            throw new CustomException(ErrorCode.NFT_NOT_FOUND_ERROR);
+        }
+    }
+
     // 마켓에 판매중인 특정 NFT 상세 조회
     @GetMapping("/{marketId}")
     public CommonResponse<NFTMarketResponseDto> getSellingNFTDetail(
@@ -306,7 +324,7 @@ public class NFTController implements NFTApi {
 
     // 좋아요
     @PostMapping("/{marketId}/like")
-    public CommonResponse<NFTResponseDto> marketLike(
+    public CommonResponse<NFTMarketLikedResponseDto> marketLike(
         @AuthenticationPrincipal UserDetails userDetails,
         @PathVariable Long marketId) {
         try {
@@ -314,8 +332,12 @@ public class NFTController implements NFTApi {
             if (nftService.checkLike(users.getId(), marketId)) {
                 throw new CustomException(ErrorCode.MARKET_ALREADY_LIKE);
             }
-            nftService.marketLike(users.getId(), marketId);
-            return CommonResponse.success("NFT 좋아요 성공");
+            int likedCount = nftService.marketLike(users.getId(), marketId);
+            NFTMarketLikedResponseDto responseDto = new NFTMarketLikedResponseDto(
+                marketId,
+                likedCount
+            );
+            return CommonResponse.success(responseDto, "NFT 좋아요 성공");
         } catch (Exception e) {
             throw new CustomException(ErrorCode.MARKET_LIKE_FAIL);
         }
@@ -323,7 +345,7 @@ public class NFTController implements NFTApi {
 
     // 좋아요 취소
     @DeleteMapping("/{marketId}/like")
-    public CommonResponse<NFTResponseDto> marketDisLike(
+    public CommonResponse<NFTMarketLikedResponseDto> marketDisLike(
         @AuthenticationPrincipal UserDetails userDetails,
         @PathVariable Long marketId) {
         try {
@@ -331,8 +353,13 @@ public class NFTController implements NFTApi {
             if (!nftService.checkLike(users.getId(), marketId)) {
                 throw new CustomException(ErrorCode.MARKET_ALREADY_DISLIKE);
             }
-            nftService.marketDislike(users.getId(), marketId);
-            return CommonResponse.success("NFT 좋아요 취소 성공");
+            int likedCount = nftService.marketDislike(users.getId(), marketId);
+
+            NFTMarketLikedResponseDto responseDto = new NFTMarketLikedResponseDto(
+                marketId,
+                likedCount
+            );
+            return CommonResponse.success(responseDto, "NFT 좋아요 취소 성공");
         } catch (Exception e) {
             throw new CustomException(ErrorCode.MARKET_DISLIKE_FAIL);
         }
@@ -342,14 +369,43 @@ public class NFTController implements NFTApi {
     @PostMapping("/purchase")
     public CommonResponse<NFTResponseDto> buyNFT(
         @AuthenticationPrincipal UserDetails userDetails,
-        @RequestParam() Long marketId) {
+        @RequestBody String txHash,
+        @RequestBody Long marketId) {
         try {
+            TransactionReceipt transactionResult = blockChainService.waitForTransactionReceipt(txHash);
+
+            BigInteger tradeId = null;
+
+            if (Objects.equals(transactionResult.getStatus(), "0x1")) {
+                for (org.web3j.protocol.core.methods.response.Log txLog : transactionResult.getLogs()) {
+                    String eventHash = EventEncoder.encode(TradeEvent.TRADE_RECORDED_EVENT);
+
+                    if (txLog.getTopics().get(0).equals(eventHash)) {
+                        EventValues eventValues = Contract.staticExtractEventParameters(
+                            TradeEvent.TRADE_RECORDED_EVENT, txLog
+                        );
+
+                        if (eventValues != null) {
+                            List<Type> indexedValues = eventValues.getIndexedValues();
+
+                            tradeId = (BigInteger) indexedValues.get(0).getValue();
+
+                            log.info(tradeId);
+                        } else {
+                            throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
+                        }
+                    }
+                }
+            } else {
+                throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
+            }
+
             if (nftService.checkOnSale(marketId)) {
                 throw new CustomException(ErrorCode.MARKET_ALREADY_SOLD);
             }
             Users users = userService.findByAddress(userDetails.getUsername());
-            nftService.marketBuy(users.getId(), marketId);
-            return CommonResponse.success("NFT 시세 조회 성공");
+            nftService.marketBuy(users.getId(), marketId, tradeId);
+            return CommonResponse.success("NFT 구매 성공");
         } catch (Exception e) {
             throw new CustomException(ErrorCode.MARKET_BUY_FAIL);
         }

@@ -243,8 +243,8 @@ public class BlockChainServiceImpl implements BlockChainService {
     }
 
     @Override
-    public BigInteger convertFromSmallestUnit(BigInteger amount) {
-        return amount.divide(UNIT_CONVERSION_FACTOR);
+    public Long convertFromSmallestUnit(BigInteger amount) {
+        return amount.divide(UNIT_CONVERSION_FACTOR).longValue();
     }
 
 

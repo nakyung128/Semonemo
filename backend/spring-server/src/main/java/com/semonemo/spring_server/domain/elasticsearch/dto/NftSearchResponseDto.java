@@ -1,5 +1,6 @@
 package com.semonemo.spring_server.domain.elasticsearch.dto;
 
+import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -12,7 +13,7 @@ public record NftSearchResponseDto(
 	Long marketId,
 	Long nftId,
 	Long seller,
-	Long price,
+    Long price,
 	int likeCount,
 	boolean isLiked,
 	NFTInfoDto nftInfo,

@@ -54,7 +54,7 @@ public interface CoinApi {
     CommonResponse<CoinResponseDto> coinToPayable(
         @AuthenticationPrincipal UserDetails userDetails,
         @RequestBody String txHash,
-        @RequestBody BigInteger amount
+        @RequestBody Long amount
     );
 
     @Operation(summary = "페이머니 코인으로 전환", description = "페이머니 코인으로 전환")
@@ -67,6 +67,6 @@ public interface CoinApi {
     CommonResponse<CoinResponseDto> payableToCoin(
         @AuthenticationPrincipal UserDetails userDetails,
         @RequestBody String txHash,
-        @RequestBody BigInteger amount
+        @RequestBody Long amount
     );
 }

@@ -20,6 +20,6 @@ public interface BlockChainService {
 
     BigInteger convertToSmallestUnit(BigInteger amount);
 
-    BigInteger convertFromSmallestUnit(BigInteger amount);
+    Long convertFromSmallestUnit(BigInteger amount);
 }
 

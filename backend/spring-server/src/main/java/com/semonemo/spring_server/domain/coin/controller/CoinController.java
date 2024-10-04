@@ -78,7 +78,7 @@ public class CoinController implements CoinApi{
     public CommonResponse<CoinResponseDto> coinToPayable(
         @AuthenticationPrincipal UserDetails userDetails,
         @RequestBody String txHash,
-        @RequestBody BigInteger amount) {
+        @RequestBody Long amount) {
         try {
             TransactionReceipt transactionResult = blockChainService.waitForTransactionReceipt(txHash);
 
@@ -113,8 +113,8 @@ public class CoinController implements CoinApi{
             }
 
             Users users = userService.findByAddress(userDetails.getUsername());
-            BigInteger payableBalance = coinService.coinToPayable(users.getId(), amount);
-            BigInteger coinBalance = blockChainService.convertFromSmallestUnit(newBalance);
+            Long payableBalance = coinService.coinToPayable(users.getId(), amount);
+            Long coinBalance = blockChainService.convertFromSmallestUnit(newBalance);
 
             CoinResponseDto responseValue = new CoinResponseDto(
                 users.getId(),
@@ -133,7 +133,7 @@ public class CoinController implements CoinApi{
     public CommonResponse<CoinResponseDto> payableToCoin(
         @AuthenticationPrincipal UserDetails userDetails,
         @RequestBody String txHash,
-        @RequestBody BigInteger amount) {
+        @RequestBody Long amount) {
         try {
             TransactionReceipt transactionResult = blockChainService.waitForTransactionReceipt(txHash);
 
@@ -168,8 +168,8 @@ public class CoinController implements CoinApi{
             }
 
             Users users = userService.findByAddress(userDetails.getUsername());
-            BigInteger payableBalance = coinService.payableToCoin(users.getId(), amount);
-            BigInteger coinBalance = blockChainService.convertFromSmallestUnit(newBalance);
+            Long payableBalance = coinService.payableToCoin(users.getId(), amount);
+            Long coinBalance = blockChainService.convertFromSmallestUnit(newBalance);
 
             CoinResponseDto responseValue = new CoinResponseDto(
                 users.getId(),
