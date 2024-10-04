@@ -1,16 +1,13 @@
 package com.semonemo.spring_server.domain.elasticsearch.service;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.stereotype.Service;
 
 import com.semonemo.spring_server.domain.asset.repository.like.AssetLikeRepository;
@@ -21,14 +18,15 @@ import com.semonemo.spring_server.domain.elasticsearch.document.UserDocument;
 import com.semonemo.spring_server.domain.elasticsearch.dto.AssetSearchResponseDto;
 import com.semonemo.spring_server.domain.elasticsearch.document.AssetSellDocument;
 import com.semonemo.spring_server.domain.elasticsearch.dto.NftSearchResponseDto;
+import com.semonemo.spring_server.domain.elasticsearch.dto.PopularSearchDto;
 import com.semonemo.spring_server.domain.elasticsearch.dto.UserSearchResponseDto;
-import com.semonemo.spring_server.domain.elasticsearch.repository.NftSearchRepository;
+import com.semonemo.spring_server.domain.elasticsearch.repository.nft.NftSearchRepository;
 import com.semonemo.spring_server.domain.elasticsearch.repository.asset.AssetElasticsearchRepository;
+import com.semonemo.spring_server.domain.elasticsearch.repository.searchquery.SearchQueryRepository;
 import com.semonemo.spring_server.domain.elasticsearch.repository.user.UserSearchRepository;
 import com.semonemo.spring_server.domain.nft.entity.NFTMarket;
 import com.semonemo.spring_server.domain.nft.repository.nftmarket.NFTMarketRepository;
 import com.semonemo.spring_server.domain.nft.repository.nftmarketlike.NFTMarketLikeRepository;
-import com.semonemo.spring_server.domain.user.repository.UserRepository;
 import com.semonemo.spring_server.global.common.CursorResult;
 import com.semonemo.spring_server.global.exception.CustomException;
 import com.semonemo.spring_server.global.exception.ErrorCode;
@@ -45,28 +43,29 @@ public class SearchServiceImpl implements SearchService {
 	private final NFTMarketLikeRepository nftMarketLikeRepository;
 	private final NFTMarketRepository nftMarketRepository;
 	private final NftSearchRepository nftSearchRepository;
-	private final ElasticsearchOperations elasticsearchOperations;
-	private  final ElasticsearchSyncService syncService;
+	private final SearchQueryRepository searchQueryRepository;
+	private final ElasticsearchSyncService syncService;
 	private final BlockChainService blockChainService;
-
-
 
 	@PostConstruct
 	public void initializeElasticsearch() {
 		syncService.syncAllData();
 	}
+
 	@Override
 	public CursorResult<AssetSearchResponseDto> searchAsset(Long nowid, String keyword, Long cursorId, int size) {
-		CursorResult<AssetSellDocument> assetSellDocument = assetElasticsearchRepository.findByTagKeyword(keyword, cursorId, size);
+		CursorResult<AssetSellDocument> assetSellDocument = assetElasticsearchRepository.findByTagKeyword(keyword,
+			cursorId, size);
 		List<AssetSearchResponseDto> dtos = assetSellDocument.getContent().stream()
 			.map(document -> convertToAssetDto(nowid, document))
 			.toList();
-		return new CursorResult<>(dtos,assetSellDocument.getNextCursor(),assetSellDocument.isHasNext());
+		return new CursorResult<>(dtos, assetSellDocument.getNextCursor(), assetSellDocument.isHasNext());
 	}
 
 	@Override
 	public Page<AssetSearchResponseDto> findOrderBy(Long nowid, String orderBy, String keyword, int page, int size) {
-		Page<AssetSellDocument> assetSellDocuments = assetElasticsearchRepository.keywordAndOrderby( keyword, orderBy, page, size);
+		Page<AssetSellDocument> assetSellDocuments = assetElasticsearchRepository.keywordAndOrderby(keyword, orderBy,
+			page, size);
 
 		List<AssetSearchResponseDto> assetSellDtos = assetSellDocuments.getContent().stream()
 			.map(document -> convertToAssetDto(nowid, document))
@@ -75,14 +74,19 @@ public class SearchServiceImpl implements SearchService {
 		return new PageImpl<>(assetSellDtos, assetSellDocuments.getPageable(), assetSellDocuments.getTotalElements());
 	}
 
-
 	@Override
 	public Page<NftSearchResponseDto> findNft(Long nowid, String orderBy, String keyword, int page, int size) {
-		Page<NFTSellDocument> nftSellDocuments = nftSearchRepository.keywordAndOrderby(keyword,orderBy,page,size);
+		Page<NFTSellDocument> nftSellDocuments = nftSearchRepository.keywordAndOrderby(keyword, orderBy, page, size);
 		List<NftSearchResponseDto> nftSearchResponseDtos = nftSellDocuments.getContent().stream()
-			.map(nftSellDocument -> convertToNFTDto(nowid,nftSellDocument) )
+			.map(nftSellDocument -> convertToNFTDto(nowid, nftSellDocument))
 			.toList();
-		return new PageImpl<>(nftSearchResponseDtos,nftSellDocuments.getPageable(),nftSellDocuments.getTotalElements());
+		return new PageImpl<>(nftSearchResponseDtos, nftSellDocuments.getPageable(),
+			nftSellDocuments.getTotalElements());
+	}
+
+	@Override
+	public List<PopularSearchDto> getPopularSearches(int days, int size) {
+		return searchQueryRepository.getPopularSearches(days, size);
 	}
 
 	@Override
@@ -97,8 +101,7 @@ public class SearchServiceImpl implements SearchService {
 		return new PageImpl<>(userSearchResponseDtos, pageable, userDocumentPage.getTotalElements());
 	}
 
-
-	private AssetSearchResponseDto convertToAssetDto (Long nowid,AssetSellDocument document){
+	private AssetSearchResponseDto convertToAssetDto(Long nowid, AssetSellDocument document) {
 		boolean isLiked = assetLikeRepository.existsByUserIdAndAssetSellId(nowid, document.getAssetSellId());
 
 		AssetSearchResponseDto dto = new AssetSearchResponseDto(
@@ -116,7 +119,8 @@ public class SearchServiceImpl implements SearchService {
 		);
 		return dto;
 	}
-	private UserSearchResponseDto convertToUserDto( UserDocument document) {
+
+	private UserSearchResponseDto convertToUserDto(UserDocument document) {
 		return new UserSearchResponseDto(
 			document.getId(),
 			document.getNickname(),
@@ -125,7 +129,7 @@ public class SearchServiceImpl implements SearchService {
 		);
 	}
 
-	private NftSearchResponseDto convertToNFTDto (Long nowid,NFTSellDocument document){
+	private NftSearchResponseDto convertToNFTDto(Long nowid, NFTSellDocument document) {
 		boolean isLiked = nftMarketLikeRepository.existsByUserIdAndMarketId(nowid, document.getNftSellId());
 		NFTMarket market = nftMarketRepository.findById(document.getNftSellId())
 			.orElseThrow(() -> new CustomException(ErrorCode.NFT_MARKET_NOT_FOUND_ERROR));
@@ -136,7 +140,7 @@ public class SearchServiceImpl implements SearchService {
 		} catch (Exception e) {
 			throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
 		}
-		NFTInfoDto nftinfo =nftInfos.get(0);
+		NFTInfoDto nftinfo = nftInfos.get(0);
 
 		NftSearchResponseDto nftDto = new NftSearchResponseDto(
 			document.getNftSellId(),

@@ -1,4 +1,4 @@
-package com.semonemo.spring_server.domain.elasticsearch.repository;
+package com.semonemo.spring_server.domain.elasticsearch.repository.nft;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -14,19 +14,14 @@ import org.springframework.data.elasticsearch.core.document.Document;
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
 import org.springframework.data.elasticsearch.core.query.UpdateQuery;
 
-import com.semonemo.spring_server.domain.asset.model.AssetSell;
-import com.semonemo.spring_server.domain.elasticsearch.document.AssetSellDocument;
 import com.semonemo.spring_server.domain.elasticsearch.document.NFTSellDocument;
 import com.semonemo.spring_server.domain.nft.entity.NFTMarket;
-import com.semonemo.spring_server.global.common.CursorResult;
 
 import co.elastic.clients.elasticsearch._types.SortOrder;
 import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.MatchQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.NestedQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.Operator;
-import co.elastic.clients.elasticsearch._types.query_dsl.RangeQuery;
-import co.elastic.clients.json.JsonData;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
