@@ -217,7 +217,7 @@ public class AssetController implements AssetApi {
 		@RequestParam(defaultValue = "40") int size
 	){
 		Users users = userService.findByAddress(userDetails.getUsername());
-		List<AssetSellResponseDto> result = assetService.getLikeAsset(users,page,size);
+		Page<AssetSellResponseDto> result = assetService.getLikeAsset(users,page,size);
 		return CommonResponse.success(result,"좋아요 에셋목록 조회 성공");
 	}
 

@@ -39,5 +39,5 @@ public interface AssetService {
 
 	boolean exist(Long assetId);
 
-	List<AssetSellResponseDto> getLikeAsset(Users users, int page, int size);
+	Page<AssetSellResponseDto> getLikeAsset(Users users, int page, int size);
 }
