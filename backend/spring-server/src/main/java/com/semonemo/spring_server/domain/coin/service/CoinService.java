@@ -15,7 +15,7 @@ public interface CoinService {
 
     Page<TradeLogResponseDto> getTradeLog(Long userId, int page, int size);
 
-    Long payableToCoin(Long userId, Long amount);
+    Long payableToCoin(Long userId, Long amount, BigInteger tradeId);
 
-    Long coinToPayable(Long userId, Long amount);
+    Long coinToPayable(Long userId, Long amount, BigInteger tradeId);
 }
