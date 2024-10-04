@@ -57,6 +57,7 @@ public enum ErrorCode {
     COIN_MINT_FAIL("CO001", "코인 발행에 실패하였습니다.", HttpStatus.BAD_REQUEST),
     COIN_GET_FAIL("CO002", "코인 조회에 실패하였습니다.", HttpStatus.BAD_REQUEST),
     COIN_EXCHANGE_FAIL("CO003", "코인 전환에 실패하였습니다.", HttpStatus.BAD_REQUEST),
+    GET_LOG_FAIL("CO004", "코인 거래내역 조회에 실패하였습니다.", HttpStatus.BAD_REQUEST),
 
 	// Asset
 	LIKE_NOT_FOUND_ERROR("AS001", "좋아요를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
