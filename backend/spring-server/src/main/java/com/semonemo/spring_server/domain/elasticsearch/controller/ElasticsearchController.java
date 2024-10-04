@@ -91,8 +91,7 @@ public class ElasticsearchController implements ElasticSearchApi {
 		HttpEntity<Map<String, String>> request = new HttpEntity<>(body, headers);
 
 		try {
-			ResponseEntity<String> response = restTemplate.postForEntity("http://43.201.33.160:5000", request,
-				String.class);
+			restTemplate.postForEntity("http://localhost:5000", request,String.class);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
