@@ -425,7 +425,7 @@ public class NFTController implements NFTApi {
             availableNFT = nftService.getOwnedNFTsByType(users.getId(), type, page, size);
             return CommonResponse.success(availableNFT, "유저 NFT 조회 성공");
         } catch (Exception e) {
-            throw new CustomException(ErrorCode.MARKET_BUY_FAIL);
+            throw new CustomException(ErrorCode.NFT_MARKET_NOT_FOUND_ERROR);
         }
     }
 }
