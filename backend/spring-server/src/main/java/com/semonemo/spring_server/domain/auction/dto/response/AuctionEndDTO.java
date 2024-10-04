@@ -11,5 +11,5 @@ public class AuctionEndDTO {
     private long auctionId;
     private int finalPrice;
     private long winner;
-    private LocalDateTime endTime;
+    private String endTime;
 }
