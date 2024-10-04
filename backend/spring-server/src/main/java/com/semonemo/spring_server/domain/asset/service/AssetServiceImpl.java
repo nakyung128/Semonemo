@@ -29,6 +29,7 @@ import com.semonemo.spring_server.domain.asset.repository.atags.ATagsRepository;
 import com.semonemo.spring_server.domain.asset.repository.like.AssetLikeRepository;
 import com.semonemo.spring_server.domain.elasticsearch.service.ElasticsearchIndexChecker;
 import com.semonemo.spring_server.domain.elasticsearch.service.ElasticsearchSyncService;
+import com.semonemo.spring_server.domain.user.dto.response.UserInfoResponseDTO;
 import com.semonemo.spring_server.domain.user.entity.Users;
 import com.semonemo.spring_server.domain.user.repository.UserRepository;
 import com.semonemo.spring_server.domain.user.service.UserService;
@@ -50,6 +51,7 @@ public class AssetServiceImpl implements AssetService {
 	private final ATagsRepository aTagsRepository;
 	private final UserRepository userRepository;
 	private final ElasticsearchSyncService syncService;
+	private final UserService userService;
 	private final ElasticsearchIndexChecker indexChecker;
 
 	// @PostConstruct
@@ -283,21 +285,16 @@ public class AssetServiceImpl implements AssetService {
 		boolean isLiked = assetLikeRepository.existsByUserIdAndAssetSellId(nowid, assetSellId);
 		Users user = userRepository.findById(assetImage.getCreator())
 			.orElseThrow(() -> new IllegalArgumentException("User id not found"));
-		// List<Long> tagId= assetTagRepository.findAllByAssetSellId(assetSellId);
-		// List<Atags> atags = new ArrayList<>();  // null이 아닌 빈 리스트로 초기화
-		// for (Long id : tagId) {
-		// 	aTagsRepository.findById(id).ifPresent(atags::add); // Optional을 사용하여 null 체크 후 추가
-		// }
+		UserInfoResponseDTO userDto = convertToUserInfo(user.getId());
 		List<String> tags = assetTagRepository.findTagsByAssetSellId(assetSellId);
 		AssetDetailResponseDto dto = new AssetDetailResponseDto(
 			assetSell.getAssetId(),
 			assetSell.getId(),
-			assetImage.getCreator(),
+			userDto,
 			assetImage.getImageUrl(),
 			assetImage.getCreatedAt(),
 			assetSell.getHits(),
 			assetSell.getLikeCount(),
-			user.getNickname(),
 			assetSell.getPrice(),
 			isLiked,
 			tags
@@ -311,9 +308,10 @@ public class AssetServiceImpl implements AssetService {
 		AssetImage assetImage = assetImageRepository.findById(assetId)
 			.orElseThrow(() -> new IllegalArgumentException("Asset id not found"));
 		boolean isLiked = assetLikeRepository.existsByUserIdAndAssetSellId(nowid, assetId);
+		UserInfoResponseDTO userInfoResponseDTO =convertToUserInfo(assetImage.getCreator());
 		AssetResponseDto assetResponseDto = new AssetResponseDto(
 			assetImage.getId(),
-			assetImage.getCreator(),
+			userInfoResponseDTO,
 			assetImage.getImageUrl(),
 			isLiked
 		);
@@ -328,21 +326,29 @@ public class AssetServiceImpl implements AssetService {
 			.orElseThrow(() -> new IllegalArgumentException("Asset id not found"));
 
 		boolean isLiked = assetLikeRepository.existsByUserIdAndAssetSellId(nowid, assetSellId);
-		Users user = userRepository.findById(assetImage.getCreator())
-			.orElseThrow(() -> new IllegalArgumentException("User id not found"));
-
+		UserInfoResponseDTO userDto =convertToUserInfo(nowid);
 		AssetSellResponseDto dto = new AssetSellResponseDto(
 			assetSell.getAssetId(),
 			assetSell.getId(),
-			assetImage.getCreator(),
+			userDto,
 			assetImage.getImageUrl(),
 			assetImage.getCreatedAt(),
 			assetSell.getHits(),
 			assetSell.getLikeCount(),
-			user.getNickname(),
 			assetSell.getPrice(),
 			isLiked
 		);
 		return dto;
+	}
+	private UserInfoResponseDTO convertToUserInfo (Long userId) {
+		Users users=userRepository.findById(userId)
+			.orElseThrow(() -> new IllegalArgumentException("User id not found"));
+		UserInfoResponseDTO userDto = new UserInfoResponseDTO(
+			users.getId(),
+			users.getAddress(),
+			users.getNickname(),
+			users.getProfileImage()
+		);
+		return userDto;
 	}
 }
