@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.semonemo.domain.model.ApiResponse
+import com.semonemo.domain.repository.CoinRepository
 import com.semonemo.domain.repository.NftRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -23,6 +24,7 @@ class FrameDetailViewModel
     constructor(
         private val nftRepository: NftRepository,
         private val savedStateHandle: SavedStateHandle,
+        private val coinRepository: CoinRepository,
     ) : ViewModel() {
         private val _uiState = MutableStateFlow(FrameDetailUiState())
         val uiState = _uiState.asStateFlow()
@@ -31,6 +33,17 @@ class FrameDetailViewModel
 
         init {
             getSaleNftDetail(savedStateHandle["marketId"] ?: -1L)
+        }
+
+        private fun getBalance() {
+            viewModelScope.launch {
+                coinRepository.getBalance().collectLatest { response ->
+                    when (response) {
+                        is ApiResponse.Error -> {}
+                        is ApiResponse.Success -> {}
+                    }
+                }
+            }
         }
 
         private fun getSaleNftDetail(marketId: Long) {
