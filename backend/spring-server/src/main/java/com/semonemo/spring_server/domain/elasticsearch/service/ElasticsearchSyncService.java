@@ -138,6 +138,10 @@ public class ElasticsearchSyncService {
 			.orElseThrow(() -> new IllegalArgumentException("NFT Image not found"));
 		nftSearchRepository.updateData(nftSellId, type, market);
 	}
+	//NFT 삭제
+	public void deleteNftData(Long marketId) {
+		nftSearchRepository.deleteById(marketId);
+	}
 
 	//유저 프로필 및 닉네임변경 업데이트
 	public void updateUser(Users user) {
