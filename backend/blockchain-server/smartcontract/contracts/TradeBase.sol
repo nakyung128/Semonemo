@@ -34,11 +34,11 @@ contract TradeBase is Ownable, ReentrancyGuard {
     // 주소별 거래 ID를 저장하는 매핑 추가
     mapping(address => uint256[]) private userTrades;
 
-    event TradeRecorded(uint256 indexed tradeId, address from, address to, uint256 amount, uint256 timestamp);
-    event Deposit(address indexed user, uint256 amount);
-    event Withdrawal(address indexed user, uint256 amount);
-    event BalanceAdjusted(address indexed from, address indexed to, uint256 amount);
-    event BalanceTransferred(address indexed from, address indexed to, uint256 amount);
+    event TradeRecorded(uint256 indexed tradeId, address from, address to, uint256 amount, uint256 timestamp, uint256 fromBalance, uint256 toBalance);
+    event Deposit(address indexed user, uint256 amount, uint256 coinBalance, uint256 payableBalance);
+    event Withdrawal(address indexed user, uint256 amount, uint256 coinBalance, uint256 payableBalance);
+    event BalanceAdjusted(address indexed from, address indexed to, uint256 amount, uint256 fromBalance, uint256 toBalance);
+    event BalanceTransferred(address indexed from, address indexed to, uint256 amount, uint256 fromBalance, uint256 toBalance);
 
     // 초기설정
     function initializeContracts(address _nftContractAddress, address _tokenContractAddress) internal {
@@ -56,7 +56,7 @@ contract TradeBase is Ownable, ReentrancyGuard {
         userTrades[from].push(tradeId);
         userTrades[to].push(tradeId);
         
-        emit TradeRecorded(tradeId, from, to, amount, block.timestamp);
+        emit TradeRecorded(tradeId, from, to, amount, block.timestamp, userBalances[from], userBalances[to]);
     }
 
     // 특정 주소의 거래 기록을 조회하는 함수
@@ -89,14 +89,20 @@ contract TradeBase is Ownable, ReentrancyGuard {
         return TradeResult(userTradeInfos, totalUserTrades, hasNext);
     }
 
-
+    // 특정 tradeId의 trade 정보를 단일 조회하는 함수
+    function getTradeInfo(uint256 _tradeId) public view returns (TradeInfo memory) {
+        require(_tradeId > 0 && _tradeId <= tradeId, "Invalid trade ID");
+        return trades[_tradeId];
+    }
+    
     // 입금 함수
     function deposit(uint256 amount) external nonReentrant {
         require(amount > 0, "Deposit amount must be greater than 0");
         require(tokenContract.transferCoinByAdmin(msg.sender, address(this), amount), "Transfer failed");
         
         userBalances[msg.sender] += amount;
-        emit Deposit(msg.sender, amount);
+        recordTrade(address(0), msg.sender, amount);
+        emit Deposit(msg.sender, amount, tokenContract.balanceOf(msg.sender), userBalances[msg.sender]);
     }
 
     // 출금 함수
@@ -104,10 +110,11 @@ contract TradeBase is Ownable, ReentrancyGuard {
         require(amount > 0, "Withdrawal amount must be greater than 0");
         require(userBalances[msg.sender] >= amount, "Insufficient balance");
         
-        userBalances[msg.sender] -= amount;
         require(tokenContract.transferCoinByAdmin(address(this), msg.sender, amount), "Transfer failed");
+        userBalances[msg.sender] -= amount;
         
-        emit Withdrawal(msg.sender, amount);
+        recordTrade(msg.sender, address(0), amount);
+        emit Withdrawal(msg.sender, amount, tokenContract.balanceOf(msg.sender), userBalances[msg.sender]);
     }
 
     // 잔액 조정
@@ -116,7 +123,7 @@ contract TradeBase is Ownable, ReentrancyGuard {
         userBalances[from] -= amount;
         userBalances[to] += amount;
         recordTrade(from, to, amount);
-        emit BalanceAdjusted(from, to, amount);
+        emit BalanceAdjusted(from, to, amount, userBalances[from], userBalances[to]);
     }
 
     // 유저 간 잔액 이동
@@ -130,7 +137,7 @@ contract TradeBase is Ownable, ReentrancyGuard {
         userBalances[to] += amount;
 
         recordTrade(from, to, amount);
-        emit BalanceTransferred(from, to, amount);
+        emit BalanceTransferred(from, to, amount, userBalances[from], userBalances[to]);
     }
 
     // 컨트랙트 보유 NFT

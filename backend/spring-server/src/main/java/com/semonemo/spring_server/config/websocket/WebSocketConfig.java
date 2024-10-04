@@ -1,4 +1,4 @@
-package com.semonemo.spring_server.config;
+package com.semonemo.spring_server.config.websocket;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;

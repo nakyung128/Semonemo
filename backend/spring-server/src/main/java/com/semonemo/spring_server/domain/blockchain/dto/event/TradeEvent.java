@@ -16,21 +16,27 @@ public class TradeEvent {
             new TypeReference<Address>() {},      // non-indexed from
             new TypeReference<Address>() {},      // non-indexed to
             new TypeReference<Uint256>() {},      // non-indexed amount
-            new TypeReference<Uint256>() {}       // non-indexed timestamp
+            new TypeReference<Uint256>() {},      // non-indexed timestamp
+            new TypeReference<Uint256>() {},      // non-indexed fromBalance
+            new TypeReference<Uint256>() {}       // non-indexed toBalance
         )
     );
 
     public static final Event DEPOSIT_EVENT = new Event("Deposit",
         Arrays.<TypeReference<?>>asList(
             new TypeReference<Address>(true) {},  // indexed user
-            new TypeReference<Uint256>() {}       // non-indexed amount
+            new TypeReference<Uint256>() {},      // non-indexed amount
+            new TypeReference<Uint256>() {},      // non-indexed coinBalance
+            new TypeReference<Uint256>() {}       // non-indexed payableBalance
         )
     );
 
     public static final Event WITHDRAWAL_EVENT = new Event("Withdrawal",
         Arrays.<TypeReference<?>>asList(
             new TypeReference<Address>(true) {},  // indexed user
-            new TypeReference<Uint256>() {}       // non-indexed amount
+            new TypeReference<Uint256>() {},      // non-indexed amount
+            new TypeReference<Uint256>() {},      // non-indexed coinBalance
+            new TypeReference<Uint256>() {}       // non-indexed payableBalance
         )
     );
 
@@ -38,7 +44,9 @@ public class TradeEvent {
         Arrays.<TypeReference<?>>asList(
             new TypeReference<Address>(true) {},  // indexed from
             new TypeReference<Address>(true) {},  // indexed to
-            new TypeReference<Uint256>() {}       // non-indexed amount
+            new TypeReference<Uint256>() {},      // non-indexed amount
+            new TypeReference<Uint256>() {},      // non-indexed fromBalance
+            new TypeReference<Uint256>() {}       // non-indexed toBalance
         )
     );
 
@@ -46,7 +54,9 @@ public class TradeEvent {
         Arrays.<TypeReference<?>>asList(
             new TypeReference<Address>(true) {},  // indexed from
             new TypeReference<Address>(true) {},  // indexed to
-            new TypeReference<Uint256>() {}       // non-indexed amount
+            new TypeReference<Uint256>() {},      // non-indexed amount
+            new TypeReference<Uint256>() {},      // non-indexed fromBalance
+            new TypeReference<Uint256>() {}       // non-indexed toBalance
         )
     );
 }

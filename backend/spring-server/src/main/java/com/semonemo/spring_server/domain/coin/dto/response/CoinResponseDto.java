@@ -5,6 +5,7 @@ import java.util.List;
 
 public record CoinResponseDto (
     Long userId,
-    BigInteger coinBalance
+    BigInteger coinBalance,
+    BigInteger payableBalance
 ) {
 }
