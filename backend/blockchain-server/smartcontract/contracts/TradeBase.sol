@@ -89,13 +89,19 @@ contract TradeBase is Ownable, ReentrancyGuard {
         return TradeResult(userTradeInfos, totalUserTrades, hasNext);
     }
 
-
+    // 특정 tradeId의 trade 정보를 단일 조회하는 함수
+    function getTradeInfo(uint256 _tradeId) public view returns (TradeInfo memory) {
+        require(_tradeId > 0 && _tradeId <= tradeId, "Invalid trade ID");
+        return trades[_tradeId];
+    }
+    
     // 입금 함수
     function deposit(uint256 amount) external nonReentrant {
         require(amount > 0, "Deposit amount must be greater than 0");
         require(tokenContract.transferCoinByAdmin(msg.sender, address(this), amount), "Transfer failed");
         
         userBalances[msg.sender] += amount;
+        recordTrade(address(0), msg.sender, amount);
         emit Deposit(msg.sender, amount, tokenContract.balanceOf(msg.sender), userBalances[msg.sender]);
     }
 
@@ -104,9 +110,10 @@ contract TradeBase is Ownable, ReentrancyGuard {
         require(amount > 0, "Withdrawal amount must be greater than 0");
         require(userBalances[msg.sender] >= amount, "Insufficient balance");
         
-        userBalances[msg.sender] -= amount;
         require(tokenContract.transferCoinByAdmin(address(this), msg.sender, amount), "Transfer failed");
+        userBalances[msg.sender] -= amount;
         
+        recordTrade(msg.sender, address(0), amount);
         emit Withdrawal(msg.sender, amount, tokenContract.balanceOf(msg.sender), userBalances[msg.sender]);
     }
 
