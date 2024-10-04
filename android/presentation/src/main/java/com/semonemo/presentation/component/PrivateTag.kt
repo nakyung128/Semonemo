@@ -31,9 +31,12 @@ import com.semonemo.presentation.theme.Typography
  */
 
 @Composable
-fun PrivateTag(title: String) {
+fun PrivateTag(
+    modifier: Modifier = Modifier,
+    title: String,
+) {
     Surface(
-        modifier = Modifier.wrapContentSize(),
+        modifier = modifier.wrapContentSize(),
         shape = RoundedCornerShape(7.dp),
         color = Gray03,
     ) {

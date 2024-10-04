@@ -128,10 +128,6 @@ class MyPageViewModel
                     userRepository.loadFollowers(userId),
                 ) { userInfo, followingInfo, followerInfo ->
 
-                    Log.d("nakyung", "userinfo: " + userInfo.toString())
-                    Log.d("nakyung", "followingInfo: " + followingInfo.toString())
-                    Log.d("nakyung", "followerInfo: " + followerInfo.toString())
-
                     var currentState = MyPageUiState.Success()
                     currentState =
                         when (userInfo) {

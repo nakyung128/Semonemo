@@ -1,5 +1,6 @@
 package com.semonemo.presentation.screen.search
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -31,12 +32,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshots.SnapshotStateList
-import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -55,7 +53,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.semonemo.domain.model.AssetDetail
 import com.semonemo.domain.model.FrameDetail
 import com.semonemo.domain.model.HotKeyword
-import com.semonemo.domain.model.Profile
+import com.semonemo.domain.model.UserInfoResponse
 import com.semonemo.presentation.BuildConfig
 import com.semonemo.presentation.R
 import com.semonemo.presentation.component.BackButton
@@ -278,7 +276,7 @@ fun SearchTabScreen(
 @Composable
 fun SearchSuccessScreen(
     modifier: Modifier = Modifier,
-    userList: List<Profile> = emptyList(),
+    userList: List<UserInfoResponse> = emptyList(),
     frameList: List<FrameDetail> = emptyList(),
     assetList: List<AssetDetail> = emptyList(),
     navigateToProfile: (Long) -> Unit = {},
@@ -295,9 +293,9 @@ fun SearchSuccessScreen(
             items(userList.size) { index ->
                 val user = userList[index]
                 UserListItem(
-                    userId = user.userId,
-                    profileImgUrl = user.profileImageUrl,
-                    nickname = user.nickname,
+                    userId = user.userInfoResponseDTO.userId,
+                    profileImgUrl = user.userInfoResponseDTO.profileImage,
+                    nickname = user.userInfoResponseDTO.nickname,
                     navigateToProfile = navigateToProfile,
                 )
             }
@@ -358,7 +356,7 @@ fun SearchSuccessScreen(
                                 shape = RoundedCornerShape(10.dp),
                                 color = Gray03,
                             ),
-                    imageModel = asset.imageUrls.toUri(),
+                    imageModel = asset.imageUrl.toUri(),
                     contentScale = ContentScale.Crop,
                 )
             }

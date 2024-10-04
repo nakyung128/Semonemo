@@ -1,6 +1,6 @@
-package com.semonemo.presentation.screen.mypage
+package com.semonemo.presentation.screen.mypage.detail
 
-import androidx.compose.foundation.Image
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,13 +15,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -30,19 +30,26 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.semonemo.presentation.BuildConfig
 import com.semonemo.presentation.R
 import com.semonemo.presentation.component.CustomDialog
 import com.semonemo.presentation.component.HashTag
+import com.semonemo.presentation.component.LoadingDialog
 import com.semonemo.presentation.component.LongWhiteButton
 import com.semonemo.presentation.component.PrivateTag
+import com.semonemo.presentation.component.TopAppBar
 import com.semonemo.presentation.theme.Main01
 import com.semonemo.presentation.theme.SemonemoTheme
 import com.semonemo.presentation.theme.Typography
+import com.skydoves.landscapist.glide.GlideImage
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.collectLatest
 
 // 다이얼로그 타입
 enum class DialogType {
@@ -50,29 +57,98 @@ enum class DialogType {
     SALE,
 }
 
-/**
- * TODO
- *
- * @param isPrivate : 비공개 - true, 공개 - false | 비공개일 경우, 판매 불가능 (자동으로 비판매)
- * @param isNotSale : 비판매 - true, 판매 가능 - false
- * @param onPublicClicked : 공개 NFT로 변경하기 버튼 클릭 시
- * @param onSaleClicked : 판매 가능한 NFT로 변경하기 버튼 클릭 시
- */
+@Composable
+fun DetailRoute(
+    modifier: Modifier,
+    viewModel: DetailViewModel = hiltViewModel(),
+    onSaleClicked: () -> Unit = {},
+    onShowSnackBar: (String) -> Unit,
+    popUpBackStack: () -> Unit,
+) {
+    val uiState = viewModel.uiState.collectAsStateWithLifecycle()
+
+    DetailContent(
+        modifier = modifier,
+        uiEvent = viewModel.uiEvent,
+        uiState = uiState.value,
+        onPublicClicked = viewModel::openNft,
+        onSaleClicked = onSaleClicked,
+        onShowSnackBar = onShowSnackBar,
+        popUpBackStack = popUpBackStack,
+    )
+}
+
+@Composable
+fun DetailContent(
+    modifier: Modifier,
+    uiEvent: SharedFlow<DetailUiEvent>,
+    uiState: DetailUiState,
+    onPublicClicked: () -> Unit,
+    onSaleClicked: () -> Unit,
+    onShowSnackBar: (String) -> Unit,
+    popUpBackStack: () -> Unit,
+) {
+    var isLoading by remember { mutableStateOf(true) }
+
+    LaunchedEffect(uiEvent) {
+        uiEvent.collectLatest { event ->
+            when (event) {
+                is DetailUiEvent.OpenSuccess -> {
+                    onShowSnackBar(event.message)
+                }
+
+                is DetailUiEvent.Error -> {
+                    onShowSnackBar(event.errorMessage)
+                    isLoading = false
+                }
+
+                else -> {
+                    isLoading = true
+                }
+            }
+        }
+    }
+    if (isLoading) {
+        Log.d("nakyung", "여기")
+        LoadingDialog()
+    }
+
+    DetailScreen(
+        modifier = modifier,
+        owner = uiState.owner,
+        profileImg = uiState.profileImg,
+        tags = uiState.tags,
+        isOpen = uiState.isOpen,
+        isOnSale = uiState.isOnSale,
+        title = uiState.title,
+        content = uiState.content,
+        frameImg = uiState.image,
+        onPublicClicked = onPublicClicked,
+        onSaleClicked = onSaleClicked,
+        popUpBackStack = popUpBackStack,
+    )
+}
+
 @Composable
 fun DetailScreen(
     modifier: Modifier = Modifier,
-    nftId: Long? = null,
+    owner: String = "",
+    profileImg: String = "",
+    tags: List<String> = listOf(),
+    isOpen: Boolean = false,
+    isOnSale: Boolean = false,
+    title: String = "",
+    content: String = "",
+    frameImg: String = "",
     onPublicClicked: () -> Unit = {},
     onSaleClicked: () -> Unit = {},
+    popUpBackStack: () -> Unit = {},
 ) {
     val scrollState = rememberScrollState()
     var showDialog by remember { mutableStateOf<DialogType?>(null) }
 
-    val isPrivate = false
-    val isNotSale = true
-
-    // 더미 데이터
-    val tags = listOf("윈터", "연예인", "에스파", "에스파윈터", "연예인프레임")
+    val ipfsUrl = BuildConfig.IPFS_READ_URL
+    val imgUrl = ipfsUrl + "ipfs/" + frameImg
 
     @Composable
     fun showCustomDialog(
@@ -105,88 +181,96 @@ fun DetailScreen(
         modifier =
             modifier
                 .fillMaxSize()
-                .background(brush = Main01)
                 .verticalScroll(state = scrollState)
+                .background(brush = Main01)
                 .statusBarsPadding()
-                .navigationBarsPadding()
-                .padding(horizontal = 25.dp, vertical = 5.dp),
+                .navigationBarsPadding(),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
+        Spacer(modifier = Modifier.height(10.dp))
+        TopAppBar(
+            onNavigationClick = popUpBackStack,
+        )
         Box(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(top = 10.dp),
+            modifier = Modifier.fillMaxWidth(),
             contentAlignment = Alignment.Center,
         ) {
             Text(
-                text = "윈터와 함께~ ❤️",
+                text = title,
                 style = Typography.bodyLarge,
             )
-            if (isPrivate) {
+            if (!isOpen) {
                 Box(
                     modifier = Modifier.fillMaxWidth(),
                     contentAlignment = Alignment.CenterEnd,
                 ) {
-                    PrivateTag(title = stringResource(R.string.private_tag))
+                    PrivateTag(
+                        modifier = Modifier.padding(end = 10.dp),
+                        title = stringResource(R.string.private_tag),
+                    )
                 }
             } else {
-                if (isNotSale) {
+                if (!isOnSale) {
                     Box(
                         modifier = Modifier.fillMaxWidth(),
                         contentAlignment = Alignment.CenterEnd,
                     ) {
-                        PrivateTag(title = stringResource(R.string.not_sale_tag))
+                        PrivateTag(
+                            modifier = Modifier.padding(end = 10.dp),
+                            title = stringResource(R.string.not_sale_tag),
+                        )
                     }
                 }
             }
         }
+        Spacer(modifier = Modifier.height(30.dp))
+        GlideImage(
+            modifier =
+                Modifier
+                    .size(width = 265.dp, height = 365.dp),
+            contentScale = ContentScale.Fit,
+            imageModel = imgUrl,
+        )
         Spacer(modifier = Modifier.height(20.dp))
-        Box(
+        Row(
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .wrapContentHeight(),
-        ) {
-            Image(
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.FillWidth,
-                painter = painterResource(id = R.drawable.img_example3),
-                contentDescription = "frame_img",
-            )
-        }
-        Spacer(modifier = Modifier.height(12.dp))
-        Row(
-            modifier = Modifier.fillMaxWidth(),
+                    .padding(horizontal = 20.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Image(
+            GlideImage(
                 modifier =
                     Modifier
                         .size(25.dp)
                         .clip(CircleShape),
-                painter = painterResource(id = R.drawable.img_example),
-                contentDescription = "img_profile",
+                imageModel = profileImg,
             )
             Spacer(modifier = Modifier.width(6.dp))
             Text(
-                text = "나갱갱",
+                text = owner,
                 style = Typography.bodySmall.copy(fontSize = 15.sp),
             )
         }
         Spacer(modifier = Modifier.height(10.dp))
         Box(
-            modifier = Modifier.fillMaxWidth(),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp),
             contentAlignment = Alignment.CenterStart,
         ) {
             Text(
-                text = "윈터와 함께 사진을 찍고 싶을 때 사용하는 프레임! >\"<",
+                text = content,
                 style = Typography.labelMedium.copy(fontSize = 18.sp),
             )
         }
-        Spacer(modifier = Modifier.height(13.dp))
+        Spacer(modifier = Modifier.height(15.dp))
         LazyRow(
-            modifier = Modifier.fillMaxWidth(),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp),
             horizontalArrangement = Arrangement.spacedBy(5.dp),
             content = {
                 items(count = tags.size) { index ->
@@ -194,39 +278,54 @@ fun DetailScreen(
                 }
             },
         )
-        Spacer(modifier = Modifier.height(55.dp))
-        if (isPrivate) {
+        Spacer(modifier = Modifier.height(50.dp))
+        if (!isOpen) {
             LongWhiteButton(
-                modifier = Modifier.fillMaxWidth(),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp),
                 icon = null,
                 text = stringResource(R.string.change_to_public_nft),
                 onClick = { showDialog = DialogType.PUBLIC },
             )
         } else {
-            if (isNotSale) {
+            if (!isOnSale) {
                 LongWhiteButton(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 20.dp),
                     icon = null,
                     text = stringResource(R.string.change_to_private_nft),
                     onClick = { showDialog = DialogType.PUBLIC },
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 LongWhiteButton(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 20.dp),
                     icon = null,
                     text = stringResource(R.string.change_to_sale_nft),
                     onClick = { showDialog = DialogType.SALE },
                 )
             } else {
                 LongWhiteButton(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 20.dp),
                     icon = null,
                     text = stringResource(id = R.string.change_to_private_nft),
                     onClick = { showDialog = DialogType.PUBLIC },
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 LongWhiteButton(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 20.dp),
                     icon = null,
                     text = stringResource(R.string.change_to_not_sale_nft),
                     onClick = { showDialog = DialogType.SALE },
@@ -236,23 +335,23 @@ fun DetailScreen(
     }
     when (showDialog) {
         DialogType.PUBLIC -> {
-            val (title, content) =
-                if (isPrivate) {
+            val (dialogTitle, dialogContent) =
+                if (!isOpen) {
                     stringResource(R.string.public_dialog_title) to stringResource(R.string.public_dialog_content)
                 } else {
                     stringResource(R.string.private_dialog_title) to stringResource(R.string.private_dialog_content)
                 }
 
             val (titleKeywords, contentKeywords) =
-                if (isPrivate) {
+                if (!isOpen) {
                     listOf("공개로 변경") to listOf("판매", "비공개로 변경")
                 } else {
                     listOf("비공개로 변경") to listOf("볼 수 없으며", "공개로 변경")
                 }
 
             showCustomDialog(
-                title = title,
-                content = content,
+                title = dialogTitle,
+                content = dialogContent,
                 onConfirmClicked = onPublicClicked,
                 titleKeywords = titleKeywords,
                 contentKeywords = contentKeywords,
@@ -260,23 +359,23 @@ fun DetailScreen(
         }
 
         DialogType.SALE -> {
-            val (title, content) =
-                if (isNotSale) {
+            val (dialogTitle, dialogContent) =
+                if (!isOnSale) {
                     stringResource(R.string.sale_dialog_title) to stringResource(R.string.sale_dialog_content)
                 } else {
                     stringResource(R.string.not_sale_dialog_title) to stringResource(R.string.not_sale_dialog_content)
                 }
 
             val (titleKeywords, contentKeywords) =
-                if (isNotSale) {
+                if (!isOnSale) {
                     listOf("판매") to listOf("구매할 수 있게", "비판매로 변경")
                 } else {
                     listOf("비판매") to listOf("구매할 수 없게", "판매로 변경")
                 }
 
             showCustomDialog(
-                title = title,
-                content = content,
+                title = dialogTitle,
+                content = dialogContent,
                 onConfirmClicked = onSaleClicked,
                 titleKeywords = titleKeywords,
                 contentKeywords = contentKeywords,

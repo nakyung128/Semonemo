@@ -33,9 +33,9 @@ import com.semonemo.presentation.screen.frame.MomentGraph
 import com.semonemo.presentation.screen.imgAsset.ImageAssetScreen
 import com.semonemo.presentation.screen.imgAsset.ImageSelectRoute
 import com.semonemo.presentation.screen.login.LoginRoute
-import com.semonemo.presentation.screen.mypage.DetailScreen
 import com.semonemo.presentation.screen.mypage.FollowListScreen
 import com.semonemo.presentation.screen.mypage.MyPageRoute
+import com.semonemo.presentation.screen.mypage.detail.DetailRoute
 import com.semonemo.presentation.screen.mypage.setting.SettingRoute
 import com.semonemo.presentation.screen.picture.PictureGraph
 import com.semonemo.presentation.screen.search.SearchRoute
@@ -374,10 +374,12 @@ fun MainNavHost(
 
         composable(
             route = ScreenDestinations.Detail.route,
+            arguments = ScreenDestinations.Detail.arguments,
         ) {
-            DetailScreen(
+            DetailRoute(
                 modifier = modifier,
-                nftId = it.arguments?.getLong("nftId"),
+                onShowSnackBar = onShowErrorSnackBar,
+                popUpBackStack = navController::popBackStack,
             )
         }
 

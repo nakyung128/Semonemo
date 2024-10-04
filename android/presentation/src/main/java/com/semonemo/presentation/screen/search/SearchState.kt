@@ -6,6 +6,7 @@ import com.semonemo.domain.model.AssetDetail
 import com.semonemo.domain.model.FrameDetail
 import com.semonemo.domain.model.HotKeyword
 import com.semonemo.domain.model.Profile
+import com.semonemo.domain.model.UserInfoResponse
 
 @Stable
 sealed interface SearchState {
@@ -20,7 +21,7 @@ sealed interface SearchState {
 
     @Immutable
     data class Success(
-        val userList: List<Profile> = listOf(),
+        val userList: List<UserInfoResponse> = listOf(),
         val frameList: List<FrameDetail> = listOf(),
         val assetList: List<AssetDetail> = listOf(),
     ) : SearchState

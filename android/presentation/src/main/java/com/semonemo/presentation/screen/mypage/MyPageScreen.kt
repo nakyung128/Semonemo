@@ -78,7 +78,6 @@ import com.semonemo.presentation.component.TopAppBarNavigationType
 import com.semonemo.presentation.theme.Blue3
 import com.semonemo.presentation.theme.Gray03
 import com.semonemo.presentation.theme.Main01
-import com.semonemo.presentation.theme.Main02
 import com.semonemo.presentation.theme.SemonemoTheme
 import com.semonemo.presentation.theme.Typography
 import com.semonemo.presentation.util.noRippleClickable
@@ -452,7 +451,7 @@ fun MyPageScreen(
                                                         shape = RoundedCornerShape(10.dp),
                                                         color = Gray03,
                                                     ).noRippleClickable {
-                                                        navigateToDetail(frame.marketId)
+                                                        navigateToDetail(frame.nftId)
                                                     },
                                             imageModel = imgUrl,
                                             contentScale = ContentScale.Inside,
