@@ -131,4 +131,13 @@ class NftRepositoryImpl
             flow {
                 emit(emitApiResponse(apiResponse = { api.getNftDetail(nftId) }, default = MyFrame()))
             }
+
+        override suspend fun getSaleLikeNft(): Flow<ApiResponse<List<FrameDetail>>> =
+            flow {
+                val response = emitApiResponse(apiResponse = { api.getSaleLikeNft() }, SearchFrame())
+                when (response) {
+                    is ApiResponse.Error -> emit(response)
+                    is ApiResponse.Success -> emit(ApiResponse.Success(data = response.data.content))
+                }
+            }
     }

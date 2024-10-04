@@ -73,4 +73,7 @@ interface NftApi {
     suspend fun getNftDetail(
         @Path("nftId") nftId: Long,
     ): BaseResponse<MyFrame>
+
+    @GET("api/nft/users/liked")
+    suspend fun getSaleLikeNft(): BaseResponse<SearchFrame>
 }

@@ -31,6 +31,17 @@ class StoreViewModel
             loadStoreInfo()
         }
 
+        private fun loadLikeNft() {
+            viewModelScope.launch {
+                nftRepository.getSaleLikeNft().collectLatest { response ->
+                    when (response) {
+                        is ApiResponse.Error -> {}
+                        is ApiResponse.Success -> {}
+                    }
+                }
+            }
+        }
+
         private fun loadStoreInfo() {
             viewModelScope.launch {
                 combine(

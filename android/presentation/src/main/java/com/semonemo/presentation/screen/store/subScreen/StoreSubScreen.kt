@@ -44,7 +44,7 @@ fun StoreSubScreen(
                             .fillMaxHeight()
                             .aspectRatio(3f / 4f)
                             .clickable { navigateToFrameDetail(storeItem.marketId) },
-                    author = storeItem.seller.nickname,
+                    author = storeItem.nftInfo.data.title,
                     imgUrl =
                         storeItem.nftInfo.data.image
                             .urlToIpfs(),
