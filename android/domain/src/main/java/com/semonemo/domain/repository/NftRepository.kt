@@ -15,5 +15,7 @@ interface NftRepository {
 
     suspend fun getAvailableNft(type: Int): Flow<ApiResponse<List<MyFrame>>>
 
-    suspend fun sellRegisterNft(request: SellNftRequest) : Flow<ApiResponse<FrameDetail>>
+    suspend fun sellRegisterNft(request: SellNftRequest): Flow<ApiResponse<FrameDetail>>
+
+    suspend fun getAllSaleNft(): Flow<ApiResponse<List<FrameDetail>>>
 }

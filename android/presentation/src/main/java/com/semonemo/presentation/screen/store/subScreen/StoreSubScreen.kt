@@ -1,5 +1,6 @@
 package com.semonemo.presentation.screen.store.subScreen
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.aspectRatio
@@ -11,13 +12,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.semonemo.domain.model.AssetDetail
+import com.semonemo.domain.model.FrameDetail
 import com.semonemo.presentation.component.StoreItemCard
+import com.semonemo.presentation.util.urlToIpfs
 
 @Preview(showBackground = true)
 @Composable
-fun StoreSubScreen(modifier: Modifier = Modifier, isFrame: Boolean = true) {
+fun StoreSubScreen(
+    modifier: Modifier = Modifier,
+    isFrame: Boolean = true,
+    saleFrames: List<FrameDetail> = listOf(),
+    saleAssets: List<AssetDetail> = listOf(),
+) {
     val frameDataList = getSampleFrameData(5)
-
     LazyHorizontalGrid(
         modifier = modifier,
         rows = GridCells.Fixed(if (isFrame) 1 else 2),
@@ -25,18 +33,36 @@ fun StoreSubScreen(modifier: Modifier = Modifier, isFrame: Boolean = true) {
         verticalArrangement = Arrangement.spacedBy(8.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        items(frameDataList) { storeItem ->
-            StoreItemCard(
-                modifier =
-                    modifier
-                        .fillMaxWidth()
-                        .aspectRatio(if (isFrame) 0.6f else 0.8f),
-                title = storeItem.title,
-                author = storeItem.author,
-                imgUrl = storeItem.imgUrl,
-                price = storeItem.price,
-                isLiked = storeItem.isLiked,
-            )
+        if (isFrame) {
+            items(saleFrames) { storeItem ->
+                StoreItemCard(
+                    modifier =
+                        modifier
+                            .fillMaxWidth()
+                            .aspectRatio(if (isFrame) 0.6f else 0.8f),
+                    title = storeItem.nftInfo.data.title,
+                    author = storeItem.nftInfo.data.title, // 실제로는 만든 사람이 들어가야하는데 데이터가 없음
+                    imgUrl =
+                        storeItem.nftInfo.data.image
+                            .urlToIpfs(),
+                    price = storeItem.price.toInt(),
+                    isLiked = storeItem.isLiked,
+                )
+            }
+        } else {
+            items(frameDataList) { storeItem ->
+                StoreItemCard(
+                    modifier =
+                        modifier
+                            .fillMaxWidth()
+                            .aspectRatio(if (isFrame) 0.6f else 0.8f),
+                    title = storeItem.title,
+                    author = storeItem.author,
+                    imgUrl = storeItem.imgUrl,
+                    price = storeItem.price,
+                    isLiked = storeItem.isLiked,
+                )
+            }
         }
     }
 }

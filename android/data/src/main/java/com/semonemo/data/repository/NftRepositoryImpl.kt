@@ -6,6 +6,7 @@ import com.semonemo.data.network.response.emitApiResponse
 import com.semonemo.domain.model.ApiResponse
 import com.semonemo.domain.model.FrameDetail
 import com.semonemo.domain.model.Nft
+import com.semonemo.domain.model.SearchFrame
 import com.semonemo.domain.model.myFrame.GetMyFrameResponse
 import com.semonemo.domain.model.myFrame.MyFrame
 import com.semonemo.domain.repository.NftRepository
@@ -62,5 +63,15 @@ class NftRepositoryImpl
                         default = FrameDetail(),
                     ),
                 )
+            }
+
+        override suspend fun getAllSaleNft(): Flow<ApiResponse<List<FrameDetail>>> =
+            flow {
+                val response =
+                    emitApiResponse(apiResponse = { api.getAllSaleNft() }, default = SearchFrame())
+                when (response) {
+                    is ApiResponse.Error -> emit(response)
+                    is ApiResponse.Success -> emit(ApiResponse.Success(response.data.content))
+                }
             }
     }

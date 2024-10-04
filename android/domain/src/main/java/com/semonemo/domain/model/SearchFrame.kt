@@ -24,7 +24,7 @@ data class FrameDetail(
     val likeCount: Long = 0,
     val isLiked: Boolean = false,
     val nftInfo: FrameInfo = FrameInfo(),
-    val tags: List<NTag> = emptyList(),
+    val tags: List<String> = emptyList(),
 )
 
 data class FrameInfo(
@@ -40,7 +40,3 @@ data class NftData(
     val image: String = "",
 )
 
-data class NTag(
-    val ntagId: Long = 0,
-    val name: String = "",
-)

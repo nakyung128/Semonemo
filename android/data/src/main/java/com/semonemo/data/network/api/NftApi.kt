@@ -3,6 +3,7 @@ package com.semonemo.data.network.api
 import com.semonemo.data.network.response.BaseResponse
 import com.semonemo.domain.model.FrameDetail
 import com.semonemo.domain.model.Nft
+import com.semonemo.domain.model.SearchFrame
 import com.semonemo.domain.model.myFrame.GetMyFrameResponse
 import com.semonemo.domain.request.PublishNftRequest
 import com.semonemo.domain.request.SellNftRequest
@@ -32,4 +33,11 @@ interface NftApi {
     suspend fun sellRegisterNft(
         @Body request: SellNftRequest,
     ): BaseResponse<FrameDetail>
+
+    @GET("api/nft")
+    suspend fun getAllSaleNft(
+        @Query("orderBy") orderBy: String = "latest",
+        @Query("page") page: Int = 0,
+        @Query("size") size: Int = 15,
+    ): BaseResponse<SearchFrame>
 }
