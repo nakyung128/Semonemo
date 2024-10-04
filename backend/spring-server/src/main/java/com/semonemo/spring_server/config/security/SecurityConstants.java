@@ -12,7 +12,8 @@ public final class SecurityConstants {
 		"/api/auth/**",
 		"/api/asset/**",
 		"/api/search/**",
-		"/api/auction/**"
+		"/api/auction/**",
+		"/ws-stomp/**",
 	};
 
 	private SecurityConstants() {}
