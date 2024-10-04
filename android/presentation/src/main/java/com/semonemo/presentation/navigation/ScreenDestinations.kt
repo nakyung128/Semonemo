@@ -150,6 +150,14 @@ sealed class ScreenDestinations(
         fun createRoute(isFrame: Boolean) = "storeFullView/$isFrame"
     }
 
+    data object FrameDetail : ScreenDestinations(route = "frameDetail") {
+        override val route: String
+            get() = "frameDetail/{marketId}"
+        val arguments = listOf(navArgument(name = "marketId") { type = NavType.LongType })
+
+        fun createRoute(marketId: Long) = "frameDetail/$marketId"
+    }
+
     data object FrameDone : ScreenDestinations(route = "frameDone")
 
     data object Search : ScreenDestinations(route = "search")

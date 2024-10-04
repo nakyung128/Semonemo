@@ -2,8 +2,8 @@ package com.semonemo.domain.model
 
 data class Nft(
     val nftId: Long = 0,
-    val creator: Long = 0,
-    val owner: Long = 0,
+    val creator: User = User(),
+    val owner: User = User(),
     val tokenId: String = "",
     val tags: List<String> = listOf(),
     val isOpen: Boolean = true,

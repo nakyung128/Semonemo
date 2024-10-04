@@ -55,6 +55,7 @@ fun StoreRoute(
     navigateToAssetSale: () -> Unit = {},
     navigateToFrameSale: () -> Unit = {},
     viewModel: StoreViewModel = hiltViewModel(),
+    navigateToFrameDetail: (Long) -> Unit = {},
 ) {
     val uiState = viewModel.uiState.collectAsStateWithLifecycle()
     StoreContent(
@@ -64,6 +65,7 @@ fun StoreRoute(
         navigateToFullView = navigateToFullView,
         navigateToSearch = navigateToSearch,
         uiState = uiState.value,
+        navigateToFrameDetail = navigateToFrameDetail,
         uiEvent = viewModel.uiEvent,
     )
 }
@@ -78,6 +80,7 @@ fun StoreContent(
     uiState: StoreUiState,
     uiEvent: SharedFlow<StoreUiEvent>,
     onShowError: (String) -> Unit = {},
+    navigateToFrameDetail: (Long) -> Unit = {},
 ) {
     LaunchedEffect(uiEvent) {
         uiEvent.collectLatest { event ->
@@ -96,6 +99,7 @@ fun StoreContent(
         navigateToFullView = navigateToFullView,
         navigateToSearch = navigateToSearch,
         saleFrames = uiState.saleFrame,
+        navigateToFrameDetail = navigateToFrameDetail,
         saleAssets = uiState.saleAsset,
     )
 }
@@ -109,6 +113,7 @@ fun StoreScreen(
     navigateToFrameSale: () -> Unit = {},
     saleFrames: List<FrameDetail> = listOf(),
     saleAssets: List<SellAssetDetail> = listOf(),
+    navigateToFrameDetail: (Long) -> Unit = {},
 ) {
     val verticalScrollState = rememberScrollState()
 
@@ -177,7 +182,8 @@ fun StoreScreen(
                         .height(frameHeight)
                         .fillMaxWidth(),
                 isFrame = true,
-                saleFrames,
+                saleFrames = saleFrames,
+                navigateToFrameDetail = navigateToFrameDetail,
             )
             Spacer(modifier = Modifier.height(10.dp))
             Row(

@@ -74,4 +74,9 @@ class NftRepositoryImpl
                     is ApiResponse.Success -> emit(ApiResponse.Success(response.data.content))
                 }
             }
+
+        override suspend fun getFrameDetail(marketId: Long): Flow<ApiResponse<FrameDetail>> =
+            flow {
+                emit(emitApiResponse(apiResponse = { api.getNftDetail(marketId) }, default = FrameDetail()))
+            }
     }

@@ -40,4 +40,9 @@ interface NftApi {
         @Query("page") page: Int = 0,
         @Query("size") size: Int = 15,
     ): BaseResponse<SearchFrame>
+
+    @GET("api/nft/{marketId}")
+    suspend fun getNftDetail(
+        @Path("marketId") marketId: Long,
+    ): BaseResponse<FrameDetail>
 }

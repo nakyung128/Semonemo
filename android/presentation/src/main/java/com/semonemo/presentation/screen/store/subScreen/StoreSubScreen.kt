@@ -1,5 +1,6 @@
 package com.semonemo.presentation.screen.store.subScreen
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.aspectRatio
@@ -24,6 +25,7 @@ fun StoreSubScreen(
     isFrame: Boolean = true,
     saleFrames: List<FrameDetail> = listOf(),
     saleAssets: List<SellAssetDetail> = listOf(),
+    navigateToFrameDetail: (Long) -> Unit = {},
 ) {
     LazyHorizontalGrid(
         modifier = modifier.wrapContentHeight(),
@@ -38,8 +40,9 @@ fun StoreSubScreen(
                     modifier =
                         Modifier
                             .fillMaxHeight()
-                            .aspectRatio(3f / 4f),
-                    author = storeItem.nftInfo.creator,
+                            .aspectRatio(3f / 4f)
+                            .clickable { navigateToFrameDetail(storeItem.marketId) },
+                    author = storeItem.nftInfo.data.title,
                     imgUrl =
                         storeItem.nftInfo.data.image
                             .urlToIpfs(),

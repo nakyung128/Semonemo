@@ -19,7 +19,7 @@ data class SearchFrame(
 data class FrameDetail(
     val marketId: Long = 0,
     val nftId: Long = 0,
-    val seller: Long = 0,
+    val seller: User = User(),
     val price: BigInteger = BigInteger.ZERO,
     val likeCount: Long = 0,
     val isLiked: Boolean = false,
@@ -39,4 +39,3 @@ data class NftData(
     val content: String = "",
     val image: String = "",
 )
-

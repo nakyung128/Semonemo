@@ -2,6 +2,7 @@ package com.semonemo.presentation.screen.detail.frame
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -21,6 +22,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -35,8 +37,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.semonemo.presentation.R
 import com.semonemo.presentation.component.HashTag
+import com.semonemo.presentation.component.LoadingDialog
 import com.semonemo.presentation.component.LongBlackButton
 import com.semonemo.presentation.component.NameWithBadge
 import com.semonemo.presentation.component.TopAppBar
@@ -44,15 +49,65 @@ import com.semonemo.presentation.theme.GunMetal
 import com.semonemo.presentation.theme.SemonemoTheme
 import com.semonemo.presentation.theme.Typography
 import com.semonemo.presentation.util.noRippleClickable
+import com.semonemo.presentation.util.urlToIpfs
 import com.skydoves.landscapist.glide.GlideImage
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.collectLatest
 import java.util.Locale
 
 @Composable
 fun FrameDetailRoute(
     modifier: Modifier = Modifier,
     popUpBackStack: () -> Unit = {},
+    onShowSnackBar: (String) -> Unit = {},
+    viewModel: FrameDetailViewModel = hiltViewModel(),
 ) {
-    val hashTag = listOf("아이유", "인사이드 아웃", "단발")
+    val uiState = viewModel.uiState.collectAsStateWithLifecycle()
+    FrameDetailContent(
+        modifier = modifier,
+        popUpBackStack = popUpBackStack,
+        onShowSnackBar = onShowSnackBar,
+        uiState = uiState.value,
+        uiEvent = viewModel.uiEvent,
+    )
+}
+
+@Composable
+fun FrameDetailContent(
+    modifier: Modifier = Modifier,
+    popUpBackStack: () -> Unit = {},
+    onShowSnackBar: (String) -> Unit = {},
+    uiEvent: SharedFlow<FrameDetailUiEvent>,
+    uiState: FrameDetailUiState,
+) {
+    LaunchedEffect(uiEvent) {
+        uiEvent.collectLatest { event ->
+            when (event) {
+                is FrameDetailUiEvent.Error -> onShowSnackBar(event.errorMessage)
+            }
+        }
+    }
+
+    if (uiState.isLoading) {
+        LoadingDialog()
+    }
+    val frame = uiState.frame
+    FrameDetailScreen(
+        modifier = modifier,
+        popUpBackStack = popUpBackStack,
+        frameTitle = frame.nftInfo.data.title,
+        frameUrl =
+            frame.nftInfo.data.image
+                .urlToIpfs(),
+        hashTag = frame.tags,
+        hasBadge = true,
+        nickname = frame.seller.nickname,
+        frameContent = frame.nftInfo.data.content,
+        isHeart = frame.isLiked,
+        heartCount = frame.likeCount,
+        price = frame.price.toDouble(),
+        profileImageUrl = frame.seller.profileImage,
+    )
 }
 
 @Composable
@@ -65,9 +120,9 @@ fun FrameDetailScreen(
     profileImageUrl: String = "",
     nickname: String = "짜이한",
     hasBadge: Boolean = true,
-    frameContent: String = "아이유와 한컷! 아이유와 한컷! 아이유와 한컷! 아이유와 한컷! 아이유와 한컷! ",
+    frameContent: String = "아이유와 한컷! 아이유와 한컷! 아이유와 한컷! 아이유와 한컷! 아이유와 한컷!  123123123123123123123123123121231231",
     isHeart: Boolean = true,
-    heartCount: Int = 100000,
+    heartCount: Long = 100000,
     price: Double = 100.1,
 ) {
     val scrollState = rememberScrollState()
@@ -77,9 +132,9 @@ fun FrameDetailScreen(
         }
     val (heart, isHeart) =
         remember {
-            mutableStateOf(false)
+            mutableStateOf(isHeart)
         }
-
+    val maxLines = 2 // 2줄 이상일 때 아이콘 표시
     Surface(
         modifier =
             Modifier
@@ -106,12 +161,11 @@ fun FrameDetailScreen(
             )
             GlideImage(
                 imageModel = frameUrl.toUri(),
-                contentScale = ContentScale.Crop,
+                contentScale = ContentScale.Fit,
                 modifier =
                     Modifier
                         .padding(horizontal = 20.dp)
-                        .size(width = 365.dp, height = 465.dp)
-                        .background(color = Color.Red),
+                        .size(width = 265.dp, height = 365.dp),
             )
             LazyRow(
                 modifier =
@@ -154,34 +208,15 @@ fun FrameDetailScreen(
                 }
             }
             Row(modifier = Modifier) {
-                if (expanded) {
-                    Text(modifier = Modifier.weight(1f), text = frameContent)
-                    Spacer(modifier = Modifier.weight(0.1f))
-                    Icon(
-                        modifier =
-                            Modifier
-                                .size(25.dp)
-                                .noRippleClickable { isExpanded(!expanded) },
-                        painter = painterResource(id = R.drawable.ic_arrow_down),
-                        contentDescription = "",
-                    )
-                } else {
-                    Text(
-                        modifier = Modifier.weight(1f),
-                        text = frameContent,
-                        maxLines = 1, // 한 줄로 제한
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                    Spacer(modifier = Modifier.weight(0.1f))
-                    Icon(
-                        modifier =
-                            Modifier
-                                .size(25.dp)
-                                .noRippleClickable { isExpanded(!expanded) },
-                        painter = painterResource(id = R.drawable.ic_arrow_up),
-                        contentDescription = "",
-                    )
-                }
+                Text(
+                    modifier =
+                        Modifier
+                            .weight(1f)
+                            .clickable { isExpanded(expanded.not()) },
+                    text = frameContent,
+                    maxLines = if (expanded) Int.MAX_VALUE else maxLines, // expanded 상태에 따라 줄 수 제한
+                    overflow = TextOverflow.Ellipsis,
+                )
             }
             Row(
                 modifier = Modifier.align(Alignment.Start),
@@ -242,7 +277,12 @@ fun FrameDetailScreen(
                             .weight(1f)
                             .height(45.dp),
                     icon = R.drawable.ic_color_sene_coin,
-                    text = stringResource(R.string.buy_price_message, price),
+                    text =
+                        String.format(
+                            Locale.KOREAN,
+                            "%,.0f ",
+                            price,
+                        ) + stringResource(id = R.string.buy_price_message),
                 )
             }
         }
