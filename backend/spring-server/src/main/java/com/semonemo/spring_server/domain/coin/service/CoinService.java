@@ -11,7 +11,7 @@ public interface CoinService {
 
     CoinResponseDto getCoin(Long userId);
 
-    BigInteger payableToCoin(Long userId, BigInteger amount);
+    Long payableToCoin(Long userId, Long amount);
 
-    BigInteger coinToPayable(Long userId, BigInteger amount);
+    Long coinToPayable(Long userId, Long amount);
 }

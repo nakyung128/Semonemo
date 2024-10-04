@@ -1,5 +1,6 @@
 package com.semonemo.spring_server.domain.nft.entity;
 
+import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.Set;
 
@@ -48,8 +49,10 @@ public class NFTMarket extends BaseTimeEntity {
     @OneToMany(mappedBy = "marketId")
     private Set<NFTMarketLike> likedMarkets;
 
-    public void updateLikeCount(int count) {
+    public int updateLikeCount(int count) {
         this.likeCount += count;
+
+        return likeCount;
     }
 
     public void markAsSold() {

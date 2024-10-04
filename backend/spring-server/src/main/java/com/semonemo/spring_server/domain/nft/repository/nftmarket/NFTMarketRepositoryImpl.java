@@ -7,6 +7,7 @@ import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.semonemo.spring_server.domain.nft.entity.NFTMarket;
 import com.semonemo.spring_server.domain.nft.entity.QNFTMarket;
+import com.semonemo.spring_server.domain.nft.entity.QNFTMarketLike;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -20,6 +21,7 @@ public class NFTMarketRepositoryImpl implements NFTMarketRepositoryCustom {
     }
 
     QNFTMarket nftMarket = QNFTMarket.nFTMarket;
+    QNFTMarketLike nftMarketLike = QNFTMarketLike.nFTMarketLike;
 
     @Override
     public List<NFTMarket> findSold(Long nftId) {
@@ -77,6 +79,32 @@ public class NFTMarketRepositoryImpl implements NFTMarketRepositoryCustom {
             .where(
                 nftMarket.isSold.isFalse()
                     .and(nftMarket.nftId.creator.id.eq(creator))
+            )
+            .fetchOne()).orElse(0L);
+
+        return new PageImpl<>(content, pageable, total);
+    }
+
+    @Override
+    public Page<NFTMarket> findByLiked(Long userId, Pageable pageable) {
+        List<NFTMarket> content = queryFactory
+            .selectFrom(nftMarket)
+            .join(nftMarket.likedMarkets, nftMarketLike)
+            .where(
+                nftMarketLike.likedUserId.id.eq(userId)
+                    .and(nftMarket.isSold.isFalse())
+            )
+            .offset(pageable.getOffset())
+            .limit(pageable.getPageSize())
+            .fetch();
+
+        long total = Optional.ofNullable(queryFactory
+            .select(nftMarket.count())
+            .from(nftMarket)
+            .join(nftMarket.likedMarkets, nftMarketLike)
+            .where(
+                nftMarketLike.likedUserId.id.eq(userId)
+                    .and(nftMarket.isSold.isFalse())
             )
             .fetchOne()).orElse(0L);
 
