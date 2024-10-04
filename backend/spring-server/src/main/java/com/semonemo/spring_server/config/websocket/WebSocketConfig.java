@@ -1,4 +1,4 @@
-package com.semonemo.spring_server.config;
+package com.semonemo.spring_server.config.websocket;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
@@ -19,11 +19,11 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 	@Override
 	public void registerStompEndpoints(StompEndpointRegistry registry) {
 		registry.addEndpoint("/ws-stomp")
-			.setAllowedOriginPatterns("*")
+			.setAllowedOriginPatterns("http://127.0.0.1:5500")
 			.withSockJS();
 
 		// API 통신 시, `withSockJS()` 설정을 빼야한다.
 		registry.addEndpoint("/ws-stomp")
-			.setAllowedOriginPatterns("*");
+			.setAllowedOriginPatterns("http://127.0.0.1:5500");
 	}
 }

@@ -124,6 +124,7 @@ public class AuctionServiceImpl implements AuctionService {
 				if (bidRequest.getBidAmount() > currentBid) {
 					hashOps.put(auctionKey, "currentBid", bidRequest.getBidAmount());
 					hashOps.put(auctionKey, "currentBidder", bidRequest.getUserId());
+					hashOps.put(auctionKey, "endTime", LocalDateTime.now().plusSeconds(15).format(formatter));
 					redisTemplate.expire(auctionKey, 15, TimeUnit.SECONDS);
 
 					// TODO : 사용자 임의 번호 적용
@@ -134,10 +135,13 @@ public class AuctionServiceImpl implements AuctionService {
 						.build();
 					addBidLog(auctionId, logDTO);
 
+					String endTimeStr = (String) hashOps.get(auctionKey, "endTime");
+					LocalDateTime endTime = LocalDateTime.parse(endTimeStr, formatter);
 					AuctionResponseDTO response = new AuctionResponseDTO(
 						auctionId,
 						bidRequest.getBidAmount(),
-						bidRequest.getUserId()
+						bidRequest.getUserId(),
+						endTime
 					);
 
 					messagingTemplate.convertAndSend("/topic/auction/" + auctionId, response);
