@@ -16,6 +16,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import java.math.BigInteger;
+
 @Tag(name = "코인 관리", description = "코인 관련 API")
 public interface CoinApi {
 
@@ -33,7 +35,7 @@ public interface CoinApi {
 
     @Operation(summary = "코인 조회", description = "코인 조회")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "발행 성공",
+        @ApiResponse(responseCode = "200", description = "조회 성공",
             content = @Content(schema = @Schema(implementation = CoinResponseDto.class))),
         @ApiResponse(responseCode = "500", description = "서버 내부 오류",
             content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
@@ -42,4 +44,29 @@ public interface CoinApi {
         @AuthenticationPrincipal UserDetails userDetails
     );
 
+    @Operation(summary = "코인 페이머니로 전환", description = "코인 결제용 페이머니로 전환")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "전환 성공",
+            content = @Content(schema = @Schema(implementation = CoinResponseDto.class))),
+        @ApiResponse(responseCode = "500", description = "서버 내부 오류",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    CommonResponse<CoinResponseDto> coinToPayable(
+        @AuthenticationPrincipal UserDetails userDetails,
+        @RequestBody String txHash,
+        @RequestBody BigInteger amount
+    );
+
+    @Operation(summary = "페이머니 코인으로 전환", description = "페이머니 코인으로 전환")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "전환 성공",
+            content = @Content(schema = @Schema(implementation = CoinResponseDto.class))),
+        @ApiResponse(responseCode = "500", description = "서버 내부 오류",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    CommonResponse<CoinResponseDto> payableToCoin(
+        @AuthenticationPrincipal UserDetails userDetails,
+        @RequestBody String txHash,
+        @RequestBody BigInteger amount
+    );
 }
