@@ -1,6 +1,7 @@
 package com.semonemo.data.network.api
 
 import com.semonemo.data.network.response.BaseResponse
+import com.semonemo.domain.model.HotKeyword
 import com.semonemo.domain.model.SearchAsset
 import com.semonemo.domain.model.SearchFrame
 import com.semonemo.domain.model.SearchUser
@@ -23,4 +24,7 @@ interface SearchApi {
     suspend fun searchNft(
         @Query("keyword") keyword: String,
     ): BaseResponse<SearchFrame>
+
+    @GET("api/search/hot")
+    suspend fun getHotKeywords(): BaseResponse<List<HotKeyword>>
 }

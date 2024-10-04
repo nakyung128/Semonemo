@@ -1,6 +1,5 @@
 package com.semonemo.presentation.screen.store
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -123,8 +122,8 @@ fun StoreScreen(
     Surface(
         modifier =
             modifier
-                .fillMaxSize()
-                .background(color = Color.White),
+                .fillMaxSize(),
+        color = Color.White,
     ) {
         Column(
             modifier =
@@ -132,7 +131,6 @@ fun StoreScreen(
                     .fillMaxSize()
                     .statusBarsPadding()
                     .navigationBarsPadding()
-                    .background(color = Color.White)
                     .verticalScroll(state = verticalScrollState),
         ) {
             Row(

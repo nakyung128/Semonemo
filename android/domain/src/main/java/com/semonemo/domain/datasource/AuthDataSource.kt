@@ -22,4 +22,10 @@ interface AuthDataSource {
     suspend fun saveUserId(userId: Long): Unit
 
     suspend fun getUserId(): String?
+
+    suspend fun saveCurrentKeyword(keyword: String): Unit
+
+    suspend fun getCurrentKeyword(): List<String>
+
+    suspend fun removeKeyword(keyword: String): Unit
 }

@@ -83,11 +83,44 @@ class AuthDataSourceImpl
                     prefs[USER_ID_KEY]
                 }.first()
 
+        override suspend fun saveCurrentKeyword(keyword: String) {
+            dataStore.edit { prefs ->
+                val currentKeywords =
+                    prefs[CURRENT_KEYWORD_KEY]?.split(",")?.toMutableList() ?: mutableListOf()
+
+                if (currentKeywords.contains(keyword)) {
+                    currentKeywords.remove(keyword)
+                    currentKeywords.add(0, keyword)
+                } else {
+                    currentKeywords.add(0, keyword)
+                }
+
+                prefs[CURRENT_KEYWORD_KEY] = currentKeywords.joinToString(",")
+            }
+        }
+
+        override suspend fun getCurrentKeyword(): List<String> =
+            dataStore.data
+                .map { prefs ->
+                    prefs[CURRENT_KEYWORD_KEY]?.split(",")?.filter { it.isNotEmpty() } ?: emptyList()
+                }.first()
+
+        override suspend fun removeKeyword(keyword: String) {
+            dataStore.edit { prefs ->
+                val currentKeywords =
+                    prefs[CURRENT_KEYWORD_KEY]?.split(",")?.toMutableList() ?: mutableListOf()
+                currentKeywords.remove(keyword)
+
+                prefs[CURRENT_KEYWORD_KEY] = currentKeywords.joinToString(",")
+            }
+        }
+
         companion object {
             val WALLET_ADDRESS_KEY = stringPreferencesKey("WALLET_ADDRESS_KEY")
             val PASSWORD_KEY = stringPreferencesKey("PASSWORD_KEY")
             val NICKNAME_KEY = stringPreferencesKey("NICKNAME_KEY")
             val USER_ID_KEY = stringPreferencesKey("USER_ID_KEY")
             val PROFILE_IMAGE_KEY = stringPreferencesKey("PROFILE_IMAGE_KEY")
+            val CURRENT_KEYWORD_KEY = stringPreferencesKey("CURRENT_KEYWORD_KEY")
         }
     }

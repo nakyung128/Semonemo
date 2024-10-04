@@ -4,6 +4,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import com.semonemo.domain.model.AssetDetail
 import com.semonemo.domain.model.FrameDetail
+import com.semonemo.domain.model.HotKeyword
 import com.semonemo.domain.model.Profile
 
 @Stable
@@ -13,14 +14,15 @@ sealed interface SearchState {
 
     @Immutable
     data class Init(
-        val hotList: List<String> = emptyList(),
+        val recentList: List<String> = listOf(),
+        val hotList: List<HotKeyword> = listOf(),
     ) : SearchState
 
     @Immutable
     data class Success(
-        val userList: List<Profile> = emptyList(),
-        val frameList: List<FrameDetail> = emptyList(),
-        val assetList: List<AssetDetail> = emptyList(),
+        val userList: List<Profile> = listOf(),
+        val frameList: List<FrameDetail> = listOf(),
+        val assetList: List<AssetDetail> = listOf(),
     ) : SearchState
 
     @Immutable

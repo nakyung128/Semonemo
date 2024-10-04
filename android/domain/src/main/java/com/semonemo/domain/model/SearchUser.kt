@@ -1,7 +1,7 @@
 package com.semonemo.domain.model
 
 data class SearchUser(
-    val content: List<Profile> = emptyList(),
+    val content: List<Profile> = listOf(),
     val pageable: Pageable = Pageable(),
     val totalElements: Int = 0,
     val totalPages: Int = 0,
@@ -16,6 +16,7 @@ data class SearchUser(
 
 data class Profile(
     val userId: Long = 0L,
+    val address: String = "",
     val nickname: String = "",
     val profileImageUrl: String = "",
 )

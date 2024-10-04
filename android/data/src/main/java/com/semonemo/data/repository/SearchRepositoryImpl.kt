@@ -3,6 +3,7 @@ package com.semonemo.data.repository
 import com.semonemo.data.network.api.SearchApi
 import com.semonemo.data.network.response.emitApiResponse
 import com.semonemo.domain.model.ApiResponse
+import com.semonemo.domain.model.HotKeyword
 import com.semonemo.domain.model.SearchAsset
 import com.semonemo.domain.model.SearchFrame
 import com.semonemo.domain.model.SearchUser
@@ -49,6 +50,16 @@ class SearchRepositoryImpl
                             api.searchNft(keyword)
                         },
                         default = SearchFrame(),
+                    )
+                emit(response)
+            }
+
+        override suspend fun getHotKeywords(): Flow<ApiResponse<List<HotKeyword>>> =
+            flow {
+                val response =
+                    emitApiResponse(
+                        apiResponse = { api.getHotKeywords() },
+                        default = listOf(),
                     )
                 emit(response)
             }
