@@ -34,12 +34,12 @@ public class Auction extends BaseTimeEntity {
 	@Enumerated(EnumType.STRING)
 	private AuctionStatus status;
 
-	private int startPrice;
+	private Long startPrice;
 
 	// TODO : 낙찰자 Id 와 mapping
 	private Long winner;
 
-	private int finalPrice;
+	private Long finalPrice;
 
 	@Setter
 	private LocalDateTime startTime;
@@ -47,7 +47,7 @@ public class Auction extends BaseTimeEntity {
 	@Setter
 	private LocalDateTime endTime;
 
-	public void updateResult(Long winner, int finalPrice, LocalDateTime endTime) {
+	public void updateResult(Long winner, Long finalPrice, LocalDateTime endTime) {
 		this.winner = winner;
 		this.finalPrice = finalPrice;
 		this.endTime = endTime;

@@ -9,7 +9,7 @@ import lombok.Getter;
 @Builder
 public class AuctionEndDTO {
     private long auctionId;
-    private int finalPrice;
+    private long finalPrice;
     private long winner;
     private String endTime;
 }
