@@ -59,16 +59,17 @@ public enum ErrorCode {
 
 	// Asset
 	LIKE_NOT_FOUND_ERROR("AS001", "좋아요를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
-	LIKE_Already_exist("AS002", "이미 좋아요 눌렀습니다.", HttpStatus.ALREADY_REPORTED),
+	LIKE_ALREADY_EXIST("AS002", "이미 좋아요 눌렀습니다.", HttpStatus.ALREADY_REPORTED),
 	ASSET_UPLOAD_FAIL("AS003", "에셋 업로드 실패했습니다", HttpStatus.BAD_REQUEST),
 	ASSET_DETAIL_FAIL("AS004", "에셋 상세 조회 실패했습니다", HttpStatus.NOT_FOUND),
 	SELL_DETAIL_FAIL("AS005", "판매에셋 상세 조회 실패했습니다", HttpStatus.NOT_FOUND),
 	ASSET_LOAD_FAIL("AS006", "판매에셋 전체 조회 실패했습니다", HttpStatus.NOT_FOUND),
-	MINE_LOAD_FAIL("A007", "보유중 에셋 조회 실패했습니다", HttpStatus.NOT_FOUND),
-	USERS_LOAD_FAIL("A008", "유저 생성 에셋 조회 실패했습니다", HttpStatus.NOT_FOUND),
-	LIKE_FAIL("A009", "좋아요 실패하였습니다", HttpStatus.INTERNAL_SERVER_ERROR),
-	DISLIKE_FAIL("A010", "좋아요 취소 실패하였습니다", HttpStatus.INTERNAL_SERVER_ERROR),
-	ASSET_ON_SALE("AS011", "이미 판매중인 에셋입니다", HttpStatus.BAD_REQUEST),
+	MINE_LOAD_FAIL("AS007", "보유중 에셋 조회 실패했습니다", HttpStatus.NOT_FOUND),
+	USERS_LOAD_FAIL("AS008", "유저 생성 에셋 조회 실패했습니다", HttpStatus.NOT_FOUND),
+	LIKE_FAIL("AS009", "좋아요 실패하였습니다", HttpStatus.INTERNAL_SERVER_ERROR),
+	DISLIKE_FAIL("AS010", "좋아요 취소 실패하였습니다", HttpStatus.INTERNAL_SERVER_ERROR),
+	ASSET_ON_SALE("ASS011", "이미 판매중인 에셋입니다", HttpStatus.BAD_REQUEST),
+	CREATOR_NOT_MATCH("ASS011", "에셋 제작자가 아닙니다", HttpStatus.BAD_REQUEST),
 	;
 
 	private final String code;

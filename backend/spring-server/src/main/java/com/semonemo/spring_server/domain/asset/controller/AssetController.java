@@ -1,6 +1,7 @@
 package com.semonemo.spring_server.domain.asset.controller;
 
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -65,10 +66,14 @@ public class AssetController implements AssetApi {
 		@AuthenticationPrincipal UserDetails userDetails,
 		@RequestBody AssetSellRequestDto assetSellRequestDto
 	){
+		Users users = userService.findByAddress(userDetails.getUsername());
+		AssetResponseDto asset = assetService.getAssetDetail(users.getId(),assetSellRequestDto.assetId());
+		if(!Objects.equals(asset.creator(), users.getId())){
+			throw new CustomException(ErrorCode.CREATOR_NOT_MATCH);
+		}
 		if(assetService.exist(assetSellRequestDto.assetId())){
 			throw new CustomException(ErrorCode.ASSET_ON_SALE);
 		}
-		Users users = userService.findByAddress(userDetails.getUsername());
 		assetService.registSale(users.getId(),assetSellRequestDto);
 		return CommonResponse.success("에셋 판매등록 성공");
 	}
@@ -175,7 +180,7 @@ public class AssetController implements AssetApi {
 		try {
 			Users users = userService.findByAddress(userDetails.getUsername());
 			if (assetService.checkLike(users.getId(), assetSellId)) {
-				throw new CustomException(ErrorCode.LIKE_Already_exist);
+				throw new CustomException(ErrorCode.LIKE_ALREADY_EXIST);
 			}
 			assetService.like(users.getId(), assetSellId);
 			return CommonResponse.success("좋아요 성공");

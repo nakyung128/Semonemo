@@ -98,8 +98,8 @@ public class ElasticsearchController implements ElasticSearchApi {
 	}
 
 	@GetMapping("/hot")
-	public CommonResponse<?> getPopularSearches(
-		@RequestParam(defaultValue = "7") int days,
+	public CommonResponse<?> getHotSearches(
+		@RequestParam(defaultValue = "6") int days,
 		@RequestParam(defaultValue = "10") int size) {
 		List<PopularSearchDto> popularSearches = searchService.getPopularSearches(days, size);
 		return CommonResponse.success(popularSearches, "인기 검색어 조회 성공");
