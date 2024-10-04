@@ -102,12 +102,14 @@ public class CoinController implements CoinApi{
             String userAddress = null;
             BigInteger depositAmount = null;
             BigInteger newBalance = null;
+            BigInteger tradeId = null;
 
             if (Objects.equals(transactionResult.getStatus(), "0x1")) {
                 for (org.web3j.protocol.core.methods.response.Log txLog : transactionResult.getLogs()) {
-                    String eventHash = EventEncoder.encode(TradeEvent.DEPOSIT_EVENT);
+                    String depositEventHash = EventEncoder.encode(TradeEvent.DEPOSIT_EVENT);
+                    String recordEventHash = EventEncoder.encode(TradeEvent.TRADE_RECORDED_EVENT);
 
-                    if (txLog.getTopics().get(0).equals(eventHash)) {
+                    if (txLog.getTopics().get(0).equals(depositEventHash)) {
                         EventValues eventValues = Contract.staticExtractEventParameters(
                             TradeEvent.DEPOSIT_EVENT, txLog
                         );
@@ -119,7 +121,18 @@ public class CoinController implements CoinApi{
                             userAddress = (String) indexedValues.get(0).getValue();
                             depositAmount = (BigInteger) nonIndexedValues.get(0).getValue();
                             newBalance = (BigInteger) nonIndexedValues.get(1).getValue();
+                        } else {
+                            throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
+                        }
+                    } else if (txLog.getTopics().get(0).equals(recordEventHash)) {
+                        EventValues eventValues = Contract.staticExtractEventParameters(
+                            TradeEvent.TRADE_RECORDED_EVENT, txLog
+                        );
 
+                        if (eventValues != null) {
+                            List<Type> indexedValues = eventValues.getIndexedValues();;
+
+                            tradeId = (BigInteger) indexedValues.get(0).getValue();
                         } else {
                             throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
                         }
@@ -129,8 +142,12 @@ public class CoinController implements CoinApi{
                 throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
             }
 
+            if (tradeId == null) {
+                throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
+            }
+
             Users users = userService.findByAddress(userDetails.getUsername());
-            Long payableBalance = coinService.coinToPayable(users.getId(), amount);
+            Long payableBalance = coinService.coinToPayable(users.getId(), amount, tradeId);
             Long coinBalance = blockChainService.convertFromSmallestUnit(newBalance);
 
             CoinResponseDto responseValue = new CoinResponseDto(
@@ -157,12 +174,14 @@ public class CoinController implements CoinApi{
             String userAddress = null;
             BigInteger depositAmount = null;
             BigInteger newBalance = null;
+            BigInteger tradeId = null;
 
             if (Objects.equals(transactionResult.getStatus(), "0x1")) {
                 for (org.web3j.protocol.core.methods.response.Log txLog : transactionResult.getLogs()) {
-                    String eventHash = EventEncoder.encode(TradeEvent.WITHDRAWAL_EVENT);
+                    String withdrawEvent = EventEncoder.encode(TradeEvent.WITHDRAWAL_EVENT);
+                    String recordEventHash = EventEncoder.encode(TradeEvent.TRADE_RECORDED_EVENT);
 
-                    if (txLog.getTopics().get(0).equals(eventHash)) {
+                    if (txLog.getTopics().get(0).equals(withdrawEvent)) {
                         EventValues eventValues = Contract.staticExtractEventParameters(
                             TradeEvent.WITHDRAWAL_EVENT, txLog
                         );
@@ -178,14 +197,30 @@ public class CoinController implements CoinApi{
                         } else {
                             throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
                         }
+                    } else if (txLog.getTopics().get(0).equals(recordEventHash)) {
+                        EventValues eventValues = Contract.staticExtractEventParameters(
+                            TradeEvent.TRADE_RECORDED_EVENT, txLog
+                        );
+
+                        if (eventValues != null) {
+                            List<Type> indexedValues = eventValues.getIndexedValues();;
+
+                            tradeId = (BigInteger) indexedValues.get(0).getValue();
+                        } else {
+                            throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
+                        }
                     }
                 }
             } else {
                 throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
             }
 
+            if (tradeId == null) {
+                throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
+            }
+
             Users users = userService.findByAddress(userDetails.getUsername());
-            Long payableBalance = coinService.payableToCoin(users.getId(), amount);
+            Long payableBalance = coinService.payableToCoin(users.getId(), amount, tradeId);
             Long coinBalance = blockChainService.convertFromSmallestUnit(newBalance);
 
             CoinResponseDto responseValue = new CoinResponseDto(
