@@ -8,8 +8,8 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class AuctionResponseDTO {
-	private long auctionId;
-	private int currentBid;
-	private long currentBidder;
+	private long userId;
+	private long bidAmount;
+	private String bidTime;
 	private String endTime;
 }

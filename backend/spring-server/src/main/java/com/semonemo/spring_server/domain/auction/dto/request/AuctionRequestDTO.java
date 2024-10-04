@@ -4,7 +4,7 @@ import com.semonemo.spring_server.domain.auction.entity.Auction;
 
 public record AuctionRequestDTO(
 	Long nftId,
-	int startPrice) {
+	long startPrice) {
 
 	public Auction toEntity() {
 		return Auction.builder()

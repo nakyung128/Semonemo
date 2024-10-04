@@ -128,18 +128,22 @@ public class AuctionServiceImpl implements AuctionService {
 					redisTemplate.expire(auctionKey, 15, TimeUnit.SECONDS);
 
 					// TODO : 사용자 임의 번호 적용
+					String now = LocalDateTime.now().format(formatter);
+					String endTime = (String) hashOps.get(auctionKey, "endTime");
+
 					BidLogDTO logDTO = BidLogDTO.builder()
 						.userId(bidRequest.getUserId())
 						.bidAmount(bidRequest.getBidAmount())
-						.bidTime(LocalDateTime.now())
+						.bidTime(now)
+						.endTime(endTime)
 						.build();
 					addBidLog(auctionId, logDTO);
 
 					AuctionResponseDTO response = new AuctionResponseDTO(
-						auctionId,
-						bidRequest.getBidAmount(),
 						bidRequest.getUserId(),
-						(String) hashOps.get(auctionKey, "endTime")
+						bidRequest.getBidAmount(),
+						now,
+						endTime
 					);
 
 					messagingTemplate.convertAndSend("/topic/auction/" + auctionId, response);
@@ -157,7 +161,6 @@ public class AuctionServiceImpl implements AuctionService {
 	@Override
 	@Transactional
 	public void endAuction(long auctionId) {
-		String auctionKey = AUCTION_KEY_PREFIX + auctionId;
 		String logKey = AUCTION_LOG_KEY_PREFIX + auctionId;
 		HashOperations<String, String, Object> hashOps = redisTemplate.opsForHash();
 
@@ -197,9 +200,8 @@ public class AuctionServiceImpl implements AuctionService {
 
 		messagingTemplate.convertAndSend("/topic/auction/" + auctionId + "/end", response);
 
-		// 경매 종료 후 Redis에서 관련 데이터 삭제
-		// redisTemplate.delete(auctionKey);
-		// redisTemplate.delete(logKey);
+		// 경매 종료 후 Redis 에서 경매 로그 데이터 삭제
+		redisTemplate.delete(logKey);
 	}
 
 	private void addBidLog(Long auctionId, BidLogDTO bidLog) {
