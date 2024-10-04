@@ -44,7 +44,7 @@ public class ElasticsearchController implements ElasticSearchApi {
 		@RequestParam(defaultValue = "0") int page,
 		@RequestParam(defaultValue = "10") int size) {
 		Users users = userService.findByAddress(userDetails.getUsername());
-		Page<UserSearchResponseDto> result = searchService.findUser(users.getId(), keyword, page, size);
+		Page<UserSearchResponseDto> result = searchService.findUser( keyword, page, size);
 		sendSearchQuery(keyword);
 		return CommonResponse.success(result, "유저 키워드 검색 성공");
 	}
@@ -57,7 +57,7 @@ public class ElasticsearchController implements ElasticSearchApi {
 		@RequestParam(defaultValue = "0") int page,
 		@RequestParam(defaultValue = "40") int size) {
 		Users users = userService.findByAddress(userDetails.getUsername());
-		Page<AssetSearchResponseDto> result = searchService.findOrderBy(users.getId(), orderBy, keyword, page, size);
+		Page<AssetSearchResponseDto> result = searchService.findOrderBy(users, orderBy, keyword, page, size);
 		sendSearchQuery(keyword);
 		return CommonResponse.success(result, "에셋 키워드 검색 성공");
 	}
@@ -70,7 +70,7 @@ public class ElasticsearchController implements ElasticSearchApi {
 		@RequestParam(defaultValue = "0") int page,
 		@RequestParam(defaultValue = "40") int size) {
 		Users users = userService.findByAddress(userDetails.getUsername());
-		Page<NftSearchResponseDto> result = searchService.findNft(users.getId(), orderBy, keyword, page, size);
+		Page<NftSearchResponseDto> result = searchService.findNft(users, orderBy, keyword, page, size);
 		sendSearchQuery(keyword);
 		return CommonResponse.success(result, "NFT 키워드 검색 성공");
 	}
@@ -80,7 +80,6 @@ public class ElasticsearchController implements ElasticSearchApi {
 
 		String logMessage = String.format("%s INFO [SearchService] Search query: %s",
 			LocalDateTime.now(), keyword);
-		System.out.println("Sending log message: " + logMessage);
 
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);

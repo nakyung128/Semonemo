@@ -100,7 +100,7 @@ public class AssetController implements AssetApi {
 		try{
 		Users users = userService.findByAddress(userDetails.getUsername());
 			AssetDetailResponseDto asset = assetService.getAssetSellDetail(users.getId(), assetSellId);
-		return CommonResponse.success(asset, "에셋 상세조회 성공");
+		return CommonResponse.success(asset, "판매 에셋 상세조회 성공");
 		}catch (Exception e) {
 			throw new CustomException(ErrorCode.SELL_DETAIL_FAIL);
 		}
