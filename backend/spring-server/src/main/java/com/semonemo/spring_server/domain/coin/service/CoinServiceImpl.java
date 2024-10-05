@@ -65,7 +65,6 @@ public class CoinServiceImpl implements CoinService {
         try {
             TransactionReceipt transactionResult = blockChainService.mintCoin(user.getAddress(), amountInSmallestUnit);
 
-            String to = "";
             BigInteger value = null;
 
             if (Objects.equals(transactionResult.getStatus(), "0x1")) {
@@ -78,14 +77,8 @@ public class CoinServiceImpl implements CoinService {
                         );
 
                         if (eventValues != null) {
-                            List<Type> indexedValues = eventValues.getIndexedValues();
                             List<Type> nonIndexedValues = eventValues.getNonIndexedValues();
-
-                            to = (String) indexedValues.get(0).getValue();
                             value = (BigInteger) nonIndexedValues.get(1).getValue();
-
-                            log.info(to);
-                            log.info(value);
                         } else {
                             throw new CustomException(ErrorCode.COIN_MINT_FAIL);
                         }
@@ -93,10 +86,6 @@ public class CoinServiceImpl implements CoinService {
                 }
             } else {
                 throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
-            }
-
-            if (!Objects.equals(to, user.getAddress()) || value == null) {
-                throw new CustomException(ErrorCode.COIN_MINT_FAIL);
             }
 
             return new CoinResponseDto(

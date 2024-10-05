@@ -49,6 +49,7 @@ public enum ErrorCode {
     MARKET_BUY_FAIL("NM008", "NFT 구매를 실패하였습니다.", HttpStatus.BAD_REQUEST),
     MARKET_OPEN_FAIL("NM009", "NFT 공개/비공개 전환에 실패하였습니다.", HttpStatus.BAD_REQUEST),
     MARKET_ALREADY_SOLD("NM010", "이미 판매완료된 상품입니다.", HttpStatus.BAD_REQUEST),
+    MARKET_CANCEL_FAIL("NM011", "NFT 판매 취소에 실패했습니다.", HttpStatus.BAD_REQUEST),
 
     // BlockChain
     BLOCKCHAIN_ERROR("BC001", "트랜잭션 처리과정에서 오류가 발생했습니다.", HttpStatus.BAD_REQUEST),
@@ -58,6 +59,7 @@ public enum ErrorCode {
     COIN_GET_FAIL("CO002", "코인 조회에 실패하였습니다.", HttpStatus.BAD_REQUEST),
     COIN_EXCHANGE_FAIL("CO003", "코인 전환에 실패하였습니다.", HttpStatus.BAD_REQUEST),
     GET_LOG_FAIL("CO004", "코인 거래내역 조회에 실패하였습니다.", HttpStatus.BAD_REQUEST),
+    COIN_BURN_FAIL("CO005", "코인 소각에 실패하였습니다.", HttpStatus.BAD_REQUEST),
 
 	// Asset
 	LIKE_NOT_FOUND_ERROR("AS001", "좋아요를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
