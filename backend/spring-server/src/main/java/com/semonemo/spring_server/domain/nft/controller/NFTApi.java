@@ -63,7 +63,8 @@ public interface NFTApi {
     })
     CommonResponse<NFTMarketResponseDto> cancelNFTSell(
         @AuthenticationPrincipal UserDetails userDetails,
-        @RequestBody NFTMarketCancelDto nftMarketCancelDto
+        @PathVariable Long marketId,
+        @PathVariable String txHash
     );
 
     @Operation(summary = "마켓 판매 NFT 조회", description = "마켓에 판매중인 모든 NFT 조회")

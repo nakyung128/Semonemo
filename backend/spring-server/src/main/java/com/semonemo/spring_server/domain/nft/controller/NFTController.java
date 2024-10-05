@@ -138,12 +138,13 @@ public class NFTController implements NFTApi {
     }
 
     // NFT 판매 취소
-    @DeleteMapping(value = "/sell")
+    @DeleteMapping(value = "/sell/{marketId}/{txHash}")
     public CommonResponse<NFTMarketResponseDto> cancelNFTSell(
         @AuthenticationPrincipal UserDetails userDetails,
-        @RequestBody NFTMarketCancelDto nftMarketCancelDto) {
+        @PathVariable Long marketId,
+        @PathVariable String txHash) {
         try {
-            TransactionReceipt transactionResult = blockChainService.waitForTransactionReceipt(nftMarketCancelDto.getTxHash());
+            TransactionReceipt transactionResult = blockChainService.waitForTransactionReceipt(txHash);
 
             boolean eventFound = false;
 
@@ -164,7 +165,7 @@ public class NFTController implements NFTApi {
             }
 
             Users users = userService.findByAddress(userDetails.getUsername());
-            nftService.cancelNFTMarket(users.getId(), nftMarketCancelDto.getMarketId());
+            nftService.cancelNFTMarket(users.getId(), marketId);
             return CommonResponse.success("NFT 판매 취소 성공");
         } catch (Exception e) {
             throw new CustomException(ErrorCode.MARKET_CANCEL_FAIL);
