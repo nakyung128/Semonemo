@@ -10,6 +10,6 @@ import lombok.Getter;
 public class AuctionEndDTO {
     private long auctionId;
     private long finalPrice;
-    private long winner;
+    private Long winner;
     private String endTime;
 }
