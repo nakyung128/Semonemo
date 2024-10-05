@@ -1,5 +1,6 @@
 package com.semonemo.spring_server.domain.asset.service;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -19,14 +20,18 @@ import com.semonemo.spring_server.domain.asset.dto.AssetSellRequestDto;
 import com.semonemo.spring_server.domain.asset.dto.AssetSellResponseDto;
 import com.semonemo.spring_server.domain.asset.model.AssetImage;
 import com.semonemo.spring_server.domain.asset.model.AssetLike;
+import com.semonemo.spring_server.domain.asset.model.AssetPurchase;
 import com.semonemo.spring_server.domain.asset.model.AssetSell;
 import com.semonemo.spring_server.domain.asset.model.AssetTag;
 import com.semonemo.spring_server.domain.asset.model.Atags;
 import com.semonemo.spring_server.domain.asset.repository.assetimage.AssetImageRepository;
+import com.semonemo.spring_server.domain.asset.repository.assetpurchase.AssetPurchaseRepository;
 import com.semonemo.spring_server.domain.asset.repository.assetsell.AssetSellRepository;
 import com.semonemo.spring_server.domain.asset.repository.assettag.AssetTagRepository;
 import com.semonemo.spring_server.domain.asset.repository.atags.ATagsRepository;
 import com.semonemo.spring_server.domain.asset.repository.like.AssetLikeRepository;
+import com.semonemo.spring_server.domain.coin.entity.TradeLog;
+import com.semonemo.spring_server.domain.coin.repository.TradeLogRepository;
 import com.semonemo.spring_server.domain.elasticsearch.service.ElasticsearchIndexChecker;
 import com.semonemo.spring_server.domain.elasticsearch.service.ElasticsearchSyncService;
 import com.semonemo.spring_server.domain.user.dto.response.UserInfoResponseDTO;
@@ -34,6 +39,8 @@ import com.semonemo.spring_server.domain.user.entity.Users;
 import com.semonemo.spring_server.domain.user.repository.UserRepository;
 import com.semonemo.spring_server.domain.user.service.UserService;
 import com.semonemo.spring_server.global.common.CursorResult;
+import com.semonemo.spring_server.global.exception.CustomException;
+import com.semonemo.spring_server.global.exception.ErrorCode;
 
 import co.elastic.clients.elasticsearch._types.SortOrder;
 import jakarta.annotation.PostConstruct;
@@ -49,15 +56,13 @@ public class AssetServiceImpl implements AssetService {
 	private final AssetLikeRepository assetLikeRepository;
 	private final AssetTagRepository assetTagRepository;
 	private final ATagsRepository aTagsRepository;
+	private final AssetPurchaseRepository assetPurchaseRepository;
 	private final UserRepository userRepository;
 	private final ElasticsearchSyncService syncService;
 	private final UserService userService;
 	private final ElasticsearchIndexChecker indexChecker;
+	private final TradeLogRepository tradeLogRepository;
 
-	// @PostConstruct
-	// public void initializeElasticsearch() {
-	// 	syncService.syncAllData();
-	// }
 	@Transactional
 	@Override
 	public void saveImage(AssetRequestDto assetRequestDto) {
@@ -265,17 +270,47 @@ public class AssetServiceImpl implements AssetService {
 	}
 
 	@Override
-	public Page<AssetSellResponseDto> getLikeAsset(Users users, int page, int size) {
+	public Page<AssetSellResponseDto> getLikeAsset(Users user, int page, int size) {
 		Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-		Page<AssetLike> likedAssets = assetLikeRepository.findAllByUserId(users.getId(), pageable);
+		Page<AssetLike> likedAssets = assetLikeRepository.findAllByUserId(user.getId(), pageable);
 
 		List<AssetSellResponseDto> dtos = new ArrayList<>();
 		for (AssetLike like : likedAssets.getContent()) {
-			AssetSellResponseDto dto = convertToDto(users.getId(), like.getAssetSellId());
+			AssetSellResponseDto dto = convertToDto(user.getId(), like.getAssetSellId());
 			dtos.add(dto);
 		}
 
 		return new PageImpl<>(dtos, pageable, likedAssets.getTotalElements());
+	}
+
+	@Transactional
+	@Override
+	public void assetBuy(Users users, Long assetSellId, BigInteger tradeId) {
+		AssetSell assetSell = assetSellRepository.findById(assetSellId)
+			.orElseThrow(() -> new RuntimeException("Asset Sell Not Found"));
+		AssetImage assetImage = assetImageRepository.findById(assetSell.getAssetId())
+			.orElseThrow(() -> new RuntimeException("Asset Image Not Found"));
+		Users seller = userService.findById(assetImage.getCreator());
+		if(users.getBalance()<assetSell.getPrice()){
+			throw new CustomException(ErrorCode.NOT_ENOUGH_BALANCE);
+		}
+		users.minusBalance(assetSell.getPrice());
+		seller.plusBalance(assetSell.getPrice());
+
+		TradeLog tradeLog = TradeLog.builder()
+			.tradeId(tradeId)
+			.fromUser(users)
+			.toUser(seller)
+			.amount(assetSell.getPrice())
+			.tradeType("에셋 거래")
+			.build();
+		assetPurchaseRepository.save(
+			AssetPurchase.builder()
+				.assetSellId(assetSellId)
+				.userId(users.getId())
+				.build()
+		);
+		tradeLogRepository.save(tradeLog);
 	}
 
 	@Override

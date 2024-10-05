@@ -71,7 +71,8 @@ public enum ErrorCode {
 	LIKE_FAIL("AS009", "좋아요 실패하였습니다", HttpStatus.INTERNAL_SERVER_ERROR),
 	DISLIKE_FAIL("AS010", "좋아요 취소 실패하였습니다", HttpStatus.INTERNAL_SERVER_ERROR),
 	ASSET_ON_SALE("ASS011", "이미 판매중인 에셋입니다", HttpStatus.BAD_REQUEST),
-	CREATOR_NOT_MATCH("ASS011", "에셋 제작자가 아닙니다", HttpStatus.BAD_REQUEST),
+	CREATOR_NOT_MATCH("ASS012", "에셋 제작자가 아닙니다", HttpStatus.BAD_REQUEST),
+	NOT_ENOUGH_BALANCE("AS013","보유 자산이 부족합니다",HttpStatus.BAD_REQUEST),
 	;
 
 	private final String code;
