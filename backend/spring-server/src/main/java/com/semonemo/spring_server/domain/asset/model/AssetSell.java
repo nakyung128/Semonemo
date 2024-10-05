@@ -42,10 +42,14 @@ public class AssetSell extends BaseTimeEntity {
 	@Column(name = "purchase_count")
 	private Long purchaseCount;
 
+	@Column(name = "is_on_sale")
+	private Boolean isOnSale;
+
 	@PrePersist
 	protected void onCreate() {
 		hits = 0L;
 		likeCount = 0L;
 		purchaseCount = 0L;
+		isOnSale = Boolean.TRUE;
 	}
 }
