@@ -231,6 +231,10 @@ public class AuctionServiceImpl implements AuctionService {
 			);
 		}
 
+		Users user = userRepository.findById(lastBid.getUserId())
+			.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND_ERROR));
+		user.minusBalance(lastBid.getBidAmount());
+
 		AuctionEndDTO response = AuctionEndDTO.builder()
 			.auctionId(auctionId)
 			.finalPrice(lastBid != null ? lastBid.getBidAmount() : auction.getStartPrice())
