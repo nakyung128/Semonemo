@@ -9,5 +9,5 @@ import lombok.ToString;
 @ToString
 public class BidRequestDTO {
 	private long userId;
-	private int bidAmount;
+	private long bidAmount;
 }

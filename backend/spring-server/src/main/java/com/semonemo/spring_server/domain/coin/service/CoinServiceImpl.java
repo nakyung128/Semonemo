@@ -146,12 +146,21 @@ public class CoinServiceImpl implements CoinService {
     }
 
     @Override
-    public Long payableToCoin(Long userId, Long amount) {
+    public Long payableToCoin(Long userId, Long amount, BigInteger tradeId) {
         Users user = userRepository.findById(userId)
             .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND_ERROR));
 
         try {
             user.minusBalance(amount);
+
+            TradeLog tradeLog = TradeLog.builder()
+                .tradeId(tradeId)
+                .fromUser(user)
+                .toUser(null)
+                .amount(amount)
+                .tradeType("코인 전환")
+                .build();
+            tradeLogRepository.save(tradeLog);
 
             return user.getBalance();
         } catch (Exception e) {
@@ -160,12 +169,21 @@ public class CoinServiceImpl implements CoinService {
     }
 
     @Override
-    public Long coinToPayable(Long userId, Long amount) {
+    public Long coinToPayable(Long userId, Long amount, BigInteger tradeId) {
         Users user = userRepository.findById(userId)
             .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND_ERROR));
 
         try {
             user.plusBalance(amount);
+
+            TradeLog tradeLog = TradeLog.builder()
+                .tradeId(tradeId)
+                .fromUser(null)
+                .toUser(user)
+                .amount(amount)
+                .tradeType("페이코인 전환")
+                .build();
+            tradeLogRepository.save(tradeLog);
 
             return user.getBalance();
         } catch (Exception e) {

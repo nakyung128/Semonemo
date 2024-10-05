@@ -9,6 +9,7 @@ import lombok.Getter;
 @Builder
 public class BidLogDTO {
 	private Long userId;
-	private int bidAmount;
-	private LocalDateTime bidTime;
+	private long bidAmount;
+	private String bidTime;
+	private String endTime;
 }
