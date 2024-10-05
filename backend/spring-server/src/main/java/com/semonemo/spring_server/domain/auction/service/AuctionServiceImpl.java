@@ -5,7 +5,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
@@ -25,6 +27,10 @@ import com.semonemo.spring_server.domain.auction.dto.response.AuctionResponseDTO
 import com.semonemo.spring_server.domain.auction.entity.Auction;
 import com.semonemo.spring_server.domain.auction.entity.AuctionStatus;
 import com.semonemo.spring_server.domain.auction.repository.AuctionRepository;
+import com.semonemo.spring_server.domain.user.entity.Users;
+import com.semonemo.spring_server.domain.user.repository.UserRepository;
+import com.semonemo.spring_server.global.exception.CustomException;
+import com.semonemo.spring_server.global.exception.ErrorCode;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,6 +44,9 @@ public class AuctionServiceImpl implements AuctionService {
 	private static final String AUCTION_KEY_PREFIX = "auction:";
 	private static final String AUCTION_LOG_KEY_PREFIX = "auction:log:";
 
+	private final Map<Long, AtomicInteger> participantCount = new ConcurrentHashMap<>();
+
+	private final UserRepository userRepository;
 	private final AuctionRepository auctionRepository;
 	private final RedisTemplate<String, Object> redisTemplate;
 	private final SimpMessagingTemplate messagingTemplate;
@@ -69,6 +78,11 @@ public class AuctionServiceImpl implements AuctionService {
 
 	@Override
 	public List<BidLogDTO> readAuctionLog(Long auctionId) {
+		String auctionKey = AUCTION_KEY_PREFIX + auctionId;
+		if(Boolean.FALSE.equals(redisTemplate.hasKey(auctionKey))) {
+			throw new CustomException(ErrorCode.AUCTION_NOT_FOUND);
+		}
+
 		String logKey = AUCTION_LOG_KEY_PREFIX + auctionId;
 		HashOperations<String, String, String> hashOps = redisTemplate.opsForHash();
 
@@ -92,6 +106,10 @@ public class AuctionServiceImpl implements AuctionService {
 		Auction auction = auctionRepository.findById(auctionId)
 			.orElseThrow(() -> new RuntimeException("Auction not found"));
 
+		if(auction.getStatus() != AuctionStatus.READY) {
+			throw new CustomException(ErrorCode.INVALID_AUCTION_STATUS);
+		}
+
 		// TODO : 경매 시작 로직 수정하기
 		auction.setStartTime(LocalDateTime.now());
 		auction.setStatus(AuctionStatus.PROGRESS);
@@ -109,6 +127,21 @@ public class AuctionServiceImpl implements AuctionService {
 	}
 
 	@Override
+	public void addParticipantCount(long auctionId) {
+		participantCount.computeIfAbsent(auctionId, k -> new AtomicInteger(0)).incrementAndGet();
+		sendParticipantCount(auctionId);
+	}
+
+	@Override
+	public void removeParticipant(long auctionId) {
+		participantCount.computeIfPresent(auctionId, (k, v) -> {
+			v.decrementAndGet();
+			return v.get() > 0 ? v : null;
+		});
+		sendParticipantCount(auctionId);
+	}
+
+	@Override
 	@Transactional
 	public void processBid(long auctionId, BidRequestDTO bidRequest) {
 		RLock lock = redissonClient.getLock("auction-lock:" + auctionId);
@@ -119,8 +152,13 @@ public class AuctionServiceImpl implements AuctionService {
 
 				int currentBid = (Integer) hashOps.get(auctionKey, "currentBid");
 
-				// TODO : 사용자 잔고 확인
-				// TODO : 사용자가 입찰한 금액이 현재 입찰가보다 높은지 확인 -> 클라이언트에서 처리? 서버에서 처리?
+				// 사용자 잔액 확인
+				Users user = userRepository.findById(bidRequest.getUserId())
+					.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND_ERROR));
+				if(user.getBalance() < bidRequest.getBidAmount()) {
+					throw new CustomException(ErrorCode.INSUFFICIENT_BALANCE);
+				}
+
 				if (bidRequest.getBidAmount() > currentBid) {
 					hashOps.put(auctionKey, "currentBid", bidRequest.getBidAmount());
 					hashOps.put(auctionKey, "currentBidder", bidRequest.getUserId());
@@ -147,6 +185,8 @@ public class AuctionServiceImpl implements AuctionService {
 					);
 
 					messagingTemplate.convertAndSend("/topic/auction/" + auctionId, response);
+				} else {
+					throw new CustomException(ErrorCode.BID_AMOUNT_LESS_THAN_HIGHEST);
 				}
 			}
 		} catch (InterruptedException e) {
@@ -220,5 +260,14 @@ public class AuctionServiceImpl implements AuctionService {
 		} catch (JsonProcessingException e) {
 			log.error("Failed to add bid log for auction ID: " + auctionId, e);
 		}
+	}
+
+	private int getParticipantCount(long auctionId) {
+		return participantCount.getOrDefault(auctionId, new AtomicInteger(0)).get();
+	}
+
+	private void sendParticipantCount(long auctionId) {
+		int count = getParticipantCount(auctionId);
+		messagingTemplate.convertAndSend("/topic/auction/" + auctionId + "/participants", count);
 	}
 }
