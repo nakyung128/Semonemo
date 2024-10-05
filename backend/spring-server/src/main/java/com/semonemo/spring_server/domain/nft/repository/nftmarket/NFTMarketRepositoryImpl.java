@@ -37,6 +37,29 @@ public class NFTMarketRepositoryImpl implements NFTMarketRepositoryCustom {
     }
 
     @Override
+    public Page<NFTMarket> findNotSold(Pageable pageable) {
+        List<NFTMarket> content = queryFactory
+            .selectFrom(nftMarket)
+            .where(
+                nftMarket.isSold.isFalse()
+            )
+            .offset(pageable.getOffset())
+            .limit(pageable.getPageSize())
+            .orderBy(getOrderSpecifier(pageable))
+            .fetch();
+
+        long total = Optional.ofNullable(queryFactory
+            .select(nftMarket.count())
+            .from(nftMarket)
+            .where(
+                nftMarket.isSold.isFalse()
+            )
+            .fetchOne()).orElse(0L);
+
+        return new PageImpl<>(content, pageable, total);
+    }
+
+    @Override
     public Page<NFTMarket> findBySeller(Long owner, Pageable pageable) {
         List<NFTMarket> content = queryFactory
             .selectFrom(nftMarket)

@@ -9,6 +9,8 @@ import java.util.List;
 public interface NFTMarketRepositoryCustom {
     List<NFTMarket> findSold(Long nftId);
 
+    Page<NFTMarket> findNotSold(Pageable pageable);
+
     Page<NFTMarket> findBySeller(Long owner, Pageable pageable);
 
     Page<NFTMarket> findByCreator(Long creator, Pageable pageable);
