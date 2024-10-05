@@ -236,6 +236,7 @@ public class NFTServiceImpl implements NFTService {
         nft.toggleOnSale(false);
 
         nftMarketRepository.delete(market);
+        syncService.syncNFTMarket(nft, market, nft.getTags());
     }
 
 	// 마켓에 판매중인 모든 NFT 조회
