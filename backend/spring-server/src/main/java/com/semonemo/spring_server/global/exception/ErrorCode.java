@@ -75,6 +75,12 @@ public enum ErrorCode {
 	ASSET_ON_SALE("ASS011", "이미 판매중인 에셋입니다", HttpStatus.BAD_REQUEST),
 	CREATOR_NOT_MATCH("ASS012", "에셋 제작자가 아닙니다", HttpStatus.BAD_REQUEST),
 	NOT_ENOUGH_BALANCE("AS013","보유 자산이 부족합니다",HttpStatus.BAD_REQUEST),
+
+	// Auction
+	BID_AMOUNT_LESS_THAN_HIGHEST("AU001", "최고 입찰가보다 낮은 금액으로 입찰할 수 없습니다.", HttpStatus.BAD_REQUEST),
+	INSUFFICIENT_BALANCE("AU002", "잔액이 부족합니다.", HttpStatus.BAD_REQUEST),
+	INVALID_AUCTION_STATUS("AU003", "유효하지 않은 경매 상태입니다.", HttpStatus.BAD_REQUEST),
+	AUCTION_NOT_FOUND("AU004", "경매를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
 	;
 
 	private final String code;
