@@ -252,7 +252,7 @@ public class NFTServiceImpl implements NFTService {
 			default -> PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
 		};
 
-		Page<NFTMarket> sellingNFTs = nftMarketRepository.findAll(pageable);
+		Page<NFTMarket> sellingNFTs = nftMarketRepository.findNotSold(pageable);
 
 		List<NFTMarketResponseDto> dtos = new ArrayList<>();
 
