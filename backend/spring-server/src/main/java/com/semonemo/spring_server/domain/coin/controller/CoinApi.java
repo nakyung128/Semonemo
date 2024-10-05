@@ -35,6 +35,18 @@ public interface CoinApi {
         @RequestBody CoinRequestDto coinRequestDto
     );
 
+    @Operation(summary = "코인 환전(소각)", description = "코인을 소각하여 현금으로 환전")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "발행 성공",
+            content = @Content(schema = @Schema(implementation = CoinResponseDto.class))),
+        @ApiResponse(responseCode = "500", description = "서버 내부 오류",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    CommonResponse<CoinResponseDto> burnCoin(
+        @AuthenticationPrincipal UserDetails userDetails,
+        @RequestBody String txHash
+    );
+
     @Operation(summary = "코인 조회", description = "코인 조회")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "조회 성공",
