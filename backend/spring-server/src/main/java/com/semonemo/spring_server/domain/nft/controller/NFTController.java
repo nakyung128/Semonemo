@@ -53,8 +53,6 @@ public class NFTController implements NFTApi {
             TransactionReceipt transactionResult = blockChainService.waitForTransactionReceipt(NFTRequestDto.getTxHash());
 
             BigInteger tokenId = null;
-            String creator;
-            String tokenURI;
 
             if (Objects.equals(transactionResult.getStatus(), "0x1")) {
                 for (org.web3j.protocol.core.methods.response.Log txLog : transactionResult.getLogs()) {
@@ -67,11 +65,7 @@ public class NFTController implements NFTApi {
 
                         if (eventValues != null) {
                             List<Type> indexedValues = eventValues.getIndexedValues();
-                            List<Type> nonIndexedValues = eventValues.getNonIndexedValues();
-
                             tokenId = (BigInteger) indexedValues.get(0).getValue();
-                            creator = (String) indexedValues.get(1).getValue();
-                            tokenURI = (String) nonIndexedValues.get(0).getValue();
                         } else {
                             throw new CustomException(ErrorCode.MINT_NFT_FAIL);
                         }
@@ -109,31 +103,19 @@ public class NFTController implements NFTApi {
         try {
             TransactionReceipt transactionResult = blockChainService.waitForTransactionReceipt(nftMarketRequestDto.getTxHash());
 
-            BigInteger nftId = null;
-            BigInteger price = null;
+            boolean eventFound = false;
 
             if (Objects.equals(transactionResult.getStatus(), "0x1")) {
                 for (org.web3j.protocol.core.methods.response.Log txLog : transactionResult.getLogs()) {
                     String eventHash = EventEncoder.encode(MarketEvent.MARKET_CREATED_EVENT);
-
                     if (txLog.getTopics().get(0).equals(eventHash)) {
-                        EventValues eventValues = Contract.staticExtractEventParameters(
-                            MarketEvent.MARKET_CREATED_EVENT, txLog
-                        );
-
-                        if (eventValues != null) {
-                            List<Type> indexedValues = eventValues.getIndexedValues();
-                            List<Type> nonIndexedValues = eventValues.getNonIndexedValues();
-
-                            nftId = (BigInteger) indexedValues.get(0).getValue();
-                            price = (BigInteger) nonIndexedValues.get(0).getValue();
-
-                            log.info(nftId);
-                            log.info(price);
-                        } else {
-                            throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
-                        }
+                        eventFound = true;
+                        break;
                     }
+                }
+
+                if (!eventFound) {
+                    throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
                 }
             } else {
                 throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
@@ -163,7 +145,21 @@ public class NFTController implements NFTApi {
         try {
             TransactionReceipt transactionResult = blockChainService.waitForTransactionReceipt(nftMarketCancelDto.getTxHash());
 
-            if (!Objects.equals(transactionResult.getStatus(), "0x1")) {
+            boolean eventFound = false;
+
+            if (Objects.equals(transactionResult.getStatus(), "0x1")) {
+                for (org.web3j.protocol.core.methods.response.Log txLog : transactionResult.getLogs()) {
+                    String eventHash = EventEncoder.encode(MarketEvent.MARKET_CANCELLED_EVENT);
+                    if (txLog.getTopics().get(0).equals(eventHash)) {
+                        eventFound = true;
+                        break;
+                    }
+                }
+
+                if (!eventFound) {
+                    throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
+                }
+            } else {
                 throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
             }
 
@@ -171,7 +167,7 @@ public class NFTController implements NFTApi {
             nftService.cancelNFTMarket(users.getId(), nftMarketCancelDto.getMarketId());
             return CommonResponse.success("NFT 판매 취소 성공");
         } catch (Exception e) {
-            throw new CustomException(ErrorCode.MARKET_CREATE_FAIL);
+            throw new CustomException(ErrorCode.MARKET_CANCEL_FAIL);
         }
     }
 
@@ -389,8 +385,6 @@ public class NFTController implements NFTApi {
                             List<Type> indexedValues = eventValues.getIndexedValues();
 
                             tradeId = (BigInteger) indexedValues.get(0).getValue();
-
-                            log.info(tradeId);
                         } else {
                             throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
                         }
@@ -403,6 +397,7 @@ public class NFTController implements NFTApi {
             if (nftService.checkOnSale(marketId)) {
                 throw new CustomException(ErrorCode.MARKET_ALREADY_SOLD);
             }
+
             Users users = userService.findByAddress(userDetails.getUsername());
             nftService.marketBuy(users.getId(), marketId, tradeId);
             return CommonResponse.success("NFT 구매 성공");
@@ -411,7 +406,7 @@ public class NFTController implements NFTApi {
         }
     }
 
-    // 타입별 사용가능한 NFT 조회 (보유중
+    // 타입별 사용가능한 NFT 조회 (보유중)
     @GetMapping("/available")
     public CommonResponse<?> availableNFTList(
         @AuthenticationPrincipal UserDetails userDetails,
