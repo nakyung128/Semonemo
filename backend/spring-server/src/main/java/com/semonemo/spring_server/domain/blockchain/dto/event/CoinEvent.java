@@ -17,4 +17,12 @@ public class CoinEvent {
             new TypeReference<Uint256>() {}       // non-indexed newBalance
         )
     );
+
+    public static final Event TOKENS_BURNED_EVENT = new Event("TokensBurned",
+        Arrays.<TypeReference<?>>asList(
+            new TypeReference<Address>(true) {},  // indexed to
+            new TypeReference<Uint256>() {},      // non-indexed amount
+            new TypeReference<Uint256>() {}       // non-indexed newBalance
+        )
+    );
 }

@@ -1,5 +1,6 @@
 package com.semonemo.spring_server.domain.coin.controller;
 
+import com.semonemo.spring_server.domain.blockchain.dto.event.CoinEvent;
 import com.semonemo.spring_server.domain.blockchain.dto.event.MarketEvent;
 import com.semonemo.spring_server.domain.blockchain.dto.event.NFTEvent;
 import com.semonemo.spring_server.domain.blockchain.dto.event.TradeEvent;
@@ -62,6 +63,49 @@ public class CoinController implements CoinApi{
         }
     }
 
+    // 코인 소각 (환전)
+    @PostMapping(value = "/burn")
+    public CommonResponse<CoinResponseDto> burnCoin(
+        @AuthenticationPrincipal UserDetails userDetails,
+        @RequestBody String txHash) {
+        try {
+            TransactionReceipt transactionResult = blockChainService.waitForTransactionReceipt(txHash);
+
+            BigInteger value = null;
+
+            if (Objects.equals(transactionResult.getStatus(), "0x1")) {
+                for (org.web3j.protocol.core.methods.response.Log txLog : transactionResult.getLogs()) {
+                    String eventHash = EventEncoder.encode(CoinEvent.TOKENS_BURNED_EVENT);
+
+                    if (txLog.getTopics().get(0).equals(eventHash)) {
+                        EventValues eventValues = Contract.staticExtractEventParameters(
+                            CoinEvent.TOKENS_BURNED_EVENT, txLog
+                        );
+
+                        if (eventValues != null) {
+                            List<Type> nonIndexedValues = eventValues.getNonIndexedValues();
+                            value = (BigInteger) nonIndexedValues.get(1).getValue();
+                        } else {
+                            throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
+                        }
+                    }
+                }
+            } else {
+                throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
+            }
+
+            Users users = userService.findByAddress(userDetails.getUsername());
+            CoinResponseDto coinResponseDto = new CoinResponseDto(
+                users.getId(),
+                blockChainService.convertFromSmallestUnit(value),
+                users.getBalance()
+            );
+            return CommonResponse.success(coinResponseDto, "코인 환전 성공");
+        } catch (Exception e) {
+            throw new CustomException(ErrorCode.COIN_BURN_FAIL);
+        }
+    }
+
     // 코인 조회
     @GetMapping(value = "")
     public CommonResponse<CoinResponseDto> getCoin(
@@ -90,7 +134,7 @@ public class CoinController implements CoinApi{
         }
     }
 
-    // 코인 발행
+    // 페이코인으로 전환
     @PostMapping(value = "/exchange/payable")
     public CommonResponse<CoinResponseDto> coinToPayable(
         @AuthenticationPrincipal UserDetails userDetails,
@@ -99,8 +143,6 @@ public class CoinController implements CoinApi{
         try {
             TransactionReceipt transactionResult = blockChainService.waitForTransactionReceipt(txHash);
 
-            String userAddress = null;
-            BigInteger depositAmount = null;
             BigInteger newBalance = null;
             BigInteger tradeId = null;
 
@@ -115,11 +157,7 @@ public class CoinController implements CoinApi{
                         );
 
                         if (eventValues != null) {
-                            List<Type> indexedValues = eventValues.getIndexedValues();
                             List<Type> nonIndexedValues = eventValues.getNonIndexedValues();
-
-                            userAddress = (String) indexedValues.get(0).getValue();
-                            depositAmount = (BigInteger) nonIndexedValues.get(0).getValue();
                             newBalance = (BigInteger) nonIndexedValues.get(1).getValue();
                         } else {
                             throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
@@ -131,7 +169,6 @@ public class CoinController implements CoinApi{
 
                         if (eventValues != null) {
                             List<Type> indexedValues = eventValues.getIndexedValues();;
-
                             tradeId = (BigInteger) indexedValues.get(0).getValue();
                         } else {
                             throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
@@ -162,7 +199,7 @@ public class CoinController implements CoinApi{
         }
     }
 
-    // 코인 발행
+    // 코인으로 전환
     @PostMapping(value = "/exchange/coin")
     public CommonResponse<CoinResponseDto> payableToCoin(
         @AuthenticationPrincipal UserDetails userDetails,
@@ -171,8 +208,6 @@ public class CoinController implements CoinApi{
         try {
             TransactionReceipt transactionResult = blockChainService.waitForTransactionReceipt(txHash);
 
-            String userAddress = null;
-            BigInteger depositAmount = null;
             BigInteger newBalance = null;
             BigInteger tradeId = null;
 
@@ -187,11 +222,7 @@ public class CoinController implements CoinApi{
                         );
 
                         if (eventValues != null) {
-                            List<Type> indexedValues = eventValues.getIndexedValues();
                             List<Type> nonIndexedValues = eventValues.getNonIndexedValues();
-
-                            userAddress = (String) indexedValues.get(0).getValue();
-                            depositAmount = (BigInteger) nonIndexedValues.get(0).getValue();
                             newBalance = (BigInteger) nonIndexedValues.get(1).getValue();
 
                         } else {
@@ -204,7 +235,6 @@ public class CoinController implements CoinApi{
 
                         if (eventValues != null) {
                             List<Type> indexedValues = eventValues.getIndexedValues();;
-
                             tradeId = (BigInteger) indexedValues.get(0).getValue();
                         } else {
                             throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
