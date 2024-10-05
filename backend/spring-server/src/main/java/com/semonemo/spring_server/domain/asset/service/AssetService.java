@@ -1,5 +1,6 @@
 package com.semonemo.spring_server.domain.asset.service;
 
+import java.math.BigInteger;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -40,4 +41,6 @@ public interface AssetService {
 	boolean exist(Long assetId);
 
 	Page<AssetSellResponseDto> getLikeAsset(Users users, int page, int size);
+
+	void assetBuy(Users users, Long assetSellId, BigInteger tradeId);
 }
