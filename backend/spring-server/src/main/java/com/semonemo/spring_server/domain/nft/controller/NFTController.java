@@ -365,10 +365,9 @@ public class NFTController implements NFTApi {
     @PostMapping("/purchase")
     public CommonResponse<NFTResponseDto> buyNFT(
         @AuthenticationPrincipal UserDetails userDetails,
-        @RequestBody String txHash,
-        @RequestBody Long marketId) {
+        @RequestBody NFTPurchaseDto nftPurchaseDto) {
         try {
-            TransactionReceipt transactionResult = blockChainService.waitForTransactionReceipt(txHash);
+            TransactionReceipt transactionResult = blockChainService.waitForTransactionReceipt(nftPurchaseDto.getTxHash());
 
             BigInteger tradeId = null;
 
@@ -394,12 +393,12 @@ public class NFTController implements NFTApi {
                 throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
             }
 
-            if (nftService.checkOnSale(marketId)) {
+            if (nftService.checkOnSale(nftPurchaseDto.getMarketId())) {
                 throw new CustomException(ErrorCode.MARKET_ALREADY_SOLD);
             }
 
             Users users = userService.findByAddress(userDetails.getUsername());
-            nftService.marketBuy(users.getId(), marketId, tradeId);
+            nftService.marketBuy(users.getId(), nftPurchaseDto.getMarketId(), tradeId);
             return CommonResponse.success("NFT 구매 성공");
         } catch (Exception e) {
             throw new CustomException(ErrorCode.MARKET_BUY_FAIL);
