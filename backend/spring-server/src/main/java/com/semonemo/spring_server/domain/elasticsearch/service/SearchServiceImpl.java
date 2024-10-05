@@ -99,6 +99,7 @@ public class SearchServiceImpl implements SearchService {
 
 	private AssetSearchResponseDto convertToAssetDto(Users users, AssetSellDocument document) {
 		boolean isLiked = assetLikeRepository.existsByUserIdAndAssetSellId(users.getId(), document.getAssetSellId());
+		System.out.println(document.getCreator());
 		Users creator = userRepository.findById(document.getCreator())
 			.orElseThrow(()-> new CustomException(ErrorCode.USER_NOT_FOUND_ERROR));
 		UserInfoResponseDTO userDto = convertToUserInfo(creator);
