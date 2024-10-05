@@ -33,7 +33,14 @@ public class AuctionController {
 	@GetMapping("/{auctionId}/join")
 	public CommonResponse<?> joinAuction(@PathVariable Long auctionId) {
 		List<BidLogDTO> response = auctionService.readAuctionLog(auctionId);
+		auctionService.addParticipantCount(auctionId);
 		return CommonResponse.success(response, "경매 참여에 성공했습니다.");
+	}
+
+	@GetMapping("/{auctionId}/leave")
+	public CommonResponse<?> leaveAuction(@PathVariable Long auctionId) {
+		auctionService.removeParticipant(auctionId);
+		return CommonResponse.success("경매 참여를 취소했습니다.");
 	}
 
 	@GetMapping("/{auctionId}")

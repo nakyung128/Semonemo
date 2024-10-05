@@ -13,6 +13,10 @@ public interface AuctionService {
 
 	void startAuction(long auctionId);
 
+	void addParticipantCount(long auctionId);
+
+	void removeParticipant(long auctionId);
+
 	void processBid(long auctionId, BidRequestDTO bidRequest);
 
 	void endAuction(long auctionId);
