@@ -1,5 +1,6 @@
 package com.semonemo.spring_server.domain.asset.controller;
 
+import java.math.BigInteger;
 import java.util.List;
 import java.util.Objects;
 
@@ -18,6 +19,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import org.web3j.abi.EventEncoder;
+import org.web3j.abi.EventValues;
+import org.web3j.abi.datatypes.Type;
+import org.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.web3j.tx.Contract;
 
 import com.semonemo.spring_server.config.s3.S3Service;
 import com.semonemo.spring_server.domain.asset.dto.AssetDetailResponseDto;
@@ -29,7 +35,10 @@ import com.semonemo.spring_server.domain.asset.dto.AssetSellResponseDto;
 import com.semonemo.spring_server.domain.asset.model.AssetImage;
 import com.semonemo.spring_server.domain.asset.model.AssetSell;
 import com.semonemo.spring_server.domain.asset.service.AssetService;
+import com.semonemo.spring_server.domain.blockchain.dto.event.TradeEvent;
+import com.semonemo.spring_server.domain.blockchain.service.BlockChainService;
 import com.semonemo.spring_server.domain.nft.dto.response.NFTMarketLikedResponseDto;
+import com.semonemo.spring_server.domain.nft.dto.response.NFTResponseDto;
 import com.semonemo.spring_server.domain.user.entity.Users;
 import com.semonemo.spring_server.domain.user.service.UserService;
 import com.semonemo.spring_server.global.common.CommonResponse;
@@ -46,6 +55,7 @@ public class AssetController implements AssetApi {
 	private final S3Service s3Service;
 	private final AssetService assetService;
 	private final UserService userService;
+	private final BlockChainService blockChainService;
 
 	@PostMapping
 	public CommonResponse<?> upload(
@@ -71,7 +81,7 @@ public class AssetController implements AssetApi {
 	){
 		Users users = userService.findByAddress(userDetails.getUsername());
 		AssetResponseDto asset = assetService.getAssetDetail(users.getId(),assetSellRequestDto.assetId());
-		if(!Objects.equals(asset.creator(), users.getId())){
+		if(asset.creator().userId()!= users.getId()){
 			throw new CustomException(ErrorCode.CREATOR_NOT_MATCH);
 		}
 		if(assetService.exist(assetSellRequestDto.assetId())){
@@ -80,6 +90,48 @@ public class AssetController implements AssetApi {
 		assetService.registSale(users.getId(),assetSellRequestDto);
 		return CommonResponse.success("에셋 판매등록 성공");
 	}
+
+	// NFT 구매
+	@PostMapping("/purchase")
+	public CommonResponse<?> buyAsset(
+		@AuthenticationPrincipal UserDetails userDetails,
+		@RequestBody String txHash,
+		@RequestBody Long assetSellId) {
+		try {
+			TransactionReceipt transactionResult = blockChainService.waitForTransactionReceipt(txHash);
+
+			BigInteger tradeId = null;
+
+			if (Objects.equals(transactionResult.getStatus(), "0x1")) {
+				for (org.web3j.protocol.core.methods.response.Log txLog : transactionResult.getLogs()) {
+					String eventHash = EventEncoder.encode(TradeEvent.TRADE_RECORDED_EVENT);
+
+					if (txLog.getTopics().get(0).equals(eventHash)) {
+						EventValues eventValues = Contract.staticExtractEventParameters(
+							TradeEvent.TRADE_RECORDED_EVENT, txLog
+						);
+
+						if (eventValues != null) {
+							List<Type> indexedValues = eventValues.getIndexedValues();
+
+							tradeId = (BigInteger) indexedValues.get(0).getValue();
+
+						} else {
+							throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
+						}
+					}
+				}
+			} else {
+				throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
+			}
+			Users users = userService.findByAddress(userDetails.getUsername());
+			assetService.assetBuy(users, assetSellId, tradeId);
+			return CommonResponse.success("에셋 구매 성공");
+		} catch (Exception e) {
+			throw new CustomException(ErrorCode.MARKET_BUY_FAIL);
+		}
+	}
+
 
 	//에셋 상세 조회
 	@GetMapping("/{assetId}/detail")
