@@ -5,8 +5,10 @@ import com.semonemo.spring_server.domain.blockchain.dto.event.MarketEvent;
 import com.semonemo.spring_server.domain.blockchain.dto.event.NFTEvent;
 import com.semonemo.spring_server.domain.blockchain.dto.event.TradeEvent;
 import com.semonemo.spring_server.domain.blockchain.service.BlockChainService;
+import com.semonemo.spring_server.domain.coin.dto.request.CoinBurnRequestDto;
 import com.semonemo.spring_server.domain.coin.dto.request.CoinRequestDto;
 import com.semonemo.spring_server.domain.coin.dto.request.CoinServiceRequestDto;
+import com.semonemo.spring_server.domain.coin.dto.request.CoinTxRequestDto;
 import com.semonemo.spring_server.domain.coin.dto.response.CoinResponseDto;
 import com.semonemo.spring_server.domain.coin.dto.response.TradeLogResponseDto;
 import com.semonemo.spring_server.domain.coin.service.CoinService;
@@ -67,9 +69,9 @@ public class CoinController implements CoinApi{
     @PostMapping(value = "/burn")
     public CommonResponse<CoinResponseDto> burnCoin(
         @AuthenticationPrincipal UserDetails userDetails,
-        @RequestBody String txHash) {
+        @RequestBody CoinBurnRequestDto coinBurnRequestDto) {
         try {
-            TransactionReceipt transactionResult = blockChainService.waitForTransactionReceipt(txHash);
+            TransactionReceipt transactionResult = blockChainService.waitForTransactionReceipt(coinBurnRequestDto.getTxHash());
 
             BigInteger value = null;
 
@@ -138,10 +140,9 @@ public class CoinController implements CoinApi{
     @PostMapping(value = "/exchange/payable")
     public CommonResponse<CoinResponseDto> coinToPayable(
         @AuthenticationPrincipal UserDetails userDetails,
-        @RequestBody String txHash,
-        @RequestBody Long amount) {
+        @RequestBody CoinTxRequestDto coinTxRequestDto) {
         try {
-            TransactionReceipt transactionResult = blockChainService.waitForTransactionReceipt(txHash);
+            TransactionReceipt transactionResult = blockChainService.waitForTransactionReceipt(coinTxRequestDto.getTxHash());
 
             BigInteger newBalance = null;
             BigInteger tradeId = null;
@@ -184,7 +185,7 @@ public class CoinController implements CoinApi{
             }
 
             Users users = userService.findByAddress(userDetails.getUsername());
-            Long payableBalance = coinService.coinToPayable(users.getId(), amount, tradeId);
+            Long payableBalance = coinService.coinToPayable(users.getId(), coinTxRequestDto.getAmount(), tradeId);
             Long coinBalance = blockChainService.convertFromSmallestUnit(newBalance);
 
             CoinResponseDto responseValue = new CoinResponseDto(
@@ -203,10 +204,9 @@ public class CoinController implements CoinApi{
     @PostMapping(value = "/exchange/coin")
     public CommonResponse<CoinResponseDto> payableToCoin(
         @AuthenticationPrincipal UserDetails userDetails,
-        @RequestBody String txHash,
-        @RequestBody Long amount) {
+        @RequestBody CoinTxRequestDto coinTxRequestDto) {
         try {
-            TransactionReceipt transactionResult = blockChainService.waitForTransactionReceipt(txHash);
+            TransactionReceipt transactionResult = blockChainService.waitForTransactionReceipt(coinTxRequestDto.getTxHash());
 
             BigInteger newBalance = null;
             BigInteger tradeId = null;
@@ -250,7 +250,7 @@ public class CoinController implements CoinApi{
             }
 
             Users users = userService.findByAddress(userDetails.getUsername());
-            Long payableBalance = coinService.payableToCoin(users.getId(), amount, tradeId);
+            Long payableBalance = coinService.payableToCoin(users.getId(), coinTxRequestDto.getAmount(), tradeId);
             Long coinBalance = blockChainService.convertFromSmallestUnit(newBalance);
 
             CoinResponseDto responseValue = new CoinResponseDto(

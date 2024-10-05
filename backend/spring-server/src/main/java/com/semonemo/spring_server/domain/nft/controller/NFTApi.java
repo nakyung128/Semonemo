@@ -2,6 +2,7 @@ package com.semonemo.spring_server.domain.nft.controller;
 
 import com.semonemo.spring_server.domain.nft.dto.request.NFTMarketCancelDto;
 import com.semonemo.spring_server.domain.nft.dto.request.NFTMarketRequestDto;
+import com.semonemo.spring_server.domain.nft.dto.request.NFTPurchaseDto;
 import com.semonemo.spring_server.domain.nft.dto.request.NFTRequestDto;
 import com.semonemo.spring_server.domain.nft.dto.response.NFTMarketHistoryResponseDto;
 import com.semonemo.spring_server.domain.nft.dto.response.NFTMarketLikedResponseDto;
@@ -217,8 +218,7 @@ public interface NFTApi {
     })
     CommonResponse<NFTResponseDto> buyNFT(
         @AuthenticationPrincipal UserDetails userDetails,
-        @RequestBody String txHash,
-        @RequestBody Long marketId
+        @RequestBody NFTPurchaseDto nftPurchaseDto
     );
 
     @Operation(summary = "유저 사용가능 NFT 리스트 조회", description = "유저 사용가능 NFT 리스트 조회")

@@ -1,6 +1,8 @@
 package com.semonemo.spring_server.domain.coin.controller;
 
+import com.semonemo.spring_server.domain.coin.dto.request.CoinBurnRequestDto;
 import com.semonemo.spring_server.domain.coin.dto.request.CoinRequestDto;
+import com.semonemo.spring_server.domain.coin.dto.request.CoinTxRequestDto;
 import com.semonemo.spring_server.domain.coin.dto.response.CoinResponseDto;
 import com.semonemo.spring_server.domain.nft.dto.request.NFTRequestDto;
 import com.semonemo.spring_server.domain.nft.dto.response.NFTResponseDto;
@@ -44,7 +46,7 @@ public interface CoinApi {
     })
     CommonResponse<CoinResponseDto> burnCoin(
         @AuthenticationPrincipal UserDetails userDetails,
-        @RequestBody String txHash
+        @RequestBody CoinBurnRequestDto coinBurnRequestDto
     );
 
     @Operation(summary = "코인 조회", description = "코인 조회")
@@ -80,8 +82,7 @@ public interface CoinApi {
     })
     CommonResponse<CoinResponseDto> coinToPayable(
         @AuthenticationPrincipal UserDetails userDetails,
-        @RequestBody String txHash,
-        @RequestBody Long amount
+        @RequestBody CoinTxRequestDto coinTxRequestDto
     );
 
     @Operation(summary = "페이머니 코인으로 전환", description = "페이머니 코인으로 전환")
@@ -93,7 +94,6 @@ public interface CoinApi {
     })
     CommonResponse<CoinResponseDto> payableToCoin(
         @AuthenticationPrincipal UserDetails userDetails,
-        @RequestBody String txHash,
-        @RequestBody Long amount
+        @RequestBody CoinTxRequestDto coinTxRequestDto
     );
 }

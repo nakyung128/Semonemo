@@ -56,7 +56,7 @@ contract NFTMarket is TradeBase {
         address seller = market.seller;
 
         require(getUserBalance(msg.sender) >= price, "Insufficient balance");
-
+  
         _adjustBalances(msg.sender, seller, price);
 
         nftContract.transferNFTByAdmin(_nftId, address(this), msg.sender);
