@@ -123,7 +123,7 @@ public class AuctionServiceImpl implements AuctionService {
 		redisTemplate.expire(auctionKey, 15, TimeUnit.SECONDS);
 
 		Map<String, Object> auctionData = hashOps.entries(auctionKey);
-		messagingTemplate.convertAndSend("/topic/auction/" + auctionId, auctionData);
+		messagingTemplate.convertAndSend("/topic/auction/" + auctionId + "/start", auctionData);
 	}
 
 	@Override
@@ -221,6 +221,7 @@ public class AuctionServiceImpl implements AuctionService {
 		Auction auction = auctionRepository.findById(auctionId)
 			.orElseThrow(() -> new RuntimeException("Auction not found"));
 
+		// 경매가 유찰된 경우
 		if (lastBid == null) {
 			auction.setStatus(AuctionStatus.CANCEL);
 		} else {
@@ -229,11 +230,11 @@ public class AuctionServiceImpl implements AuctionService {
 				lastBid.getBidAmount(),
 				LocalDateTime.now()
 			);
-		}
 
-		Users user = userRepository.findById(lastBid.getUserId())
-			.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND_ERROR));
-		user.minusBalance(lastBid.getBidAmount());
+			Users user = userRepository.findById(lastBid.getUserId())
+				.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND_ERROR));
+			user.minusBalance(lastBid.getBidAmount());
+		}
 
 		AuctionEndDTO response = AuctionEndDTO.builder()
 			.auctionId(auctionId)
