@@ -12,7 +12,6 @@ public final class SecurityConstants {
 		"/api/auth/**",
 		"/api/asset/**",
 		"/api/search/**",
-		"/api/auction/**",
 		"/ws-stomp/**",
 	};
 

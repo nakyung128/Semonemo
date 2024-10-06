@@ -13,7 +13,7 @@ public interface AuctionService {
 
 	void startAuction(long auctionId);
 
-	void addParticipantCount(long auctionId);
+	void addParticipantCount(long auctionId, long userId);
 
 	void removeParticipant(long auctionId);
 

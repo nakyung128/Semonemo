@@ -2,6 +2,8 @@ package com.semonemo.spring_server.domain.auction.controller;
 
 import java.util.List;
 
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,7 +15,11 @@ import com.semonemo.spring_server.domain.auction.dto.response.BidLogDTO;
 import com.semonemo.spring_server.domain.auction.dto.request.AuctionRequestDTO;
 import com.semonemo.spring_server.domain.auction.entity.Auction;
 import com.semonemo.spring_server.domain.auction.service.AuctionService;
+import com.semonemo.spring_server.domain.user.entity.Users;
+import com.semonemo.spring_server.domain.user.repository.UserRepository;
 import com.semonemo.spring_server.global.common.CommonResponse;
+import com.semonemo.spring_server.global.exception.CustomException;
+import com.semonemo.spring_server.global.exception.ErrorCode;
 
 import lombok.RequiredArgsConstructor;
 
@@ -23,6 +29,7 @@ import lombok.RequiredArgsConstructor;
 public class AuctionController {
 
 	private final AuctionService auctionService;
+	private final UserRepository userRepository;
 
 	@PostMapping
 	public CommonResponse<?> createAuction(@RequestBody AuctionRequestDTO requestDTO) {
@@ -31,9 +38,15 @@ public class AuctionController {
 	}
 
 	@GetMapping("/{auctionId}/join")
-	public CommonResponse<?> joinAuction(@PathVariable Long auctionId) {
+	public CommonResponse<?> joinAuction(
+		@PathVariable Long auctionId,
+		@AuthenticationPrincipal UserDetails userDetails
+	) {
+		Users user = userRepository.findByAddress(userDetails.getUsername())
+			.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND_ERROR));
+
 		List<BidLogDTO> response = auctionService.readAuctionLog(auctionId);
-		auctionService.addParticipantCount(auctionId);
+		auctionService.addParticipantCount(auctionId, user.getId());
 		return CommonResponse.success(response, "경매 참여에 성공했습니다.");
 	}
 

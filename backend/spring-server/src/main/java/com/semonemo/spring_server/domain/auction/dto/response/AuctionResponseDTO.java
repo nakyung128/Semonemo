@@ -9,6 +9,7 @@ import lombok.Data;
 @AllArgsConstructor
 public class AuctionResponseDTO {
 	private long userId;
+	private int anonym;
 	private long bidAmount;
 	private String bidTime;
 	private String endTime;
