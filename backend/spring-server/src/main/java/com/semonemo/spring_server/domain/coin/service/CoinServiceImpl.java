@@ -202,7 +202,8 @@ public class CoinServiceImpl implements CoinService {
             fromUserDto,
             toUserDto,
             tradeLog.getTradeType(),
-            tradeLog.getAmount()
+            tradeLog.getAmount(),
+            tradeLog.getCreatedAt()
         );
     }
 }

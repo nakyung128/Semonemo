@@ -5,6 +5,7 @@ import com.semonemo.spring_server.domain.user.entity.Users;
 import jakarta.persistence.*;
 
 import java.math.BigInteger;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public record TradeLogResponseDto (
@@ -13,6 +14,7 @@ public record TradeLogResponseDto (
     UserInfoResponseDTO fromUser,
     UserInfoResponseDTO toUser,
     String tradeType,
-    Long amount
+    Long amount,
+    LocalDateTime createdAt
 ) {
 }
