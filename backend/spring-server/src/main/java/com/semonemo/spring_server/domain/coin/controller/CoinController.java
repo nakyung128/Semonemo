@@ -1,8 +1,6 @@
 package com.semonemo.spring_server.domain.coin.controller;
 
 import com.semonemo.spring_server.domain.blockchain.dto.event.CoinEvent;
-import com.semonemo.spring_server.domain.blockchain.dto.event.MarketEvent;
-import com.semonemo.spring_server.domain.blockchain.dto.event.NFTEvent;
 import com.semonemo.spring_server.domain.blockchain.dto.event.TradeEvent;
 import com.semonemo.spring_server.domain.blockchain.service.BlockChainService;
 import com.semonemo.spring_server.domain.coin.dto.request.CoinBurnRequestDto;
@@ -12,10 +10,6 @@ import com.semonemo.spring_server.domain.coin.dto.request.CoinTxRequestDto;
 import com.semonemo.spring_server.domain.coin.dto.response.CoinResponseDto;
 import com.semonemo.spring_server.domain.coin.dto.response.TradeLogResponseDto;
 import com.semonemo.spring_server.domain.coin.service.CoinService;
-import com.semonemo.spring_server.domain.nft.controller.NFTController;
-import com.semonemo.spring_server.domain.nft.dto.request.NFTRequestDto;
-import com.semonemo.spring_server.domain.nft.dto.request.NFTServiceRequestDto;
-import com.semonemo.spring_server.domain.nft.dto.response.NFTResponseDto;
 import com.semonemo.spring_server.domain.user.entity.Users;
 import com.semonemo.spring_server.domain.user.service.UserService;
 import com.semonemo.spring_server.global.common.CommonResponse;
@@ -47,7 +41,6 @@ public class CoinController implements CoinApi{
     private final UserService userService;
     private final CoinService coinService;
     private final BlockChainService blockChainService;
-
     // 코인 발행
     @PostMapping(value = "/buy")
     public CommonResponse<CoinResponseDto> mintCoin(
@@ -263,5 +256,13 @@ public class CoinController implements CoinApi{
         } catch (Exception e) {
             throw new CustomException(ErrorCode.COIN_EXCHANGE_FAIL);
         }
+    }
+    @GetMapping("price")
+    public CommonResponse<?> getPrice(){
+        return CommonResponse.success(coinService.getCoinPrice(),"코인값 조회 성공");
+    }
+    @GetMapping("/weekly")
+    public CommonResponse<?> getWeeklyPrices() {
+        return CommonResponse.success(coinService.getWeeklyPrices(), "주간 코인 가격 조회 성공");
     }
 }

@@ -6,9 +6,14 @@ import com.semonemo.spring_server.domain.blockchain.dto.event.NFTEvent;
 import com.semonemo.spring_server.domain.blockchain.service.BlockChainService;
 import com.semonemo.spring_server.domain.coin.dto.request.CoinRequestDto;
 import com.semonemo.spring_server.domain.coin.dto.request.CoinServiceRequestDto;
+import com.semonemo.spring_server.domain.coin.dto.response.CoinHistoryDto;
 import com.semonemo.spring_server.domain.coin.dto.response.CoinResponseDto;
 import com.semonemo.spring_server.domain.coin.dto.response.TradeLogResponseDto;
+import com.semonemo.spring_server.domain.coin.entity.CoinPrice;
+import com.semonemo.spring_server.domain.coin.entity.CoinPriceHistory;
 import com.semonemo.spring_server.domain.coin.entity.TradeLog;
+import com.semonemo.spring_server.domain.coin.repository.CoinHistoryRepository;
+import com.semonemo.spring_server.domain.coin.repository.CoinPriceRepository;
 import com.semonemo.spring_server.domain.coin.repository.TradeLogRepository;
 import com.semonemo.spring_server.domain.nft.dto.response.NFTMarketResponseDto;
 import com.semonemo.spring_server.domain.nft.dto.response.NFTResponseDto;
@@ -26,14 +31,17 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 import org.web3j.abi.EventEncoder;
@@ -51,7 +59,8 @@ public class CoinServiceImpl implements CoinService {
     private final UserRepository userRepository;
     private final TradeLogRepository tradeLogRepository;
     private final BlockChainService blockChainService;
-
+	private final CoinPriceRepository coinPriceRepository;
+	private final CoinHistoryRepository coinHistoryRepository;
     @Override
     public CoinResponseDto mintCoin(CoinServiceRequestDto coinRequestDto) {
         Users user = userRepository.findById(coinRequestDto.getUserId())
@@ -218,4 +227,96 @@ public class CoinServiceImpl implements CoinService {
             tradeLog.getCreatedAt()
         );
     }
+
+	//코인 가격 변동 및 주간 시세
+
+	@Scheduled(fixedRate = 600000)//10분
+	public void updatePrice(){
+		CoinPrice coin = coinPriceRepository.findTopByOrderByCreatedAtDesc();
+		LocalDate today = LocalDate.now();
+		LocalDate yesterday = today.minusDays(1);
+
+		CoinPriceHistory yesterdayHistory = coinHistoryRepository.findByDate(yesterday);
+
+		Long yesterdayPrice = yesterdayHistory != null ? yesterdayHistory.getAveragePrice() : coin.getPrice();
+
+
+		double changeRate =Math.round((new Random().nextDouble() * 10 - 5) * 100) / 100.0; // -5.00 ~ +5.00
+		Long newPrice = Math.round( coin.getPrice() * (1 + changeRate / 100));
+
+		// 변동률 (전날 평균가 대비)
+		double changedFromYesterday =  calculateChangeRate(yesterdayPrice, newPrice);
+		CoinPrice newCoin = CoinPrice.builder()
+			.price(newPrice)
+			.changed(changedFromYesterday)
+			.build();
+		coinPriceRepository.save(newCoin);
+	}
+
+	@Override
+	public Long getCoinPrice() {
+		CoinPrice coin = coinPriceRepository.findTopByOrderByCreatedAtDesc();
+		return coin.getPrice();
+	}
+
+	@Scheduled(cron = "0 0 0 * * *") // 매일 밤 12시에 실행
+	public void calculateAndSaveDailyAverage() {
+		LocalDate yesterday = LocalDate.now().minusDays(1);
+		List<CoinPrice> yesterdayPrices = coinPriceRepository.findByCreatedAtBetween(
+			yesterday.atStartOfDay(),
+			yesterday.atTime(23, 59, 59)
+		);
+
+		if (!yesterdayPrices.isEmpty()) {
+			Long averagePrice = Math.round(yesterdayPrices.stream()
+				.mapToLong(CoinPrice::getPrice)
+				.average()
+				.orElse(0));
+
+			Long highestPrice = yesterdayPrices.stream()
+				.mapToLong(CoinPrice::getPrice)
+				.max()
+				.orElse(0);
+
+			Long lowestPrice = yesterdayPrices.stream()
+				.mapToLong(CoinPrice::getPrice)
+				.min()
+				.orElse(0);
+
+			CoinPriceHistory previousDay = coinHistoryRepository.findByDate(yesterday.minusDays(1));
+			double dailyChange = previousDay != null
+				? calculateChangeRate(previousDay.getAveragePrice(), averagePrice)
+				: 0.0;
+
+			CoinPriceHistory history = CoinPriceHistory.builder()
+				.date(yesterday)
+				.averagePrice(averagePrice)
+				.dailyChange(dailyChange)
+				.highestPrice(highestPrice)
+				.lowestPrice(lowestPrice)
+				.build();
+			coinHistoryRepository.save(history);
+		}
+	}
+	private double calculateChangeRate(Long oldPrice, Long newPrice) {
+		return Math.round((newPrice - oldPrice) / (double) oldPrice * 10000) / 100.0;
+	}
+
+	@Override
+	public List<CoinHistoryDto> getWeeklyPrices() {
+		List<CoinPriceHistory> weeklyPrices = coinHistoryRepository.findTop7ByOrderByDateDesc();
+		return weeklyPrices.stream()
+			.map(this::convertToCoinPriceDTO)
+			.collect(Collectors.toList());
+	}
+
+	private CoinHistoryDto convertToCoinPriceDTO(CoinPriceHistory history) {
+		return new CoinHistoryDto(
+			history.getDate(),
+			history.getAveragePrice(),
+			history.getDailyChange(),
+			history.getHighestPrice(),
+			history.getLowestPrice()
+		);
+	}
 }

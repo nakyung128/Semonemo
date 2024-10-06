@@ -10,7 +10,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import com.semonemo.spring_server.domain.asset.dto.AssetDetailResponseDto;
@@ -32,7 +31,6 @@ import com.semonemo.spring_server.domain.asset.repository.atags.ATagsRepository;
 import com.semonemo.spring_server.domain.asset.repository.like.AssetLikeRepository;
 import com.semonemo.spring_server.domain.coin.entity.TradeLog;
 import com.semonemo.spring_server.domain.coin.repository.TradeLogRepository;
-import com.semonemo.spring_server.domain.elasticsearch.service.ElasticsearchIndexChecker;
 import com.semonemo.spring_server.domain.elasticsearch.service.ElasticsearchSyncService;
 import com.semonemo.spring_server.domain.user.dto.response.UserInfoResponseDTO;
 import com.semonemo.spring_server.domain.user.entity.Users;
@@ -42,8 +40,6 @@ import com.semonemo.spring_server.global.common.CursorResult;
 import com.semonemo.spring_server.global.exception.CustomException;
 import com.semonemo.spring_server.global.exception.ErrorCode;
 
-import co.elastic.clients.elasticsearch._types.SortOrder;
-import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
@@ -60,7 +56,6 @@ public class AssetServiceImpl implements AssetService {
 	private final UserRepository userRepository;
 	private final ElasticsearchSyncService syncService;
 	private final UserService userService;
-	private final ElasticsearchIndexChecker indexChecker;
 	private final TradeLogRepository tradeLogRepository;
 
 	@Transactional
