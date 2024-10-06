@@ -5,6 +5,7 @@ import com.semonemo.spring_server.domain.coin.dto.request.CoinServiceRequestDto;
 import com.semonemo.spring_server.domain.coin.dto.response.CoinHistoryDto;
 import com.semonemo.spring_server.domain.coin.dto.response.CoinResponseDto;
 import com.semonemo.spring_server.domain.coin.dto.response.TradeLogResponseDto;
+import com.semonemo.spring_server.domain.coin.entity.CoinPrice;
 
 import org.springframework.data.domain.Page;
 
@@ -22,7 +23,7 @@ public interface CoinService {
 
     Long coinToPayable(Long userId, Long amount, BigInteger tradeId);
 
-    Long getCoinPrice();
+    CoinPrice getCoinPrice();
 
     List<CoinHistoryDto> getWeeklyPrices();
 }
