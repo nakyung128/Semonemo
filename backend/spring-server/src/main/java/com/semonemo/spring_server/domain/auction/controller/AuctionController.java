@@ -56,7 +56,7 @@ public class AuctionController {
 		return CommonResponse.success("경매 참여를 취소했습니다.");
 	}
 
-	@GetMapping("/{auctionId}")
+	@GetMapping("/{auctionId}/start")
 	public CommonResponse<?> startAuction(@PathVariable long auctionId) {
 		auctionService.startAuction(auctionId);
 		return CommonResponse.success("경매를 성공적으로 시작했습니다.");
