@@ -28,6 +28,7 @@ public class TradeLogRepositoryImpl implements TradeLogRepositoryCustom {
                 tradeLog.fromUser.id.eq(userId)
                     .or(tradeLog.toUser.id.eq(userId))
             )
+            .orderBy(tradeLog.logId.desc())
             .offset(pageable.getOffset())
             .limit(pageable.getPageSize())
             .fetch();
