@@ -8,7 +8,7 @@ import java.math.BigInteger;
 import java.util.List;
 
 public record TradeLogResponseDto (
-    Long lodId,
+    Long logId,
     BigInteger tradeId,
     UserInfoResponseDTO fromUser,
     UserInfoResponseDTO toUser,
