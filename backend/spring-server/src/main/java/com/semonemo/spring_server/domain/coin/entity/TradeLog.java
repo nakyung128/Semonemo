@@ -6,6 +6,7 @@ import java.util.Set;
 
 import com.semonemo.spring_server.domain.user.entity.Users;
 
+import com.semonemo.spring_server.global.common.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,7 +20,7 @@ import lombok.Setter;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class TradeLog {
+public class TradeLog extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "log_id")
