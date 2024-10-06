@@ -33,17 +33,16 @@ contract NFTAuction is TradeBase {
     }
 
     // 옥션에 올린 물건 취소
-    function cancelAuction(uint256 _nftId) external nonReentrant {
+    function cancelAuction(uint256 _nftId) external nonReentrant onlyOwner {
         Auction storage auction = auctions[_nftId];
         require(nftContract.ownerOf(_nftId) == address(this), "NFT not in Auction");
-        require(auction.seller == msg.sender, "You don't own this NFT");
         require(auction.seller != address(0), "This auction does not exist");
         
-        nftContract.transferNFTByAdmin(_nftId, address(this), msg.sender);
+        nftContract.transferNFTByAdmin(_nftId, address(this), auction.seller);
 
         delete auctions[_nftId];
 
-        emit AuctionCancelled(_nftId, msg.sender);
+        emit AuctionCancelled(_nftId, auction.seller);
     }
 
     // 옥션 물건 구매 (경매 종료)

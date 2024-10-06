@@ -12,6 +12,10 @@ public interface BlockChainService {
 
     TransactionReceipt mintCoin(String to, BigInteger amount) throws Exception;
 
+    TransactionReceipt cancelAuction(BigInteger tokenId) throws Exception;
+
+    TransactionReceipt encAuction(String buyer, BigInteger tokenId) throws Exception;
+
     List<NFTInfoDto> getNFTsByIds(List<BigInteger> tokenIds) throws Exception;
 
     NFTInfoDto getNFTById(BigInteger tokenId) throws Exception;

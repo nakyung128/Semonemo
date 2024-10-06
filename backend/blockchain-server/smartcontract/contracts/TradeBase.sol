@@ -127,7 +127,7 @@ contract TradeBase is Ownable, ReentrancyGuard {
     }
 
     // 유저 간 잔액 이동
-    function transferBalance(address from, address to, uint256 amount) external onlyOwner nonReentrant {
+    function transferBalanceByAdmin(address from, address to, uint256 amount) external onlyOwner nonReentrant {
         require(to != address(0), "Invalid recipient address");
         require(to != from, "Cannot transfer to yourself");
         require(amount > 0, "Transfer amount must be greater than 0");
@@ -138,6 +138,20 @@ contract TradeBase is Ownable, ReentrancyGuard {
 
         recordTrade(from, to, amount);
         emit BalanceTransferred(from, to, amount, userBalances[from], userBalances[to]);
+    }
+
+    // 유저 간 잔액 이동
+    function transferBalance(address to, uint256 amount) external nonReentrant {
+        require(to != address(0), "Invalid recipient address");
+        require(to != msg.sender, "Cannot transfer to yourself");
+        require(amount > 0, "Transfer amount must be greater than 0");
+        require(userBalances[msg.sender] >= amount, "Insufficient balance");
+
+        userBalances[msg.sender] -= amount;
+        userBalances[to] += amount;
+
+        recordTrade(msg.sender, to, amount);
+        emit BalanceTransferred(msg.sender, to, amount, userBalances[msg.sender], userBalances[to]);
     }
 
     // 컨트랙트 보유 NFT
