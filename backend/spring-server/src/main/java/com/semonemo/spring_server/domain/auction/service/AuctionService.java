@@ -13,7 +13,9 @@ public interface AuctionService {
 
 	void startAuction(long auctionId);
 
-	void addParticipantCount(long auctionId, long userId);
+	int addParticipantCount(long auctionId, long userId);
+
+	int saveParticipant(long auctionId, long userId, int count);
 
 	void removeParticipant(long auctionId);
 

@@ -129,10 +129,17 @@ public class AuctionServiceImpl implements AuctionService {
 	}
 
 	@Override
-	public void addParticipantCount(long auctionId, long userId) {
+	public int addParticipantCount(long auctionId, long userId) {
 		participantCount.computeIfAbsent(auctionId, k -> new AtomicInteger(0)).incrementAndGet();
-		int count = sendParticipantCount(auctionId);
-		saveParticipant(auctionId, userId, count);
+		return sendParticipantCount(auctionId);
+	}
+
+	@Override
+	public int saveParticipant(long auctionId, long userId, int count) {
+		String participantKey = AUCTION_PARTICIPANT_KEY_PREFIX + auctionId;
+		HashOperations<String, String, String> participantHashOps = redisTemplate.opsForHash();
+		participantHashOps.put(participantKey, String.valueOf(userId), String.valueOf(count));
+		return count;
 	}
 
 	@Override
@@ -284,11 +291,5 @@ public class AuctionServiceImpl implements AuctionService {
 		int count = getParticipantCount(auctionId);
 		messagingTemplate.convertAndSend("/topic/auction/" + auctionId + "/participants", count);
 		return count;
-	}
-
-	private void saveParticipant(long auctionId, long userId, int count) {
-		String participantKey = AUCTION_PARTICIPANT_KEY_PREFIX + auctionId;
-		HashOperations<String, String, String> participantHashOps = redisTemplate.opsForHash();
-		participantHashOps.put(participantKey, String.valueOf(userId), String.valueOf(count));
 	}
 }
