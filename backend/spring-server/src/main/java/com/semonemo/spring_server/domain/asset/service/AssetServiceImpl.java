@@ -160,20 +160,32 @@ public class AssetServiceImpl implements AssetService {
 				option = "price";
 				pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, option));
 				break;
+			case "low":
+				option = "price";
+				pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, option));
+				break;
 			case "like":
 				option = "likeCount";
 				pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, option));
+				break;
+			case "dislike":
+				option = "likeCount";
+				pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, option));
 				break;
 			case "hit":
 				option = "hits";
 				pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, option));
 				break;
+			case "unhit":
+				option = "hits";
+				pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, option));
+				break;
 			case "sell":
 				option = "purchaseCount";
 				pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, option));
 				break;
-			case "low":
-				option = "price";
+			case "unsell":
+				option = "purchaseCount";
 				pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, option));
 				break;
 
