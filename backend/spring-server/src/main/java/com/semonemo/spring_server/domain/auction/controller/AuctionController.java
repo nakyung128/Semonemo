@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.semonemo.spring_server.domain.auction.dto.response.AuctionJoinResponseDTO;
 import com.semonemo.spring_server.domain.auction.dto.response.BidLogDTO;
 import com.semonemo.spring_server.domain.auction.dto.request.AuctionRequestDTO;
 import com.semonemo.spring_server.domain.auction.entity.Auction;
@@ -45,8 +46,16 @@ public class AuctionController {
 		Users user = userRepository.findByAddress(userDetails.getUsername())
 			.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND_ERROR));
 
-		List<BidLogDTO> response = auctionService.readAuctionLog(auctionId);
-		auctionService.addParticipantCount(auctionId, user.getId());
+		int participants = auctionService.addParticipantCount(auctionId, user.getId());
+		int anonym = auctionService.saveParticipant(auctionId, user.getId(), participants);
+		List<BidLogDTO> logs = auctionService.readAuctionLog(auctionId);
+
+		AuctionJoinResponseDTO response = AuctionJoinResponseDTO.builder()
+			.anonym(anonym)
+			.participants(participants)
+			.bidLogs(logs)
+			.build();
+
 		return CommonResponse.success(response, "경매 참여에 성공했습니다.");
 	}
 
