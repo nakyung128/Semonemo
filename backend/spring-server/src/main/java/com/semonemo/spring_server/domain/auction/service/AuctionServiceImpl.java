@@ -42,7 +42,7 @@ public class AuctionServiceImpl implements AuctionService {
 
 	private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 	private static final String AUCTION_KEY_PREFIX = "auction:";
-	private static final String AUCTION_LOG_KEY_PREFIX = "auction:log:";
+	private static final String AUCTION_LOG_KEY_PREFIX = "auction-log:";
 
 	private final Map<Long, AtomicInteger> participantCount = new ConcurrentHashMap<>();
 
@@ -206,7 +206,7 @@ public class AuctionServiceImpl implements AuctionService {
 
 		// 경매 로그에서 마지막 입찰 정보 가져오기
 		String logsJson = (String) hashOps.get(logKey, "bidLogs");
-		List<BidLogDTO> bidLogs;
+		List<BidLogDTO> bidLogs = new ArrayList<>();
 		BidLogDTO lastBid = null;
 
 		try {
