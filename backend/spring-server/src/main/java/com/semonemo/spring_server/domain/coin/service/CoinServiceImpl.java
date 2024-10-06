@@ -124,17 +124,14 @@ public class CoinServiceImpl implements CoinService {
 
         Page<TradeLog> tradeLogs = tradeLogRepository.findByUser(userId, pageable);
 
-        log.info(1);
         List<TradeLogResponseDto> dtos = new ArrayList<>();
 
-        log.info(1);
         for (TradeLog tradeLog : tradeLogs.getContent()) {
             log.info(tradeLog.getCreatedAt());
             TradeLogResponseDto dto = tradeLogConvertToDto(tradeLog);
             dtos.add(dto);
         }
 
-        log.info(1);
         return new PageImpl<>(dtos, pageable, tradeLogs.getTotalElements());
     }
 
@@ -211,7 +208,6 @@ public class CoinServiceImpl implements CoinService {
             toUserDto = null;
         }
 
-        log.info(131123);
         return new TradeLogResponseDto(
             tradeLog.getLogId(),
             tradeLog.getTradeId(),
