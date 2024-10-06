@@ -249,6 +249,7 @@ public class NFTServiceImpl implements NFTService {
 			case "high" -> PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "price"));
 			case "low" -> PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "price"));
 			case "like" -> PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "likeCount"));
+            case "dislike" -> PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "likeCount"));
 			case "oldest" -> PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "createdAt"));
 			default -> PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
 		};
@@ -294,6 +295,7 @@ public class NFTServiceImpl implements NFTService {
 			case "high" -> PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "price"));
 			case "low" -> PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "price"));
 			case "like" -> PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "likeCount"));
+            case "dislike" -> PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "likeCount"));
 			case "oldest" -> PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "createdAt"));
 			default -> PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
 		};
@@ -339,6 +341,7 @@ public class NFTServiceImpl implements NFTService {
 			case "high" -> PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "price"));
 			case "low" -> PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "price"));
 			case "like" -> PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "likeCount"));
+            case "dislike" -> PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "likeCount"));
 			case "oldest" -> PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "createdAt"));
 			default -> PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
 		};
