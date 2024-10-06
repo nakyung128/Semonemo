@@ -254,9 +254,9 @@ public class CoinServiceImpl implements CoinService {
 	}
 
 	@Override
-	public Long getCoinPrice() {
+	public CoinPrice getCoinPrice() {
 		CoinPrice coin = coinPriceRepository.findTopByOrderByCreatedAtDesc();
-		return coin.getPrice();
+		return coin;
 	}
 
 	@Scheduled(cron = "0 0 0 * * *") // 매일 밤 12시에 실행
