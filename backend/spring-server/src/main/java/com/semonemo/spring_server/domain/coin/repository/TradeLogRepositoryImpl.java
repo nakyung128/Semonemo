@@ -44,4 +44,6 @@ public class TradeLogRepositoryImpl implements TradeLogRepositoryCustom {
 
         return new PageImpl<>(content, pageable, total);
     }
+
+
 }

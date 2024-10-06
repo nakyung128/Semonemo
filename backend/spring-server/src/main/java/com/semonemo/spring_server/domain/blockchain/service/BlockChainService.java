@@ -14,6 +14,8 @@ public interface BlockChainService {
 
     List<NFTInfoDto> getNFTsByIds(List<BigInteger> tokenIds) throws Exception;
 
+    NFTInfoDto getNFTById(BigInteger tokenId) throws Exception;
+
     BigInteger getBalanceOf(String address) throws Exception;
 
     TransactionReceipt waitForTransactionReceipt(String transactionHash) throws Exception;
