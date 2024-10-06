@@ -12,15 +12,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.semonemo.spring_server.domain.auction.dto.response.AuctionJoinResponseDTO;
+import com.semonemo.spring_server.domain.auction.dto.response.AuctionResponseDTO;
 import com.semonemo.spring_server.domain.auction.dto.response.BidLogDTO;
 import com.semonemo.spring_server.domain.auction.dto.request.AuctionRequestDTO;
 import com.semonemo.spring_server.domain.auction.entity.Auction;
 import com.semonemo.spring_server.domain.auction.service.AuctionService;
 import com.semonemo.spring_server.domain.user.entity.Users;
-import com.semonemo.spring_server.domain.user.repository.UserRepository;
+import com.semonemo.spring_server.domain.user.service.UserService;
 import com.semonemo.spring_server.global.common.CommonResponse;
-import com.semonemo.spring_server.global.exception.CustomException;
-import com.semonemo.spring_server.global.exception.ErrorCode;
 
 import lombok.RequiredArgsConstructor;
 
@@ -30,11 +29,17 @@ import lombok.RequiredArgsConstructor;
 public class AuctionController {
 
 	private final AuctionService auctionService;
-	private final UserRepository userRepository;
+	private final UserService userService;
+
+	@GetMapping("/{auctionId}")
+	public CommonResponse<?> getAuctionById(@PathVariable Long auctionId) {
+		AuctionResponseDTO response = auctionService.getAuctionById(auctionId);
+		return CommonResponse.success(response, "경매 조회에 성공했습니다.");
+	}
 
 	@PostMapping
 	public CommonResponse<?> createAuction(@RequestBody AuctionRequestDTO requestDTO) {
-		Auction auction = requestDTO.toEntity();
+		Auction auction = auctionService.convertWithNFT(requestDTO);
 		return CommonResponse.success(auctionService.createAuction(auction), "경매 등록에 성공했습니다.");
 	}
 
@@ -43,8 +48,7 @@ public class AuctionController {
 		@PathVariable Long auctionId,
 		@AuthenticationPrincipal UserDetails userDetails
 	) {
-		Users user = userRepository.findByAddress(userDetails.getUsername())
-			.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND_ERROR));
+		Users user = userService.findByAddress(userDetails.getUsername());
 
 		int participants = auctionService.addParticipantCount(auctionId, user.getId());
 		int anonym = auctionService.saveParticipant(auctionId, user.getId(), participants);

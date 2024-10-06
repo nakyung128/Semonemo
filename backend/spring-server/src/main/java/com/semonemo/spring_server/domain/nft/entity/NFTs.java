@@ -3,6 +3,8 @@ package com.semonemo.spring_server.domain.nft.entity;
 import java.math.BigInteger;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.semonemo.spring_server.domain.auction.entity.Auction;
 import com.semonemo.spring_server.domain.user.entity.Users;
 import com.semonemo.spring_server.global.common.BaseTimeEntity;
 
@@ -50,6 +52,10 @@ public class NFTs extends BaseTimeEntity {
 
     @OneToMany(mappedBy = "nftId")
     private Set<NFTTag> tags;
+
+    @OneToMany(mappedBy = "nft")
+    @JsonManagedReference
+    private Set<Auction> auctions;
 
     public void changeOwner(Users newOwner) {
         this.owner = newOwner;

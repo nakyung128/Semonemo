@@ -1,16 +1,20 @@
 package com.semonemo.spring_server.domain.auction.dto.response;
 
-import java.time.LocalDateTime;
+import com.semonemo.spring_server.domain.auction.entity.AuctionStatus;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Builder;
+import lombok.Getter;
 
-@Data
-@AllArgsConstructor
+@Getter
+@Builder
 public class AuctionResponseDTO {
-	private long userId;
-	private int anonym;
-	private long bidAmount;
-	private String bidTime;
+	private long id;
+	private AuctionStatus status;
+	private long nftId;
+	private String nftImageUrl;
+	private int participants;
+	private long startPrice;
+	private Long currentBid;
+	private String startTime;
 	private String endTime;
 }
