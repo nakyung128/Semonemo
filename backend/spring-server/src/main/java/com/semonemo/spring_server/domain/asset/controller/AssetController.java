@@ -4,6 +4,7 @@ import java.math.BigInteger;
 import java.util.List;
 import java.util.Objects;
 
+import com.semonemo.spring_server.domain.asset.dto.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.security.core.Authentication;
@@ -26,12 +27,6 @@ import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.tx.Contract;
 
 import com.semonemo.spring_server.config.s3.S3Service;
-import com.semonemo.spring_server.domain.asset.dto.AssetDetailResponseDto;
-import com.semonemo.spring_server.domain.asset.dto.AssetLikeDto;
-import com.semonemo.spring_server.domain.asset.dto.AssetRequestDto;
-import com.semonemo.spring_server.domain.asset.dto.AssetResponseDto;
-import com.semonemo.spring_server.domain.asset.dto.AssetSellRequestDto;
-import com.semonemo.spring_server.domain.asset.dto.AssetSellResponseDto;
 import com.semonemo.spring_server.domain.asset.model.AssetImage;
 import com.semonemo.spring_server.domain.asset.model.AssetSell;
 import com.semonemo.spring_server.domain.asset.service.AssetService;
@@ -94,11 +89,10 @@ public class AssetController implements AssetApi {
 	// NFT 구매
 	@PostMapping("/purchase")
 	public CommonResponse<?> buyAsset(
-		@AuthenticationPrincipal UserDetails userDetails,
-		@RequestBody String txHash,
-		@RequestBody Long assetSellId) {
+        @AuthenticationPrincipal UserDetails userDetails,
+        @RequestBody AssetBuyRequestDto assetBuyRequestDto) {
 		try {
-			TransactionReceipt transactionResult = blockChainService.waitForTransactionReceipt(txHash);
+			TransactionReceipt transactionResult = blockChainService.waitForTransactionReceipt(assetBuyRequestDto.getTxHash());
 
 			BigInteger tradeId = null;
 
@@ -125,7 +119,7 @@ public class AssetController implements AssetApi {
 				throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
 			}
 			Users users = userService.findByAddress(userDetails.getUsername());
-			assetService.assetBuy(users, assetSellId, tradeId);
+			assetService.assetBuy(users, assetBuyRequestDto.getAssetSellId(), tradeId);
 			return CommonResponse.success("에셋 구매 성공");
 		} catch (Exception e) {
 			throw new CustomException(ErrorCode.MARKET_BUY_FAIL);
