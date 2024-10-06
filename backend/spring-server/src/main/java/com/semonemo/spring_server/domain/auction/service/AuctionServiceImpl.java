@@ -43,6 +43,7 @@ public class AuctionServiceImpl implements AuctionService {
 	private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 	private static final String AUCTION_KEY_PREFIX = "auction:";
 	private static final String AUCTION_LOG_KEY_PREFIX = "auction-log:";
+	private static final String AUCTION_PARTICIPANT_KEY_PREFIX = "auction-participant:";
 
 	private final Map<Long, AtomicInteger> participantCount = new ConcurrentHashMap<>();
 
@@ -61,6 +62,7 @@ public class AuctionServiceImpl implements AuctionService {
 
 		String auctionKey = AUCTION_KEY_PREFIX + savedAuction.getId();
 		String logKey = AUCTION_LOG_KEY_PREFIX + savedAuction.getId();
+		String participantKey = AUCTION_PARTICIPANT_KEY_PREFIX + savedAuction.getId();
 
 		HashOperations<String, String, Object> hashOps = redisTemplate.opsForHash();
 
@@ -127,9 +129,10 @@ public class AuctionServiceImpl implements AuctionService {
 	}
 
 	@Override
-	public void addParticipantCount(long auctionId) {
+	public void addParticipantCount(long auctionId, long userId) {
 		participantCount.computeIfAbsent(auctionId, k -> new AtomicInteger(0)).incrementAndGet();
-		sendParticipantCount(auctionId);
+		int count = sendParticipantCount(auctionId);
+		saveParticipant(auctionId, userId, count);
 	}
 
 	@Override
@@ -159,6 +162,9 @@ public class AuctionServiceImpl implements AuctionService {
 					throw new CustomException(ErrorCode.INSUFFICIENT_BALANCE);
 				}
 
+				String participantKey = AUCTION_PARTICIPANT_KEY_PREFIX + auctionId;
+				int anonym = (int) hashOps.get(participantKey, String.valueOf(bidRequest.getUserId()));
+
 				if (bidRequest.getBidAmount() > currentBid) {
 					hashOps.put(auctionKey, "currentBid", bidRequest.getBidAmount());
 					hashOps.put(auctionKey, "currentBidder", bidRequest.getUserId());
@@ -171,6 +177,7 @@ public class AuctionServiceImpl implements AuctionService {
 
 					BidLogDTO logDTO = BidLogDTO.builder()
 						.userId(bidRequest.getUserId())
+						.anonym(anonym)
 						.bidAmount(bidRequest.getBidAmount())
 						.bidTime(now)
 						.endTime(endTime)
@@ -179,6 +186,7 @@ public class AuctionServiceImpl implements AuctionService {
 
 					AuctionResponseDTO response = new AuctionResponseDTO(
 						bidRequest.getUserId(),
+						anonym,
 						bidRequest.getBidAmount(),
 						now,
 						endTime
@@ -247,6 +255,7 @@ public class AuctionServiceImpl implements AuctionService {
 
 		// 경매 종료 후 Redis 에서 경매 로그 데이터 삭제
 		redisTemplate.delete(logKey);
+		redisTemplate.delete(AUCTION_PARTICIPANT_KEY_PREFIX + auctionId);
 	}
 
 	private void addBidLog(Long auctionId, BidLogDTO bidLog) {
@@ -271,8 +280,15 @@ public class AuctionServiceImpl implements AuctionService {
 		return participantCount.getOrDefault(auctionId, new AtomicInteger(0)).get();
 	}
 
-	private void sendParticipantCount(long auctionId) {
+	private int sendParticipantCount(long auctionId) {
 		int count = getParticipantCount(auctionId);
 		messagingTemplate.convertAndSend("/topic/auction/" + auctionId + "/participants", count);
+		return count;
+	}
+
+	private void saveParticipant(long auctionId, long userId, int count) {
+		String participantKey = AUCTION_PARTICIPANT_KEY_PREFIX + auctionId;
+		HashOperations<String, String, String> participantHashOps = redisTemplate.opsForHash();
+		participantHashOps.put(participantKey, String.valueOf(userId), String.valueOf(count));
 	}
 }
