@@ -127,6 +127,7 @@ public class CoinServiceImpl implements CoinService {
         List<TradeLogResponseDto> dtos = new ArrayList<>();
 
         for (TradeLog tradeLog : tradeLogs.getContent()) {
+            log.info(tradeLog.getCreatedAt());
             TradeLogResponseDto dto = tradeLogConvertToDto(tradeLog);
             dtos.add(dto);
         }
@@ -182,19 +183,30 @@ public class CoinServiceImpl implements CoinService {
 
     // Utils
     private TradeLogResponseDto tradeLogConvertToDto(TradeLog tradeLog) {
-        UserInfoResponseDTO fromUserDto = new UserInfoResponseDTO(
-            tradeLog.getFromUser().getId(),
-            tradeLog.getFromUser().getAddress(),
-            tradeLog.getFromUser().getNickname(),
-            tradeLog.getFromUser().getProfileImage()
-        );
+        UserInfoResponseDTO fromUserDto;
+        UserInfoResponseDTO toUserDto;
 
-        UserInfoResponseDTO toUserDto = new UserInfoResponseDTO(
-            tradeLog.getToUser().getId(),
-            tradeLog.getToUser().getAddress(),
-            tradeLog.getToUser().getNickname(),
-            tradeLog.getToUser().getProfileImage()
-        );
+        if (tradeLog.getFromUser() != null) {
+            fromUserDto = new UserInfoResponseDTO(
+                tradeLog.getFromUser().getId(),
+                tradeLog.getFromUser().getAddress(),
+                tradeLog.getFromUser().getNickname(),
+                tradeLog.getFromUser().getProfileImage()
+            );
+        } else {
+            fromUserDto = null;
+        }
+
+        if (tradeLog.getToUser() != null) {
+            toUserDto = new UserInfoResponseDTO(
+                tradeLog.getToUser().getId(),
+                tradeLog.getToUser().getAddress(),
+                tradeLog.getToUser().getNickname(),
+                tradeLog.getToUser().getProfileImage()
+            );
+        } else {
+            toUserDto = null;
+        }
 
         return new TradeLogResponseDto(
             tradeLog.getLogId(),
