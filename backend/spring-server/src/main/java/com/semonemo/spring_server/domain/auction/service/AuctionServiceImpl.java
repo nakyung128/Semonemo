@@ -20,13 +20,19 @@ import org.springframework.transaction.annotation.Transactional;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.semonemo.spring_server.domain.auction.dto.request.AuctionRequestDTO;
 import com.semonemo.spring_server.domain.auction.dto.response.AuctionEndDTO;
+import com.semonemo.spring_server.domain.auction.dto.response.AuctionResponseDTO;
 import com.semonemo.spring_server.domain.auction.dto.response.BidLogDTO;
 import com.semonemo.spring_server.domain.auction.dto.request.BidRequestDTO;
-import com.semonemo.spring_server.domain.auction.dto.response.AuctionResponseDTO;
+import com.semonemo.spring_server.domain.auction.dto.response.BidResponseDTO;
 import com.semonemo.spring_server.domain.auction.entity.Auction;
 import com.semonemo.spring_server.domain.auction.entity.AuctionStatus;
 import com.semonemo.spring_server.domain.auction.repository.AuctionRepository;
+import com.semonemo.spring_server.domain.blockchain.dto.NFTInfoDto;
+import com.semonemo.spring_server.domain.blockchain.service.BlockChainService;
+import com.semonemo.spring_server.domain.nft.entity.NFTs;
+import com.semonemo.spring_server.domain.nft.repository.nfts.NFTRepository;
 import com.semonemo.spring_server.domain.user.entity.Users;
 import com.semonemo.spring_server.domain.user.repository.UserRepository;
 import com.semonemo.spring_server.global.exception.CustomException;
@@ -49,6 +55,8 @@ public class AuctionServiceImpl implements AuctionService {
 
 	private final UserRepository userRepository;
 	private final AuctionRepository auctionRepository;
+	private final NFTRepository nftRepository;
+	private final BlockChainService blockChainService;
 	private final RedisTemplate<String, Object> redisTemplate;
 	private final SimpMessagingTemplate messagingTemplate;
 	private final RedissonClient redissonClient;
@@ -76,6 +84,76 @@ public class AuctionServiceImpl implements AuctionService {
 		hashOps.put(logKey, "bidLogs", "[]");
 
 		return savedAuction;
+	}
+
+	@Override
+	@Transactional
+	public Auction convertWithNFT(AuctionRequestDTO requestDTO) {
+		NFTs nft = nftRepository.findById(requestDTO.nftId())
+			.orElseThrow(() -> new CustomException(ErrorCode.NFT_NOT_FOUND_ERROR));
+
+		return requestDTO.toEntity(nft);
+	}
+
+	@Override
+	@Transactional
+	public AuctionResponseDTO getAuctionById(Long auctionId) {
+		Auction auction = auctionRepository.findById(auctionId)
+			.orElseThrow(() -> new CustomException(ErrorCode.AUCTION_NOT_FOUND));
+
+		NFTInfoDto nftInfo;
+		try {
+			nftInfo = blockChainService.getNFTById(auction.getNft().getTokenId());
+		} catch (Exception e) {
+			throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
+		}
+
+		Long currentBid = Long.parseLong(String.valueOf(redisTemplate.opsForHash().get(AUCTION_KEY_PREFIX + auctionId, "currentBid")));
+
+		return AuctionResponseDTO.builder()
+			.id(auction.getId())
+			.status(auction.getStatus())
+			.nftId(auction.getNft().getNftId())
+			.nftImageUrl(nftInfo.getData().getImage())
+			.participants(getParticipantCount(auctionId))
+			.startPrice(auction.getStartPrice())
+			.currentBid(currentBid)
+			.startTime(auction.getStartTime() != null ? auction.getStartTime().format(formatter) : null)
+			.endTime(auction.getEndTime() != null ? auction.getEndTime().format(formatter) : null)
+			.build();
+	}
+
+	@Override
+	@Transactional
+	public List<AuctionResponseDTO> getAllAuctions() {
+		List<Auction> auctions = auctionRepository.findAll();
+
+		List<AuctionResponseDTO> auctionResponseDTOs = new ArrayList<>();
+		for(Auction auction : auctions) {
+			NFTInfoDto nftInfo;
+			try {
+				nftInfo = blockChainService.getNFTById(auction.getNft().getTokenId());
+			} catch (Exception e) {
+				throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
+			}
+
+			Long currentBid = Long.parseLong(String.valueOf(redisTemplate.opsForHash().get(AUCTION_KEY_PREFIX + auction.getId(), "currentBid")));
+
+			AuctionResponseDTO auctionResponseDTO = AuctionResponseDTO.builder()
+				.id(auction.getId())
+				.status(auction.getStatus())
+				.nftId(auction.getNft().getNftId())
+				.nftImageUrl(nftInfo.getData().getImage())
+				.participants(getParticipantCount(auction.getId()))
+				.startPrice(auction.getStartPrice())
+				.currentBid(currentBid)
+				.startTime(auction.getStartTime() != null ? auction.getStartTime().format(formatter) : null)
+				.endTime(auction.getEndTime() != null ? auction.getEndTime().format(formatter) : null)
+				.build();
+			auctionResponseDTOs.add(auctionResponseDTO);
+		}
+
+		return auctionResponseDTOs;
 	}
 
 	@Override
@@ -191,7 +269,7 @@ public class AuctionServiceImpl implements AuctionService {
 						.build();
 					addBidLog(auctionId, logDTO);
 
-					AuctionResponseDTO response = new AuctionResponseDTO(
+					BidResponseDTO response = new BidResponseDTO(
 						bidRequest.getUserId(),
 						anonym,
 						bidRequest.getBidAmount(),
