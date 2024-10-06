@@ -124,6 +124,39 @@ public class AuctionServiceImpl implements AuctionService {
 	}
 
 	@Override
+	@Transactional
+	public List<AuctionResponseDTO> getAllAuctions() {
+		List<Auction> auctions = auctionRepository.findAll();
+
+		List<AuctionResponseDTO> auctionResponseDTOs = new ArrayList<>();
+		for(Auction auction : auctions) {
+			NFTInfoDto nftInfo;
+			try {
+				nftInfo = blockChainService.getNFTById(auction.getNft().getTokenId());
+			} catch (Exception e) {
+				throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
+			}
+
+			Long currentBid = Long.parseLong(String.valueOf(redisTemplate.opsForHash().get(AUCTION_KEY_PREFIX + auction.getId(), "currentBid")));
+
+			AuctionResponseDTO auctionResponseDTO = AuctionResponseDTO.builder()
+				.id(auction.getId())
+				.status(auction.getStatus())
+				.nftId(auction.getNft().getNftId())
+				.nftImageUrl(nftInfo.getData().getImage())
+				.participants(getParticipantCount(auction.getId()))
+				.startPrice(auction.getStartPrice())
+				.currentBid(currentBid)
+				.startTime(auction.getStartTime() != null ? auction.getStartTime().format(formatter) : null)
+				.endTime(auction.getEndTime() != null ? auction.getEndTime().format(formatter) : null)
+				.build();
+			auctionResponseDTOs.add(auctionResponseDTO);
+		}
+
+		return auctionResponseDTOs;
+	}
+
+	@Override
 	public List<BidLogDTO> readAuctionLog(Long auctionId) {
 		String auctionKey = AUCTION_KEY_PREFIX + auctionId;
 		if(Boolean.FALSE.equals(redisTemplate.hasKey(auctionKey))) {

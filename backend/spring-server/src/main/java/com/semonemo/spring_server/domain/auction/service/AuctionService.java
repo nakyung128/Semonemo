@@ -15,6 +15,8 @@ public interface AuctionService {
 
 	AuctionResponseDTO getAuctionById(Long auctionId);
 
+	List<AuctionResponseDTO> getAllAuctions();
+
 	List<BidLogDTO> readAuctionLog(Long auctionId);
 
 	void startAuction(long auctionId);
