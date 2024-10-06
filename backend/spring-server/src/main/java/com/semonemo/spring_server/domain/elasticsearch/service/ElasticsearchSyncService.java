@@ -27,7 +27,6 @@ import com.semonemo.spring_server.domain.nft.entity.NFTTag;
 import com.semonemo.spring_server.domain.nft.entity.NFTs;
 import com.semonemo.spring_server.domain.nft.entity.Ntags;
 import com.semonemo.spring_server.domain.nft.repository.nftmarket.NFTMarketRepository;
-import com.semonemo.spring_server.domain.nft.repository.nfts.NFTRepository;
 import com.semonemo.spring_server.domain.nft.repository.nfttag.NFTTagRepository;
 import com.semonemo.spring_server.domain.nft.repository.ntags.NTagRepository;
 import com.semonemo.spring_server.domain.user.entity.Users;
@@ -45,13 +44,11 @@ public class ElasticsearchSyncService {
 	private final ATagsRepository atagsRepository;
 	private final AssetElasticsearchRepository assetElasticsearchRepository;
 
-	private final NFTRepository nftRepository;
 	private final NFTMarketRepository nftMarketRepository;
 	private final NFTTagRepository nftTagRepository;
 	private final NTagRepository ntagRepository;
 	private final NftSearchRepository nftSearchRepository;
 
-	private final ElasticsearchIndexChecker indexChecker;
 	private final UserRepository userRepository;
 	private final UserSearchRepository userSearchRepository;
 
@@ -94,7 +91,7 @@ public class ElasticsearchSyncService {
 		nftSearchRepository.saveAll(nftDocuments);
 	}
 
-	//판매 등록시
+	//에셋 판매 등록시
 	public void syncSellAsset(Long assetSellId) {
 		AssetSell assetSell = assetSellRepository.findById(assetSellId)
 			.orElseThrow(() -> new IllegalArgumentException("Asset Image not found"));
