@@ -128,8 +128,11 @@ public class CoinController implements CoinApi{
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "15") int size) {
         try {
+            log.info(1);
             Users users = userService.findByAddress(userDetails.getUsername());
+            log.info(2);
             Page<TradeLogResponseDto> tradeLogs = coinService.getTradeLog(users.getId(), page, size);
+            log.info(3);
             return CommonResponse.success(tradeLogs, "코인 거래내역 조회 성공");
         } catch (Exception e) {
             throw new CustomException(ErrorCode.GET_LOG_FAIL);
