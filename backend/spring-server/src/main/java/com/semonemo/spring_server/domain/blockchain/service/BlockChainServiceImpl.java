@@ -134,7 +134,6 @@ public class BlockChainServiceImpl implements BlockChainService {
         ).send();
 
         String rawValue = ethCall.getValue();
-        log.info("Raw ethCall value: " + rawValue);
 
         if (ethCall.hasError()) {
             throw new Exception("Error calling contract: " + ethCall.getError().getMessage());
@@ -172,6 +171,67 @@ public class BlockChainServiceImpl implements BlockChainService {
                     nftInfoDto.setData(null); // 기존 방식으로 fallback
                 }
                 result.add(nftInfoDto);
+            }
+        } catch (Exception e) {
+            log.error("Error decoding contract response: " + e.getMessage(), e);
+            log.error("Raw response: " + rawValue);
+            throw new Exception("Failed to decode contract response", e);
+        }
+
+        return result;
+    }
+
+    @Override
+    public NFTInfoDto getNFTById(BigInteger tokenId) throws Exception {
+        Function function = new Function(
+            "getNFTInfo",
+            Collections.singletonList(new Uint256(tokenId)),
+            List.of(new TypeReference<NFTInfo>() {
+            })
+        );
+
+        String encodedFunction = FunctionEncoder.encode(function);
+
+        Credentials credentials = Credentials.create(adminPrivateKey);
+
+        EthCall ethCall = web3j.ethCall(
+            Transaction.createEthCallTransaction(
+                credentials.getAddress(), nftContractAddress, encodedFunction
+            ),
+            DefaultBlockParameterName.LATEST
+        ).send();
+
+        String rawValue = ethCall.getValue();
+
+        if (ethCall.hasError()) {
+            throw new Exception("Error calling contract: " + ethCall.getError().getMessage());
+        }
+
+        NFTInfoDto result = new NFTInfoDto();
+
+        try {
+            List<Type> decoded = FunctionReturnDecoder.decode(rawValue, function.getOutputParameters());
+            log.info("Decoded value: " + decoded);
+
+            if (decoded.isEmpty() || !(decoded.get(0) instanceof NFTInfo nftInfo)) {
+                throw new Exception("Unexpected response format");
+            }
+
+            JsonNode tokenData = fetchTokenURIData(new String(nftInfo.tokenURI.getValue(), StandardCharsets.UTF_8));
+
+            log.info("Token Data: " + tokenData);
+            result.setTokenId(nftInfo.tokenId.getValue());
+            result.setCreator(nftInfo.creator.toString());
+            result.setCurrentOwner(nftInfo.currentOwner.toString());
+
+            IPFSHashDto ipfsHashDto = new IPFSHashDto();
+            if (tokenData != null) {
+                ipfsHashDto.setContent(tokenData.get("content").asText());
+                ipfsHashDto.setImage(tokenData.get("image").asText());
+                ipfsHashDto.setTitle(tokenData.get("title").asText());
+                result.setData(ipfsHashDto);
+            } else {
+                result.setData(null); // 기존 방식으로 fallback
             }
         } catch (Exception e) {
             log.error("Error decoding contract response: " + e.getMessage(), e);

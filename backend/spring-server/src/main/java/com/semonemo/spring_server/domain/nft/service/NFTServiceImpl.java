@@ -76,15 +76,12 @@ public class NFTServiceImpl implements NFTService {
 
 		nftRepository.save(nft);
 
-		List<BigInteger> tokenIds = List.of(nft.getTokenId());
-
-		List<NFTInfoDto> allNFTInfo;
-		try {
-			allNFTInfo = blockChainService.getNFTsByIds(tokenIds);
-			log.info(allNFTInfo);
-		} catch (Exception e) {
-			throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
-		}
+        NFTInfoDto nftInfo;
+        try {
+            nftInfo = blockChainService.getNFTById(nft.getTokenId());
+        } catch (Exception e) {
+            throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
+        }
 
 		for (String tagName : nftServiceRequestDto.getTags()) {
 			// 태그가 존재하는지 확인하고, 없으면 생성
@@ -128,21 +125,17 @@ public class NFTServiceImpl implements NFTService {
             nft.getCreator().getProfileImage()
         );
 
-		if (!allNFTInfo.isEmpty()) {
-			return new NFTResponseDto(
-				nft.getNftId(),
-                creatorInfo,
-                ownerInfo,
-				nft.getTokenId(),
-                nft.getFrameType(),
-				tagNames,
-				nft.getIsOpen(),
-				nft.getIsOnSale(),
-				allNFTInfo.get(0)
-			);
-		} else {
-			throw new CustomException(ErrorCode.NFT_NOT_FOUND_ERROR);
-		}
+        return new NFTResponseDto(
+            nft.getNftId(),
+            creatorInfo,
+            ownerInfo,
+            nft.getTokenId(),
+            nft.getFrameType(),
+            tagNames,
+            nft.getIsOpen(),
+            nft.getIsOnSale(),
+            nftInfo
+        );
 	}
 
 	@Transactional
@@ -175,40 +168,33 @@ public class NFTServiceImpl implements NFTService {
 		nft.toggleOnSale(true);
 		nftMarketRepository.save(market);
 
-		List<BigInteger> tokenIds = List.of(market.getNftId().getTokenId());
-
-		List<NFTInfoDto> allNFTInfo;
-		try {
-			allNFTInfo = blockChainService.getNFTsByIds(tokenIds);
-			log.info(allNFTInfo);
-		} catch (Exception e) {
-			throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
-		}
+        NFTInfoDto nftInfo;
+        try {
+            nftInfo = blockChainService.getNFTById(market.getNftId().getTokenId());
+        } catch (Exception e) {
+            throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
+        }
 
 		List<String> tagNames = nftTagRepository.findTagNamesByNFT(nft.getNftId());
 
-		if (!allNFTInfo.isEmpty()) {
-            UserInfoResponseDTO sellerInfo = new UserInfoResponseDTO(
-                market.getSeller().getId(),
-                market.getSeller().getAddress(),
-                market.getSeller().getNickname(),
-                market.getSeller().getProfileImage()
-            );
+        UserInfoResponseDTO sellerInfo = new UserInfoResponseDTO(
+            market.getSeller().getId(),
+            market.getSeller().getAddress(),
+            market.getSeller().getNickname(),
+            market.getSeller().getProfileImage()
+        );
 
-			syncService.syncNFTMarket(nft, market, nft.getTags());
-			return new NFTMarketResponseDto(
-				market.getMarketId(),
-				market.getNftId().getNftId(),
-                sellerInfo,
-				market.getPrice(),
-				market.getLikeCount(),
-				false,
-				allNFTInfo.get(0),
-				tagNames
-			);
-		} else {
-			throw new CustomException(ErrorCode.NFT_NOT_FOUND_ERROR);
-		}
+        syncService.syncNFTMarket(nft, market, nft.getTags());
+        return new NFTMarketResponseDto(
+            market.getMarketId(),
+            market.getNftId().getNftId(),
+            sellerInfo,
+            market.getPrice(),
+            market.getLikeCount(),
+            false,
+            nftInfo,
+            tagNames
+        );
 	}
 
     @Transactional
@@ -421,18 +407,14 @@ public class NFTServiceImpl implements NFTService {
 		NFTMarket market = nftMarketRepository.findById(marketId)
 			.orElseThrow(() -> new CustomException(ErrorCode.NFT_MARKET_NOT_FOUND_ERROR));
 
-		List<BigInteger> tokenIds = List.of(market.getNftId().getTokenId());
+        NFTInfoDto nftInfo;
+        try {
+            nftInfo = blockChainService.getNFTById(market.getNftId().getTokenId());
+        } catch (Exception e) {
+            throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
+        }
 
-		List<NFTInfoDto> nftInfo;
-
-		try {
-			nftInfo = blockChainService.getNFTsByIds(tokenIds);
-			log.info(nftInfo);
-		} catch (Exception e) {
-			throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
-		}
-
-		return nftMarketConvertToDto(userId, market, nftInfo.get(0));
+		return nftMarketConvertToDto(userId, market, nftInfo);
 	}
 
 	// NFT 판매 기록 (가격, 판매시점, 판매자)
@@ -537,17 +519,14 @@ public class NFTServiceImpl implements NFTService {
 		NFTs nft = nftRepository.findById(nftId)
 			.orElseThrow(() -> new CustomException(ErrorCode.NFT_NOT_FOUND_ERROR));
 
-		List<BigInteger> tokenIds = List.of(nft.getTokenId());
+		NFTInfoDto nftInfo;
+        try {
+            nftInfo = blockChainService.getNFTById(nft.getTokenId());
+        } catch (Exception e) {
+            throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
+        }
 
-		List<NFTInfoDto> nftInfo;
-		try {
-			nftInfo = blockChainService.getNFTsByIds(tokenIds);
-			log.info(nftInfo);
-		} catch (Exception e) {
-			throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
-		}
-
-		return nftConvertToDto(nft, nftInfo.get(0));
+		return nftConvertToDto(nft, nftInfo);
 	}
 
 	// 마켓 좋아요
