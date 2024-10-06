@@ -170,7 +170,7 @@ public class AuctionServiceImpl implements AuctionService {
 				}
 
 				String participantKey = AUCTION_PARTICIPANT_KEY_PREFIX + auctionId;
-				int anonym = (Integer) hashOps.get(participantKey, String.valueOf(bidRequest.getUserId()));
+				int anonym = Integer.parseInt(String.valueOf(hashOps.get(participantKey, String.valueOf(bidRequest.getUserId()))));
 
 				if (bidRequest.getBidAmount() > currentBid) {
 					hashOps.put(auctionKey, "currentBid", bidRequest.getBidAmount());
