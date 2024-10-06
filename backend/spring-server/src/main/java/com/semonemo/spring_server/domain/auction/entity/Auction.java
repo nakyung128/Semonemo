@@ -2,6 +2,8 @@ package com.semonemo.spring_server.domain.auction.entity;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.semonemo.spring_server.domain.nft.entity.NFTs;
 import com.semonemo.spring_server.global.common.BaseTimeEntity;
 
 import jakarta.persistence.Entity;
@@ -10,6 +12,8 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -27,8 +31,11 @@ public class Auction extends BaseTimeEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	// TODO : NFT 와 mapping
-	private Long nftId;
+
+	@ManyToOne
+	@JoinColumn(name = "nft_id")
+	@JsonBackReference
+	private NFTs nft;
 
 	@Setter
 	@Enumerated(EnumType.STRING)
