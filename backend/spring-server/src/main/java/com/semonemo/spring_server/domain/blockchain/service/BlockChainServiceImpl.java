@@ -111,6 +111,87 @@ public class BlockChainServiceImpl implements BlockChainService {
     }
 
     @Override
+    public TransactionReceipt cancelAuction(BigInteger tokenId) throws Exception {
+        Function function = new Function(
+            "cancelAuction",
+            Collections.singletonList(new Uint256(tokenId)),
+            Collections.emptyList()
+        );
+
+        String encodedFunction = FunctionEncoder.encode(function);
+
+        Credentials credentials = Credentials.create(adminPrivateKey);
+
+        BigInteger gasPrice = web3j.ethGasPrice().send().getGasPrice();
+        BigInteger gasLimit = BigInteger.valueOf(300000); // 예상 가스 한도
+
+        BigInteger nonce = web3j.ethGetTransactionCount(credentials.getAddress(), DefaultBlockParameterName.LATEST).send().getTransactionCount();
+
+        RawTransaction rawTransaction = RawTransaction.createTransaction(
+            nonce,
+            gasPrice,
+            gasLimit,
+            systemContractAddress,
+            encodedFunction
+        );
+
+        byte[] signedMessage = TransactionEncoder.signMessage(rawTransaction, credentials);
+        String hexValue = Numeric.toHexString(signedMessage);
+
+        EthSendTransaction ethSendTransaction = web3j.ethSendRawTransaction(hexValue).send();
+
+        if (ethSendTransaction.hasError()) {
+            throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
+        }
+
+        String transactionHash = ethSendTransaction.getTransactionHash();
+
+        return waitForTransactionReceipt(transactionHash);
+    }
+
+    @Override
+    public TransactionReceipt encAuction(String buyer, BigInteger tokenId) throws Exception {
+        Function function = new Function(
+            "closeAuction",
+            Arrays.asList(
+                new Uint256(tokenId),
+                new Address(buyer)
+            ),
+            Collections.emptyList()
+        );
+
+        String encodedFunction = FunctionEncoder.encode(function);
+
+        Credentials credentials = Credentials.create(adminPrivateKey);
+
+        BigInteger gasPrice = web3j.ethGasPrice().send().getGasPrice();
+        BigInteger gasLimit = BigInteger.valueOf(300000); // 예상 가스 한도
+
+        BigInteger nonce = web3j.ethGetTransactionCount(credentials.getAddress(), DefaultBlockParameterName.LATEST).send().getTransactionCount();
+
+        RawTransaction rawTransaction = RawTransaction.createTransaction(
+            nonce,
+            gasPrice,
+            gasLimit,
+            systemContractAddress,
+            encodedFunction
+        );
+
+        byte[] signedMessage = TransactionEncoder.signMessage(rawTransaction, credentials);
+        String hexValue = Numeric.toHexString(signedMessage);
+
+        EthSendTransaction ethSendTransaction = web3j.ethSendRawTransaction(hexValue).send();
+
+        if (ethSendTransaction.hasError()) {
+            throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
+        }
+
+        String transactionHash = ethSendTransaction.getTransactionHash();
+
+        return waitForTransactionReceipt(transactionHash);
+    }
+
+    @Override
     public List<NFTInfoDto> getNFTsByIds(List<BigInteger> tokenIds) throws Exception {
         List<Uint256> uint256TokenIds = tokenIds.stream()
             .map(Uint256::new)
