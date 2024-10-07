@@ -2,6 +2,7 @@ package com.semonemo.spring_server.domain.asset.repository.assetsell;
 
 import java.util.List;
 
+import com.semonemo.spring_server.domain.asset.model.AssetImage;
 import com.semonemo.spring_server.domain.asset.model.AssetSell;
 
 public interface AssetSellRepositoryCustom {
@@ -15,4 +16,9 @@ public interface AssetSellRepositoryCustom {
 
 	void plusHits(Long assetSellId);
 
+	List<AssetSell> findByCreatorTopN( Long userid, int size);
+
+	List<AssetSell> findByCreatorIdNextN( Long userid, Long cursorId, int size);
 }
+
+
