@@ -83,7 +83,6 @@ public class SearchServiceImpl implements SearchService {
 	public Page<UserSearchResponseDto> findUser( String keyword, int page, int size) {
 		Pageable pageable = PageRequest.of(page, size);
 		Page<UserDocument> userDocumentPage = userSearchRepository.findByNicknameContaining(keyword, pageable);
-		System.out.println(userDocumentPage.toString());
 		List<UserSearchResponseDto> userSearchResponseDtos = userDocumentPage.getContent().stream()
 			.map(this::convertToUserDto)
 			.collect(Collectors.toList());
@@ -93,7 +92,6 @@ public class SearchServiceImpl implements SearchService {
 
 	private AssetSearchResponseDto convertToAssetDto(Users users, AssetSellDocument document) {
 		boolean isLiked = assetLikeRepository.existsByUserIdAndAssetSellId(users.getId(), document.getAssetSellId());
-		System.out.println(document.getCreator());
 		Users creator = userRepository.findById(document.getCreator())
 			.orElseThrow(()-> new CustomException(ErrorCode.USER_NOT_FOUND_ERROR));
 		UserInfoResponseDTO userDto = convertToUserInfo(creator);

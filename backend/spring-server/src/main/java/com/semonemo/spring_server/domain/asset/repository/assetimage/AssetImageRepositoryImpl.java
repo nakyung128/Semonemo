@@ -7,6 +7,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.semonemo.spring_server.domain.asset.model.AssetImage;
 import com.semonemo.spring_server.domain.asset.model.QAssetImage;
 import com.semonemo.spring_server.domain.asset.model.QAssetPurchase;
+import com.semonemo.spring_server.domain.asset.model.QAssetSell;
 
 public class AssetImageRepositoryImpl implements AssetImageRepositoryCustom {
 	private final JPAQueryFactory queryFactory;
@@ -17,17 +18,26 @@ public class AssetImageRepositoryImpl implements AssetImageRepositoryCustom {
 
 	QAssetImage assetImage = QAssetImage.assetImage;
 	QAssetPurchase assetPurchase = QAssetPurchase.assetPurchase;
+	QAssetSell assetSell = QAssetSell.assetSell;
 
 	@Override
 	public List<AssetImage> findByUserIdTopN(Long nowId, int size) {
 		return queryFactory
 			.selectFrom(assetImage)
-			.where(assetImage.Id.in(
-				JPAExpressions
-					.select(assetPurchase.assetSellId)
-					.from(assetPurchase)
-					.where(assetPurchase.userId.eq(nowId))
-			).or(assetImage.creator.eq(nowId)))
+			.where(
+				assetImage.creator.eq(nowId)
+					.or(assetImage.Id.in(
+						JPAExpressions
+							.select(assetSell.assetId)
+							.from(assetSell)
+							.where(assetSell.Id.in(
+								JPAExpressions
+									.select(assetPurchase.assetSellId)
+									.from(assetPurchase)
+									.where(assetPurchase.userId.eq(nowId))
+							))
+					))
+			)
 			.orderBy(assetImage.Id.desc())
 			.limit(size)
 			.fetch();
@@ -40,12 +50,18 @@ public class AssetImageRepositoryImpl implements AssetImageRepositoryCustom {
 			.where(
 				assetImage.Id.lt(cursorId)
 					.and(
-						assetImage.Id.in(
-							JPAExpressions
-								.select(assetPurchase.assetSellId)
-								.from(assetPurchase)
-								.where(assetPurchase.userId.eq(nowId))
-						).or(assetImage.creator.eq(nowId))
+						assetImage.creator.eq(nowId)
+							.or(assetImage.Id.in(
+								JPAExpressions
+									.select(assetSell.assetId)
+									.from(assetSell)
+									.where(assetSell.Id.in(
+										JPAExpressions
+											.select(assetPurchase.assetSellId)
+											.from(assetPurchase)
+											.where(assetPurchase.userId.eq(nowId))
+									))
+							))
 					)
 			)
 			.orderBy(assetImage.Id.desc())
@@ -53,24 +69,4 @@ public class AssetImageRepositoryImpl implements AssetImageRepositoryCustom {
 			.fetch();
 	}
 
-	@Override
-	public List<AssetImage> findByCreatorTopN(Long nowid, Long userid, int size) {
-		return queryFactory
-			.selectFrom(assetImage)
-			.where(assetImage.creator.eq(userid))
-			.orderBy(assetImage.Id.desc())
-			.limit(size)
-			.fetch();
-	}
-
-	@Override
-	public List<AssetImage> findByCreatorIdNextN(Long nowid, Long userid, Long cursorId, int size) {
-		return queryFactory
-			.selectFrom(assetImage)
-			.where(assetImage.Id.lt(cursorId)
-				.and(assetImage.creator.eq(userid)))
-			.orderBy(assetImage.Id.desc())
-			.limit(size)
-			.fetch();
-	}
 }

@@ -10,7 +10,4 @@ public interface AssetImageRepositoryCustom {
 
 	List<AssetImage> findByUserIdNextN(Long nowId, Long cursorId, int size);
 
-	List<AssetImage> findByCreatorTopN(Long nowid, Long userid, int size);
-
-	List<AssetImage> findByCreatorIdNextN(Long nowid, Long userid, Long cursorId, int size);
 }
