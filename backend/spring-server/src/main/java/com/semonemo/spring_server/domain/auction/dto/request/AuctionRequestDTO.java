@@ -5,7 +5,8 @@ import com.semonemo.spring_server.domain.nft.entity.NFTs;
 
 public record AuctionRequestDTO(
 	Long nftId,
-	long startPrice) {
+	long startPrice,
+	String txHash) {
 
 	public Auction toEntity(NFTs nft) {
 		return Auction.builder()

@@ -9,7 +9,7 @@ import com.semonemo.spring_server.domain.auction.dto.request.BidRequestDTO;
 import com.semonemo.spring_server.domain.auction.entity.Auction;
 
 public interface AuctionService {
-	Auction createAuction(Auction auction);
+	Auction createAuction(Auction auction, String txHash);
 
 	Auction convertWithNFT(AuctionRequestDTO requestDTO);
 
