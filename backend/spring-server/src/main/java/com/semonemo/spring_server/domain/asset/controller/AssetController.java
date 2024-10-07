@@ -122,7 +122,7 @@ public class AssetController implements AssetApi {
 			assetService.assetBuy(users, assetBuyRequestDto.getAssetSellId(), tradeId);
 			return CommonResponse.success("에셋 구매 성공");
 		} catch (Exception e) {
-			throw new CustomException(ErrorCode.MARKET_BUY_FAIL);
+			throw new CustomException(ErrorCode.ASSET_BUY_FAIL);
 		}
 	}
 
