@@ -47,14 +47,8 @@ public class SearchServiceImpl implements SearchService {
 	private final NFTMarketRepository nftMarketRepository;
 	private final NftSearchRepository nftSearchRepository;
 	private final SearchQueryRepository searchQueryRepository;
-	private final ElasticsearchSyncService syncService;
 	private final BlockChainService blockChainService;
 	private final UserRepository userRepository;
-
-	@PostConstruct
-	public void initializeElasticsearch() {
-		syncService.syncAllData();
-	}
 
 
 
