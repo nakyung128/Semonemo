@@ -148,14 +148,15 @@ public class BlockChainServiceImpl implements BlockChainService {
     }
 
     @Override
-    public BigInteger endAuction(String buyer, BigInteger tokenId) throws Exception {
+    public BigInteger endAuction(String buyer, BigInteger tokenId, BigInteger amount) throws Exception {
         Function function = new Function(
-                "closeAuction",
-                Arrays.asList(
-                        new Uint256(tokenId),
-                        new Address(buyer)
-                ),
-                Collections.emptyList()
+            "closeAuction",
+            Arrays.asList(
+                new Uint256(tokenId),
+                new Address(buyer),
+                new Uint256(amount)
+            ),
+            Collections.emptyList()
         );
 
         String encodedFunction = FunctionEncoder.encode(function);
