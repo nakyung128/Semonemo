@@ -357,7 +357,8 @@ public class AuctionServiceImpl implements AuctionService {
             user.minusBalance(lastBid.getBidAmount());
 
             try {
-                BigInteger tradeId = blockChainService.endAuction(user.getAddress(), nft.getTokenId());
+                BigInteger convertedAmount = blockChainService.convertToSmallestUnit(BigInteger.valueOf(lastBid.getBidAmount()));
+                BigInteger tradeId = blockChainService.endAuction(user.getAddress(), nft.getTokenId(), convertedAmount);
                 TradeLog tradeLog = TradeLog.builder()
                         .tradeId(tradeId)
                         .fromUser(user)
