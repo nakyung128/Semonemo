@@ -69,13 +69,14 @@ public enum ErrorCode {
 	SELL_DETAIL_FAIL("AS005", "판매에셋 상세 조회 실패했습니다", HttpStatus.NOT_FOUND),
 	ASSET_LOAD_FAIL("AS006", "판매에셋 전체 조회 실패했습니다", HttpStatus.NOT_FOUND),
 	MINE_LOAD_FAIL("AS007", "보유중 에셋 조회 실패했습니다", HttpStatus.NOT_FOUND),
-	USERS_LOAD_FAIL("AS008", "유저 생성 에셋 조회 실패했습니다", HttpStatus.NOT_FOUND),
+	USERS_LOAD_FAIL("AS008", "유저 보유 에셋 조회 실패했습니다", HttpStatus.NOT_FOUND),
 	LIKE_FAIL("AS009", "좋아요 실패하였습니다", HttpStatus.INTERNAL_SERVER_ERROR),
 	DISLIKE_FAIL("AS010", "좋아요 취소 실패하였습니다", HttpStatus.INTERNAL_SERVER_ERROR),
 	ASSET_ON_SALE("ASS011", "이미 판매중인 에셋입니다", HttpStatus.BAD_REQUEST),
 	CREATOR_NOT_MATCH("ASS012", "에셋 제작자가 아닙니다", HttpStatus.BAD_REQUEST),
 	NOT_ENOUGH_BALANCE("AS013","보유 자산이 부족합니다",HttpStatus.BAD_REQUEST),
 	ASSET_BUY_FAIL("AS014", "에셋 구매 실패하였습니다.", HttpStatus.BAD_REQUEST),
+	CREATORS_LOAD_FAIL("AS015", "유저 생성 에셋 조회 실패했습니다", HttpStatus.NOT_FOUND),
 
 	// Auction
 	BID_AMOUNT_LESS_THAN_HIGHEST("AU001", "최고 입찰가보다 낮은 금액으로 입찰할 수 없습니다.", HttpStatus.BAD_REQUEST),

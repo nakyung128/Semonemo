@@ -304,7 +304,7 @@ public class CoinServiceImpl implements CoinService {
 
 	@Override
 	public List<CoinHistoryDto> getWeeklyPrices() {
-		List<CoinPriceHistory> weeklyPrices = coinHistoryRepository.findTop7ByOrderByDateDesc();
+		List<CoinPriceHistory> weeklyPrices = coinHistoryRepository.findTop7ByOrderByDateAsc();
 		return weeklyPrices.stream()
 			.map(this::convertToCoinPriceDTO)
 			.collect(Collectors.toList());

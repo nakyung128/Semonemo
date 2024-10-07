@@ -10,5 +10,5 @@ import com.semonemo.spring_server.domain.coin.entity.CoinPriceHistory;
 public interface CoinHistoryRepository extends JpaRepository<CoinPriceHistory,Long> {
 
 	CoinPriceHistory findByDate(LocalDate date);
-	List<CoinPriceHistory> findTop7ByOrderByDateDesc();
+	List<CoinPriceHistory> findTop7ByOrderByDateAsc();
 }

@@ -1,11 +1,13 @@
 package com.semonemo.spring_server.domain.asset.repository.assetsell;
 
+import static com.semonemo.spring_server.domain.asset.model.QAssetImage.*;
 import static com.semonemo.spring_server.domain.asset.model.QAssetSell.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.semonemo.spring_server.domain.asset.model.AssetImage;
 import com.semonemo.spring_server.domain.asset.model.AssetSell;
 
 public class AssetSellRepositoryImpl implements AssetSellRepositoryCustom {
@@ -61,6 +63,30 @@ public class AssetSellRepositoryImpl implements AssetSellRepositoryCustom {
 			.execute();
 	}
 
+	@Override
+	public List<AssetSell> findByCreatorTopN( Long userid, int size) {
+		return queryFactory
+			.selectFrom(assetSell)
+			.join(assetImage)
+			.on(assetSell.assetId.eq(assetImage.Id))
+			.where(assetImage.creator.eq(userid))
+			.orderBy(assetSell.Id.desc())
+			.limit(size)
+			.fetch();
+	}
+
+	@Override
+	public List<AssetSell> findByCreatorIdNextN( Long userid, Long cursorId, int size) {
+		return queryFactory
+			.selectFrom(assetSell)
+			.join(assetImage)
+			.on(assetSell.assetId.eq(assetImage.Id))
+			.where(assetImage.Id.lt(cursorId)
+				.and(assetImage.creator.eq(userid)))
+			.orderBy(assetImage.Id.desc())
+			.limit(size)
+			.fetch();
+	}
 
 
 }

@@ -238,27 +238,29 @@ public class AssetServiceImpl implements AssetService {
 		return new CursorResult<>(dtos, nextCursorId, hasNext);
 	}
 
-	// @Override
-	// public CursorResult<AssetResponseDto> getUserAsset(Long nowid, Long userId, Long cursorId, int size) {
-	// 	List<AssetImage> assetImages;
-	// 	if (cursorId == null) {
-	// 		assetImages = assetImageRepository.findByCreatorTopN(nowid, userId, size + 1);
-	// 	} else {
-	// 		assetImages = assetImageRepository.findByCreatorIdNextN(nowid, userId, cursorId, size + 1);
-	// 	}
-	// 	List<AssetResponseDto> dtos = new ArrayList<>();
-	// 	boolean hasNext = false;
-	// 	if (assetImages.size() > size) {
-	// 		hasNext = true;
-	// 		assetImages = assetImages.subList(0, size);
-	// 	}
-	// 	for (AssetImage assetImage : assetImages) {
-	// 		AssetResponseDto dto = convertToAssetDto(nowid, assetImage.getId());
-	// 		dtos.add(dto);
-	// 	}
-	// 	Long nextCursorId = hasNext ? assetImages.get(assetImages.size() - 1).getId() : null;
-	// 	return new CursorResult<>(dtos, nextCursorId, hasNext);
-	// }
+
+
+	@Override
+	public CursorResult<AssetSellResponseDto> getCreatorAsset(Long nowid, Long userId, Long cursorId, int size) {
+		List<AssetSell> assetSells;
+		if (cursorId == null) {
+			assetSells = assetSellRepository.findByCreatorTopN( userId, size + 1);
+		} else {
+			assetSells = assetSellRepository.findByCreatorIdNextN( userId, cursorId, size + 1);
+		}
+		List<AssetSellResponseDto> dtos = new ArrayList<>();
+		boolean hasNext = false;
+		if (assetSells.size() > size) {
+			hasNext = true;
+			assetSells = assetSells.subList(0, size);
+		}
+		for (AssetSell assetSell : assetSells) {
+			AssetSellResponseDto dto = convertToDto(nowid, assetSell.getId());
+			dtos.add(dto);
+		}
+		Long nextCursorId = hasNext ? assetSells.get(assetSells.size() - 1).getId() : null;
+		return new CursorResult<>(dtos, nextCursorId, hasNext);
+	}
 
 	@Transactional
 	@Override

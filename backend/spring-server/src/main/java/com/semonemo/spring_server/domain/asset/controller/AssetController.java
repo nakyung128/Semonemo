@@ -206,6 +206,21 @@ public class AssetController implements AssetApi {
 
 	}
 
+	@GetMapping("/user")
+	public CommonResponse<?> getUsers(
+		@AuthenticationPrincipal UserDetails userDetails,
+		@RequestParam Long userId,
+		@RequestParam(required = false) Long cursorId,
+		@RequestParam(defaultValue = "40") int size) {
+		try {
+			Users users = userService.findByAddress(userDetails.getUsername());
+			CursorResult<AssetResponseDto> result = assetService.getUserAsset(users.getId(), userId, cursorId, size);
+			return CommonResponse.success(result, "유저보유 에셋 불러오기 성공");
+		} catch (Exception e) {
+			throw new CustomException(ErrorCode.USERS_LOAD_FAIL);
+		}
+	}
+
 	@GetMapping("/creator")
 	public CommonResponse<?> getCreator(
 		@AuthenticationPrincipal UserDetails userDetails,
@@ -214,10 +229,10 @@ public class AssetController implements AssetApi {
 		@RequestParam(defaultValue = "40") int size) {
 		try {
 			Users users = userService.findByAddress(userDetails.getUsername());
-			CursorResult<AssetResponseDto> result = assetService.getUserAsset(users.getId(), userId, cursorId, size);
+			CursorResult<AssetSellResponseDto> result = assetService.getCreatorAsset(users.getId(), userId, cursorId, size);
 			return CommonResponse.success(result, "유저생성 에셋 불러오기 성공");
 		} catch (Exception e) {
-			throw new CustomException(ErrorCode.USERS_LOAD_FAIL);
+			throw new CustomException(ErrorCode.CREATORS_LOAD_FAIL);
 		}
 	}
 
