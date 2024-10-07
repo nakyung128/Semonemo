@@ -355,6 +355,7 @@ public class AuctionServiceImpl implements AuctionService {
             Users user = userRepository.findById(lastBid.getUserId())
                     .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND_ERROR));
             user.minusBalance(lastBid.getBidAmount());
+            nft.getOwner().plusBalance(lastBid.getBidAmount());
 
             try {
                 BigInteger convertedAmount = blockChainService.convertToSmallestUnit(BigInteger.valueOf(lastBid.getBidAmount()));
