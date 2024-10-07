@@ -96,4 +96,26 @@ public interface CoinApi {
         @AuthenticationPrincipal UserDetails userDetails,
         @RequestBody CoinTxRequestDto coinTxRequestDto
     );
+
+    @Operation(summary = "코인 시세 조회", description = "코인 시세 및 변동률 조회하는 API")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "코인 시세 조회 성공",
+            content = @Content(schema = @Schema(implementation = CoinResponseDto.class))),
+        @ApiResponse(responseCode = "500", description = "서버 내부 오류",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    CommonResponse<?> getPrice(
+    );
+
+    @Operation(summary = "주간 코인 시세 조회", description = "주간 코인 시세 및 변동률 조회하는 API")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "주간 코인 시세 조회 성공",
+            content = @Content(schema = @Schema(implementation = CoinResponseDto.class))),
+        @ApiResponse(responseCode = "500", description = "서버 내부 오류",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    CommonResponse<?> getWeeklyPrices(
+    );
+
+
 }

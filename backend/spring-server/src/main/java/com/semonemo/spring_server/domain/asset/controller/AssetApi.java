@@ -153,4 +153,17 @@ public interface AssetApi {
 		@AuthenticationPrincipal UserDetails userDetails,
 		@PathVariable Long assetSellId
 	);
+
+	@Operation(summary = "좋아요 목록 조회 API", description = "좋아요누른 에셋 모두 조회하는 API")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "좋아요 목록 조회 성공"),
+		@ApiResponse(responseCode = "500", description = "서버 내부 오류",
+			content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+	})
+	CommonResponse<?> getLikeAsset(
+		@AuthenticationPrincipal UserDetails userDetails,
+		@RequestParam(defaultValue = "0") int page,
+		@RequestParam(defaultValue = "40") int size
+	);
+
 }

@@ -6,6 +6,12 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
+import org.springframework.data.elasticsearch.annotations.Query;
+import org.springframework.data.elasticsearch.client.elc.NativeQuery;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
+import org.springframework.data.elasticsearch.core.query.DeleteQuery;
 import org.springframework.stereotype.Service;
 
 import com.semonemo.spring_server.domain.asset.model.AssetImage;
@@ -32,6 +38,8 @@ import com.semonemo.spring_server.domain.nft.repository.ntags.NTagRepository;
 import com.semonemo.spring_server.domain.user.entity.Users;
 import com.semonemo.spring_server.domain.user.repository.UserRepository;
 
+import co.elastic.clients.elasticsearch._types.query_dsl.MatchAllQuery;
+import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -51,6 +59,31 @@ public class ElasticsearchSyncService {
 
 	private final UserRepository userRepository;
 	private final UserSearchRepository userSearchRepository;
+
+	private final ElasticsearchOperations elasticsearchOperations;
+
+	@EventListener(ContextRefreshedEvent.class)
+	public void onApplicationEvent(ContextRefreshedEvent event) {
+		initializeElasticsearchIndices();
+	}
+
+
+	private void initializeElasticsearchIndices() {
+		deleteAllDocuments(AssetSellDocument.class);
+		deleteAllDocuments(NFTSellDocument.class);
+		deleteAllDocuments(UserDocument.class);
+
+		syncAllData();
+	}
+
+
+	private <T> void deleteAllDocuments(Class<T> clazz) {
+		NativeQuery query = NativeQuery.builder()
+			.withQuery(q -> q.matchAll(QueryBuilders.matchAll().build()))
+			.build();
+
+		elasticsearchOperations.delete(query, clazz);
+	}
 
 	public void syncAllData() {
 		//에셋 업데이트
