@@ -9,5 +9,5 @@ public interface AssetImageRepositoryCustom {
 	List<AssetImage> findByUserIdTopN(Long nowId, int size);
 
 	List<AssetImage> findByUserIdNextN(Long nowId, Long cursorId, int size);
-
 }
+

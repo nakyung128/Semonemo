@@ -114,6 +114,20 @@ public interface AssetApi {
 		@RequestParam(defaultValue = "40") int size
 	);
 
+	@Operation(summary = "유저 보유 에셋 조회 API", description = "특정 사용자가 보유한 에셋을 조회하는 API")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "유저 보유 에셋 조회 성공",
+			content = @Content(schema = @Schema(implementation = CursorResult.class))),
+		@ApiResponse(responseCode = "500", description = "서버 내부 오류",
+			content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+	})
+	CommonResponse<?> getUsers(
+		@AuthenticationPrincipal UserDetails userDetails,
+		@RequestParam Long userId,
+		@RequestParam(required = false) Long cursorId,
+		@RequestParam(defaultValue = "40") int size
+	);
+
 	@Operation(summary = "유저 생성 에셋 조회 API", description = "특정 사용자가 생성한 에셋을 조회하는 API")
 	@ApiResponses(value = {
 		@ApiResponse(responseCode = "200", description = "유저 생성 에셋 조회 성공",
@@ -127,6 +141,9 @@ public interface AssetApi {
 		@RequestParam(required = false) Long cursorId,
 		@RequestParam(defaultValue = "40") int size
 	);
+
+
+
 
 	@Operation(summary = "좋아요 API", description = "특정 판매 에셋에 좋아요를 표시하는 API")
 	@ApiResponses(value = {

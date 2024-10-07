@@ -30,6 +30,8 @@ public interface AssetService {
 
 	CursorResult<AssetResponseDto> getUserAsset(Long nowid, Long userId, Long cursorId, int size);
 
+	CursorResult<AssetSellResponseDto> getCreatorAsset(Long id, Long userId, Long cursorId, int size);
+
 	void like(Long nowid, Long assetSellId);
 
 	void dislike(Long nowid, Long assetSellId);
@@ -43,4 +45,5 @@ public interface AssetService {
 	Page<AssetSellResponseDto> getLikeAsset(Users users, int page, int size);
 
 	void assetBuy(Users users, Long assetSellId, BigInteger tradeId);
+
 }
