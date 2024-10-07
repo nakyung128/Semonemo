@@ -14,7 +14,7 @@ public interface BlockChainService {
 
     TransactionReceipt cancelAuction(BigInteger tokenId) throws Exception;
 
-    TransactionReceipt encAuction(String buyer, BigInteger tokenId) throws Exception;
+    BigInteger endAuction(String buyer, BigInteger tokenId) throws Exception;
 
     List<NFTInfoDto> getNFTsByIds(List<BigInteger> tokenIds) throws Exception;
 

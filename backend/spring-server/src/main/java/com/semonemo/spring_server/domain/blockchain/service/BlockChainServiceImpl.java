@@ -4,11 +4,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.semonemo.spring_server.domain.blockchain.dto.IPFSHashDto;
 import com.semonemo.spring_server.domain.blockchain.dto.NFTInfoDto;
-import com.semonemo.spring_server.domain.coin.dto.response.CoinResponseDto;
-import com.semonemo.spring_server.domain.nft.service.NFTServiceImpl;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.semonemo.spring_server.domain.blockchain.dto.event.TradeEvent;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -18,8 +16,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import org.springframework.web.util.UriComponentsBuilder;
-import org.web3j.abi.FunctionReturnDecoder;
-import org.web3j.abi.TypeReference;
+import org.web3j.abi.*;
 import org.web3j.abi.datatypes.*;
 import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.crypto.Credentials;
@@ -29,7 +26,7 @@ import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.protocol.core.methods.response.*;
-import org.web3j.abi.FunctionEncoder;
+import org.web3j.tx.Contract;
 import org.web3j.utils.Numeric;
 
 import com.semonemo.spring_server.domain.blockchain.dto.decoded.NFTInfo;
@@ -37,30 +34,31 @@ import com.semonemo.spring_server.global.exception.CustomException;
 import com.semonemo.spring_server.global.exception.ErrorCode;
 
 @Service
+@RequiredArgsConstructor
 public class BlockChainServiceImpl implements BlockChainService {
-    private static final Log log = LogFactory.getLog(NFTServiceImpl.class);
 
-    private static final String BASE_IPFS_URL = "http://j11d109.p.ssafy.io:8088/ipfs/";
     private static final BigInteger UNIT_CONVERSION_FACTOR = BigInteger.TEN.pow(18);
+
+    @Value("${blockchain.baseurl}")
+    private String BASE_IPFS_URL;
+
+    @Value("${blockchain.coinContractAddress}")
+    private String coinContractAddress;
+
+    @Value("${blockchain.nftContractAddress}")
+    private String nftContractAddress;
+
+    @Value("${blockchain.systemContractAddress}")
+    private String systemContractAddress;
+
+    @Value("${blockchain.adminAddress}")
+    private String adminAddress;
+
+    @Value("${blockchain.adminPrivateKey}")
+    private String adminPrivateKey;
 
     private final Web3j web3j;
     private final RestTemplate restTemplate;
-    private final String coinContractAddress;
-    private final String nftContractAddress;
-    private final String systemContractAddress;
-    private final String adminAddress;
-    private final String adminPrivateKey;
-
-    @Autowired
-    public BlockChainServiceImpl(Web3j web3j, RestTemplate restTemplate) {
-        this.web3j = web3j;
-        this.restTemplate = restTemplate;
-        this.coinContractAddress = "0x6E558BB2bc786Bdf44De4040DE26FE6130767C05";
-        this.nftContractAddress = "0xEb70730D55b197910C9b1AD8a3418f935DCb02d4";
-        this.systemContractAddress = "0x7d61995925C3EA8bEd58E7Cb332a5f33602B0cE4";
-        this.adminAddress = "0xF17ce10D8c13f97Fd6Db4fCB05F7877512098337";
-        this.adminPrivateKey = "0x746b86dcdb199524b77523d43bfb56f0e1b73cae738e66a6bfce4748072ee95c";
-    }
 
     @Override
     public String getClientVersion() throws Exception {
@@ -71,12 +69,12 @@ public class BlockChainServiceImpl implements BlockChainService {
     @Override
     public TransactionReceipt mintCoin(String to, BigInteger amount) throws Exception {
         Function function = new Function(
-            "mint",
-            Arrays.asList(
-                new Address(to),
-                new Uint256(amount)
-            ),
-            Collections.emptyList()
+                "mint",
+                Arrays.asList(
+                        new Address(to),
+                        new Uint256(amount)
+                ),
+                Collections.emptyList()
         );
 
         String encodedFunction = FunctionEncoder.encode(function);
@@ -89,11 +87,11 @@ public class BlockChainServiceImpl implements BlockChainService {
         BigInteger nonce = web3j.ethGetTransactionCount(credentials.getAddress(), DefaultBlockParameterName.LATEST).send().getTransactionCount();
 
         RawTransaction rawTransaction = RawTransaction.createTransaction(
-            nonce,
-            gasPrice,
-            gasLimit,
-            coinContractAddress,
-            encodedFunction
+                nonce,
+                gasPrice,
+                gasLimit,
+                coinContractAddress,
+                encodedFunction
         );
 
         byte[] signedMessage = TransactionEncoder.signMessage(rawTransaction, credentials);
@@ -113,9 +111,9 @@ public class BlockChainServiceImpl implements BlockChainService {
     @Override
     public TransactionReceipt cancelAuction(BigInteger tokenId) throws Exception {
         Function function = new Function(
-            "cancelAuction",
-            Collections.singletonList(new Uint256(tokenId)),
-            Collections.emptyList()
+                "cancelAuction",
+                Collections.singletonList(new Uint256(tokenId)),
+                Collections.emptyList()
         );
 
         String encodedFunction = FunctionEncoder.encode(function);
@@ -128,11 +126,11 @@ public class BlockChainServiceImpl implements BlockChainService {
         BigInteger nonce = web3j.ethGetTransactionCount(credentials.getAddress(), DefaultBlockParameterName.LATEST).send().getTransactionCount();
 
         RawTransaction rawTransaction = RawTransaction.createTransaction(
-            nonce,
-            gasPrice,
-            gasLimit,
-            systemContractAddress,
-            encodedFunction
+                nonce,
+                gasPrice,
+                gasLimit,
+                systemContractAddress,
+                encodedFunction
         );
 
         byte[] signedMessage = TransactionEncoder.signMessage(rawTransaction, credentials);
@@ -150,14 +148,14 @@ public class BlockChainServiceImpl implements BlockChainService {
     }
 
     @Override
-    public TransactionReceipt encAuction(String buyer, BigInteger tokenId) throws Exception {
+    public BigInteger endAuction(String buyer, BigInteger tokenId) throws Exception {
         Function function = new Function(
-            "closeAuction",
-            Arrays.asList(
-                new Uint256(tokenId),
-                new Address(buyer)
-            ),
-            Collections.emptyList()
+                "closeAuction",
+                Arrays.asList(
+                        new Uint256(tokenId),
+                        new Address(buyer)
+                ),
+                Collections.emptyList()
         );
 
         String encodedFunction = FunctionEncoder.encode(function);
@@ -170,11 +168,11 @@ public class BlockChainServiceImpl implements BlockChainService {
         BigInteger nonce = web3j.ethGetTransactionCount(credentials.getAddress(), DefaultBlockParameterName.LATEST).send().getTransactionCount();
 
         RawTransaction rawTransaction = RawTransaction.createTransaction(
-            nonce,
-            gasPrice,
-            gasLimit,
-            systemContractAddress,
-            encodedFunction
+                nonce,
+                gasPrice,
+                gasLimit,
+                systemContractAddress,
+                encodedFunction
         );
 
         byte[] signedMessage = TransactionEncoder.signMessage(rawTransaction, credentials);
@@ -188,19 +186,45 @@ public class BlockChainServiceImpl implements BlockChainService {
 
         String transactionHash = ethSendTransaction.getTransactionHash();
 
-        return waitForTransactionReceipt(transactionHash);
+        TransactionReceipt transactionResult = waitForTransactionReceipt(transactionHash);
+
+        BigInteger tradeId = null;
+
+        if (Objects.equals(transactionResult.getStatus(), "0x1")) {
+            for (org.web3j.protocol.core.methods.response.Log txLog : transactionResult.getLogs()) {
+                String recordEventHash = EventEncoder.encode(TradeEvent.TRADE_RECORDED_EVENT);
+                if (txLog.getTopics().get(0).equals(recordEventHash)) {
+                    EventValues eventValues = Contract.staticExtractEventParameters(
+                            TradeEvent.TRADE_RECORDED_EVENT, txLog
+                    );
+
+                    if (eventValues != null) {
+                        List<Type> indexedValues = eventValues.getIndexedValues();
+                        ;
+                        tradeId = (BigInteger) indexedValues.get(0).getValue();
+                    } else {
+                        throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
+                    }
+                }
+            }
+        } else {
+            throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
+        }
+
+        return tradeId;
     }
 
     @Override
     public List<NFTInfoDto> getNFTsByIds(List<BigInteger> tokenIds) throws Exception {
         List<Uint256> uint256TokenIds = tokenIds.stream()
-            .map(Uint256::new)
-            .collect(Collectors.toList());
+                .map(Uint256::new)
+                .collect(Collectors.toList());
 
         Function function = new Function(
-            "getNFTsByIds",
-            Collections.singletonList(new DynamicArray<>(Uint256.class, uint256TokenIds)),
-            Collections.singletonList(new TypeReference<DynamicArray<NFTInfo>>() {})
+                "getNFTsByIds",
+                Collections.singletonList(new DynamicArray<>(Uint256.class, uint256TokenIds)),
+                Collections.singletonList(new TypeReference<DynamicArray<NFTInfo>>() {
+                })
         );
 
         String encodedFunction = FunctionEncoder.encode(function);
@@ -208,10 +232,10 @@ public class BlockChainServiceImpl implements BlockChainService {
         Credentials credentials = Credentials.create(adminPrivateKey);
 
         EthCall ethCall = web3j.ethCall(
-            Transaction.createEthCallTransaction(
-                credentials.getAddress(), nftContractAddress, encodedFunction
-            ),
-            DefaultBlockParameterName.LATEST
+                Transaction.createEthCallTransaction(
+                        credentials.getAddress(), nftContractAddress, encodedFunction
+                ),
+                DefaultBlockParameterName.LATEST
         ).send();
 
         String rawValue = ethCall.getValue();
@@ -224,7 +248,6 @@ public class BlockChainServiceImpl implements BlockChainService {
 
         try {
             List<Type> decoded = FunctionReturnDecoder.decode(rawValue, function.getOutputParameters());
-            log.info("Decoded value: " + decoded);
 
             if (decoded.isEmpty() || !(decoded.get(0) instanceof DynamicArray)) {
                 throw new Exception("Unexpected response format");
@@ -233,10 +256,8 @@ public class BlockChainServiceImpl implements BlockChainService {
             DynamicArray<NFTInfo> nftArray = (DynamicArray<NFTInfo>) decoded.get(0);
 
             for (NFTInfo nft : nftArray.getValue()) {
-                log.info(new String(nft.tokenURI.getValue(), StandardCharsets.UTF_8));
                 JsonNode tokenData = fetchTokenURIData(new String(nft.tokenURI.getValue(), StandardCharsets.UTF_8));
 
-                log.info(tokenData);
                 NFTInfoDto nftInfoDto = new NFTInfoDto();
                 nftInfoDto.setTokenId(nft.tokenId.getValue());
                 nftInfoDto.setCreator(nft.creator.toString());
@@ -254,8 +275,6 @@ public class BlockChainServiceImpl implements BlockChainService {
                 result.add(nftInfoDto);
             }
         } catch (Exception e) {
-            log.error("Error decoding contract response: " + e.getMessage(), e);
-            log.error("Raw response: " + rawValue);
             throw new Exception("Failed to decode contract response", e);
         }
 
@@ -265,10 +284,10 @@ public class BlockChainServiceImpl implements BlockChainService {
     @Override
     public NFTInfoDto getNFTById(BigInteger tokenId) throws Exception {
         Function function = new Function(
-            "getNFTInfo",
-            Collections.singletonList(new Uint256(tokenId)),
-            List.of(new TypeReference<NFTInfo>() {
-            })
+                "getNFTInfo",
+                Collections.singletonList(new Uint256(tokenId)),
+                List.of(new TypeReference<NFTInfo>() {
+                })
         );
 
         String encodedFunction = FunctionEncoder.encode(function);
@@ -276,10 +295,10 @@ public class BlockChainServiceImpl implements BlockChainService {
         Credentials credentials = Credentials.create(adminPrivateKey);
 
         EthCall ethCall = web3j.ethCall(
-            Transaction.createEthCallTransaction(
-                credentials.getAddress(), nftContractAddress, encodedFunction
-            ),
-            DefaultBlockParameterName.LATEST
+                Transaction.createEthCallTransaction(
+                        credentials.getAddress(), nftContractAddress, encodedFunction
+                ),
+                DefaultBlockParameterName.LATEST
         ).send();
 
         String rawValue = ethCall.getValue();
@@ -292,7 +311,6 @@ public class BlockChainServiceImpl implements BlockChainService {
 
         try {
             List<Type> decoded = FunctionReturnDecoder.decode(rawValue, function.getOutputParameters());
-            log.info("Decoded value: " + decoded);
 
             if (decoded.isEmpty() || !(decoded.get(0) instanceof NFTInfo nftInfo)) {
                 throw new Exception("Unexpected response format");
@@ -300,7 +318,6 @@ public class BlockChainServiceImpl implements BlockChainService {
 
             JsonNode tokenData = fetchTokenURIData(new String(nftInfo.tokenURI.getValue(), StandardCharsets.UTF_8));
 
-            log.info("Token Data: " + tokenData);
             result.setTokenId(nftInfo.tokenId.getValue());
             result.setCreator(nftInfo.creator.toString());
             result.setCurrentOwner(nftInfo.currentOwner.toString());
@@ -315,8 +332,6 @@ public class BlockChainServiceImpl implements BlockChainService {
                 result.setData(null); // 기존 방식으로 fallback
             }
         } catch (Exception e) {
-            log.error("Error decoding contract response: " + e.getMessage(), e);
-            log.error("Raw response: " + rawValue);
             throw new Exception("Failed to decode contract response", e);
         }
 
@@ -326,19 +341,19 @@ public class BlockChainServiceImpl implements BlockChainService {
     @Override
     public BigInteger getBalanceOf(String address) throws Exception {
         Function function = new Function(
-            "balanceOf",
-            List.of(new Address(address)),
-            List.of(new TypeReference<Uint256>() {
-            })
+                "balanceOf",
+                List.of(new Address(address)),
+                List.of(new TypeReference<Uint256>() {
+                })
         );
 
         String encodedFunction = FunctionEncoder.encode(function);
 
         EthCall ethCall = web3j.ethCall(
-            Transaction.createEthCallTransaction(
-                null, coinContractAddress, encodedFunction
-            ),
-            DefaultBlockParameterName.LATEST
+                Transaction.createEthCallTransaction(
+                        null, coinContractAddress, encodedFunction
+                ),
+                DefaultBlockParameterName.LATEST
         ).send();
 
         if (ethCall.hasError()) {
@@ -357,13 +372,10 @@ public class BlockChainServiceImpl implements BlockChainService {
     // 1초마다 트랜잭션 확인, 40초까지. 결과 확인을 위한 함수
     @Override
     public TransactionReceipt waitForTransactionReceipt(String transactionHash) throws Exception {
-
-        log.info(transactionHash);
         Optional<TransactionReceipt> receiptOptional;
         int attempts = 0;
         do {
             EthGetTransactionReceipt transactionReceipt = web3j.ethGetTransactionReceipt(transactionHash).send();
-            log.info(transactionReceipt);
             receiptOptional = transactionReceipt.getTransactionReceipt();
 
             if (receiptOptional.isPresent()) {
@@ -374,7 +386,6 @@ public class BlockChainServiceImpl implements BlockChainService {
             attempts++;
         } while (attempts < 30);
 
-        log.info("end");
         throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
     }
 
@@ -391,9 +402,9 @@ public class BlockChainServiceImpl implements BlockChainService {
 
     public JsonNode fetchTokenURIData(String tokenURI) {
         String fullUrl = UriComponentsBuilder.fromUriString(BASE_IPFS_URL)
-            .path(tokenURI)
-            .build()
-            .toUriString();
+                .path(tokenURI)
+                .build()
+                .toUriString();
 
         String jsonString = restTemplate.getForObject(fullUrl, String.class);
 

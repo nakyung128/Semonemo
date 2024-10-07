@@ -46,7 +46,7 @@ public class AuctionController {
 	@PostMapping
 	public CommonResponse<?> createAuction(@RequestBody AuctionRequestDTO requestDTO) {
 		Auction auction = auctionService.convertWithNFT(requestDTO);
-		return CommonResponse.success(auctionService.createAuction(auction), "경매 등록에 성공했습니다.");
+		return CommonResponse.success(auctionService.createAuction(auction, requestDTO.txHash()), "경매 등록에 성공했습니다.");
 	}
 
 	@GetMapping("/{auctionId}/join")
