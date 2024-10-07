@@ -86,7 +86,7 @@ public class AssetController implements AssetApi {
 		return CommonResponse.success("에셋 판매등록 성공");
 	}
 
-	// NFT 구매
+	// 에셋 구매
 	@PostMapping("/purchase")
 	public CommonResponse<?> buyAsset(
         @AuthenticationPrincipal UserDetails userDetails,
