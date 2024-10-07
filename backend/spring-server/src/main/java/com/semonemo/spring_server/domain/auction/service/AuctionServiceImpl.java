@@ -1,14 +1,20 @@
 package com.semonemo.spring_server.domain.auction.service;
 
+import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.semonemo.spring_server.domain.blockchain.dto.event.AuctionEvent;
+import com.semonemo.spring_server.domain.blockchain.dto.event.MarketEvent;
+import com.semonemo.spring_server.domain.coin.entity.TradeLog;
+import com.semonemo.spring_server.domain.coin.repository.TradeLogRepository;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.data.redis.core.HashOperations;
@@ -40,6 +46,9 @@ import com.semonemo.spring_server.global.exception.ErrorCode;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.web3j.abi.EventEncoder;
+import org.web3j.abi.datatypes.Event;
+import org.web3j.protocol.core.methods.response.TransactionReceipt;
 
 @Slf4j
 @Service
@@ -57,6 +66,8 @@ public class AuctionServiceImpl implements AuctionService {
     private final AuctionRepository auctionRepository;
     private final NFTRepository nftRepository;
     private final BlockChainService blockChainService;
+    private final TradeLogRepository tradeLogRepository;
+
     private final RedisTemplate<String, Object> redisTemplate;
     private final SimpMessagingTemplate messagingTemplate;
     private final RedissonClient redissonClient;
@@ -64,9 +75,11 @@ public class AuctionServiceImpl implements AuctionService {
 
     @Override
     @Transactional
-    public Auction createAuction(Auction auction) {
+    public Auction createAuction(Auction auction, String txHash) {
         auction.setStatus(AuctionStatus.READY);
         Auction savedAuction = auctionRepository.save(auction);
+
+        transactionProcess(txHash, AuctionStatus.READY);
 
         String auctionKey = AUCTION_KEY_PREFIX + savedAuction.getId();
         String logKey = AUCTION_LOG_KEY_PREFIX + savedAuction.getId();
@@ -321,10 +334,17 @@ public class AuctionServiceImpl implements AuctionService {
 
         Auction auction = auctionRepository.findById(auctionId)
                 .orElseThrow(() -> new RuntimeException("Auction not found"));
+        NFTs nft = nftRepository.findById(auction.getNft().getNftId())
+                .orElseThrow(() -> new CustomException(ErrorCode.NFT_NOT_FOUND_ERROR));
 
         // 경매가 유찰된 경우
         if (lastBid == null) {
             auction.setStatus(AuctionStatus.CANCEL);
+            try {
+                blockChainService.cancelAuction(nft.getTokenId());
+            } catch (Exception e) {
+                throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
+            }
         } else {
             auction.updateResult(
                     lastBid.getUserId(),
@@ -335,6 +355,21 @@ public class AuctionServiceImpl implements AuctionService {
             Users user = userRepository.findById(lastBid.getUserId())
                     .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND_ERROR));
             user.minusBalance(lastBid.getBidAmount());
+
+            try {
+                BigInteger tradeId = blockChainService.endAuction(user.getAddress(), nft.getTokenId());
+                TradeLog tradeLog = TradeLog.builder()
+                        .tradeId(tradeId)
+                        .fromUser(user)
+                        .toUser(auction.getNft().getOwner())
+                        .amount(lastBid.getBidAmount())
+                        .tradeType("NFT 경매")
+                        .build();
+                tradeLogRepository.save(tradeLog);
+                nft.changeOwner(user);
+            } catch (Exception e) {
+                throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
+            }
         }
 
         AuctionEndDTO response = AuctionEndDTO.builder()
@@ -378,5 +413,39 @@ public class AuctionServiceImpl implements AuctionService {
         int count = getParticipantCount(auctionId);
         messagingTemplate.convertAndSend("/topic/auction/" + auctionId + "/participants", count);
         return count;
+    }
+
+    private void transactionProcess(String txHash, AuctionStatus status) {
+        try {
+            TransactionReceipt transactionResult = blockChainService.waitForTransactionReceipt(txHash);
+
+            boolean eventFound = false;
+
+            Event event = null;
+            switch (String.valueOf(status)) {
+                case "READY" -> event = AuctionEvent.AUCTION_STARTED_EVENT;
+                case "END" -> event = AuctionEvent.AUCTION_CLOSED_EVENT;
+                default -> event = AuctionEvent.AUCTION_CANCELLED_EVENT;
+            }
+
+            if (Objects.equals(transactionResult.getStatus(), "0x1")) {
+                for (org.web3j.protocol.core.methods.response.Log txLog : transactionResult.getLogs()) {
+                    String eventHash = EventEncoder.encode(event);
+                    if (txLog.getTopics().get(0).equals(eventHash)) {
+                        eventFound = true;
+                        break;
+                    }
+                }
+
+                if (!eventFound) {
+                    throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
+                }
+            } else {
+                throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
+            }
+        } catch (Exception e) {
+            throw new CustomException(ErrorCode.MARKET_CREATE_FAIL);
+        }
+
     }
 }
