@@ -10,24 +10,25 @@ import lombok.Setter;
 @Getter
 @Builder
 public class UserRegisterRequestDTO {
-	private String address;
-	private String password;
-	private String nickname;
-	@Setter
-	private String profileImage;
+    private String address;
+    private String password;
+    private String nickname;
+    @Setter
+    private String profileImage;
 
-	public Users toEntity() {
-		return Users.builder()
-			.address(this.address)
-			.password(this.password)
-			.nickname(this.nickname)
-			.profileImage(this.profileImage)
-			.build();
-	}
+    public Users toEntity() {
+        return Users.builder()
+                .address(this.address)
+                .password(this.password)
+                .nickname(this.nickname)
+                .profileImage(this.profileImage)
+                .balance(0L)
+                .build();
+    }
 
-	@Schema(hidden = true)
-	public boolean isValid() {
-		return address != null && password != null && nickname != null &&
-			!address.isBlank() && !password.isBlank() && !nickname.isBlank();
-	}
+    @Schema(hidden = true)
+    public boolean isValid() {
+        return address != null && password != null && nickname != null &&
+                !address.isBlank() && !password.isBlank() && !nickname.isBlank();
+    }
 }

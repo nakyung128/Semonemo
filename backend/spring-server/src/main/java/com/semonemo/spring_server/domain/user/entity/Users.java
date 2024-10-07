@@ -37,7 +37,7 @@ public class Users extends BaseTimeEntity {
 	private String nickname;
 	private String profileImage;
 
-    @ColumnDefault("0")
+	@Column(columnDefinition = "BIGINT DEFAULT 0")
     private Long balance;
 
 	@OneToMany(mappedBy = "fromUser")
