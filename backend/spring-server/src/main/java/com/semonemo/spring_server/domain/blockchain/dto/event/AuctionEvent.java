@@ -13,8 +13,7 @@ public class AuctionEvent {
     public static final Event AUCTION_STARTED_EVENT = new Event("AuctionStarted",
         Arrays.<TypeReference<?>>asList(
             new TypeReference<Uint256>(true) {},  // indexed nftId
-            new TypeReference<Address>(true) {},  // indexed seller
-            new TypeReference<Uint256>() {}       // non-indexed price
+            new TypeReference<Address>(true) {}   // indexed seller
         )
     );
 
