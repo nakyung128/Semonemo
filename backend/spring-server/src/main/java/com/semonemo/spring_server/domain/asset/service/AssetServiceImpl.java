@@ -129,7 +129,7 @@ public class AssetServiceImpl implements AssetService {
 		}
 
 		for (AssetSell assetSell : assetSells) {
-			AssetSellResponseDto dto = convertToDto( assetSell.getId());
+			AssetSellResponseDto dto = convertToDto(nowId, assetSell.getId());
 			dtos.add(dto);
 		}
 		Long nextCursorId = hasNext ? assetSells.get(assetSells.size() - 1).getId() : null;
@@ -186,7 +186,7 @@ public class AssetServiceImpl implements AssetService {
 
 		Page<AssetSell> assetSellPage = assetSellRepository.findByIsOnSaleTrue(pageable);
 		List<AssetSellResponseDto> dtos = assetSellPage.getContent().stream()
-			.map(assetSell -> convertToDto(assetSell.getId()))
+			.map(assetSell -> convertToDto(nowId, assetSell.getId()))
 			.collect(Collectors.toList());
 
 		return new PageImpl<>(dtos, pageable, assetSellPage.getTotalElements());
@@ -299,7 +299,7 @@ public class AssetServiceImpl implements AssetService {
 
 		List<AssetSellResponseDto> dtos = new ArrayList<>();
 		for (AssetLike like : likedAssets.getContent()) {
-			AssetSellResponseDto dto = convertToDto( like.getAssetSellId());
+			AssetSellResponseDto dto = convertToDto(user.getId(), like.getAssetSellId());
 			dtos.add(dto);
 		}
 
@@ -392,14 +392,14 @@ public class AssetServiceImpl implements AssetService {
 		return assetResponseDto;
 	}
 
-	private AssetSellResponseDto convertToDto( Long assetSellId) {
+	private AssetSellResponseDto convertToDto(Long nowId, Long assetSellId) {
 		AssetSell assetSell = assetSellRepository.findById(assetSellId)
 			.orElseThrow(() -> new IllegalArgumentException("Asset id not found"));
 
 		AssetImage assetImage = assetImageRepository.findById(assetSell.getAssetId())
 			.orElseThrow(() -> new IllegalArgumentException("Asset id not found"));
 
-		boolean isLiked = assetLikeRepository.existsByUserIdAndAssetSellId(assetImage.getCreator(), assetSellId);
+		boolean isLiked = assetLikeRepository.existsByUserIdAndAssetSellId(nowId, assetSellId);
 		UserInfoResponseDTO userDto =convertToUserInfo(assetImage.getCreator());
 		AssetSellResponseDto dto = new AssetSellResponseDto(
 			assetSell.getAssetId(),
