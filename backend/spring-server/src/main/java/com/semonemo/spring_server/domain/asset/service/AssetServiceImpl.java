@@ -78,33 +78,26 @@ public class AssetServiceImpl implements AssetService {
 			.assetId(assetId)
 			.price(assetSellRequestDto.price())
 			.build();
-		System.out.println(assetSell.toString());
 		assetSellRepository.save(assetSell);
 		List<String> tagsname = assetSellRequestDto.tags();
-		System.out.println(tagsname.toString());
 		for (String tagname : tagsname) {
 			if (aTagsRepository.existsByName(tagname)) {
 				//이미 같은 태그가 존재하면? assettag에 걔로 추가
-				System.out.println(tagname);
 				Long atagId = aTagsRepository.findByName(tagname).getId();
-				System.out.println(atagId);
 				AssetTag assetTag = AssetTag.builder().
 					assetSellId(assetSell.getId()).
 					atagId(atagId).
 					build();
-				System.out.println(assetTag.toString());
 				assetTagRepository.save(assetTag);
 			} else {
 				Atags atags = Atags.builder()
 					.name(tagname)
 					.build();
 				aTagsRepository.save(atags);
-				System.out.println(atags.toString());
 				AssetTag assetTag = AssetTag.builder().
 					assetSellId(assetSell.getId()).
 					atagId(atags.getId()).
 					build();
-				System.out.println(assetTag.toString());
 				assetTagRepository.save(assetTag);
 			}
 		}
