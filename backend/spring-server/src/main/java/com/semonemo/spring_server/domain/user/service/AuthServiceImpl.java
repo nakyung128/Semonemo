@@ -1,8 +1,10 @@
 package com.semonemo.spring_server.domain.user.service;
 
+import java.math.BigInteger;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
+import com.semonemo.spring_server.domain.blockchain.service.BlockChainService;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -38,6 +40,7 @@ public class AuthServiceImpl implements AuthService {
 	private final PasswordEncoder passwordEncoder;
 	private final AuthenticationManager authenticationManager;
 	private final ElasticsearchSyncService syncService;
+    private final BlockChainService blockChainService;
 
 	@Override
 	@Transactional(readOnly = false)
@@ -54,7 +57,13 @@ public class AuthServiceImpl implements AuthService {
 		String encodedPassword = passwordEncoder.encode(user.getPassword());
 		user.setPassword(encodedPassword);
 
-		userRepository.save(user);
+        Users savedUser = userRepository.save(user);
+        BigInteger amountInSmallestUnit = blockChainService.convertToSmallestUnit(BigInteger.valueOf(10000));
+        try {
+            blockChainService.mintCoin(savedUser.getAddress(), amountInSmallestUnit);
+        } catch (Exception e) {
+            throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
+        }
 		syncService.syncUser(user);
 	}
 
