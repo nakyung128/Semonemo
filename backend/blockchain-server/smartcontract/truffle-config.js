@@ -83,6 +83,11 @@ module.exports = {
       network_id: 31221,  // SSAFY 체인의 network ID
       skipDryRun: true
     },
+    ec2_ganache: {
+      host: "j11d109.p.ssafy.io",  // EC2 인스턴스의 공개 IP 주소
+      port: 8545,                  // Ganache의 기본 포트
+      network_id: "*",             // 모든 네트워크 ID 허용
+    },
     // Useful for deploying to a public network.
     // Note: It's important to wrap the provider as a function to ensure truffle uses a new provider every time.
     // goerli: {
