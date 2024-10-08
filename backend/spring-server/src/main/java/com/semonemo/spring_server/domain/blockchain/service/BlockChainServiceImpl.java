@@ -123,6 +123,8 @@ public class BlockChainServiceImpl implements BlockChainService {
         BigInteger gasPrice = web3j.ethGasPrice().send().getGasPrice();
         BigInteger gasLimit = BigInteger.valueOf(300000); // 예상 가스 한도
 
+        System.out.println(gasPrice);
+
         BigInteger nonce = web3j.ethGetTransactionCount(credentials.getAddress(), DefaultBlockParameterName.LATEST).send().getTransactionCount();
 
         RawTransaction rawTransaction = RawTransaction.createTransaction(
@@ -139,6 +141,7 @@ public class BlockChainServiceImpl implements BlockChainService {
         EthSendTransaction ethSendTransaction = web3j.ethSendRawTransaction(hexValue).send();
 
         if (ethSendTransaction.hasError()) {
+            System.out.println(ethSendTransaction.getError().getMessage());
             throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
         }
 
@@ -166,6 +169,7 @@ public class BlockChainServiceImpl implements BlockChainService {
         BigInteger gasPrice = web3j.ethGasPrice().send().getGasPrice();
         BigInteger gasLimit = BigInteger.valueOf(300000); // 예상 가스 한도
 
+        System.out.println(gasPrice);
 
         BigInteger nonce = web3j.ethGetTransactionCount(credentials.getAddress(), DefaultBlockParameterName.LATEST).send().getTransactionCount();
 
@@ -183,6 +187,7 @@ public class BlockChainServiceImpl implements BlockChainService {
         EthSendTransaction ethSendTransaction = web3j.ethSendRawTransaction(hexValue).send();
 
         if (ethSendTransaction.hasError()) {
+            System.out.println(ethSendTransaction.getError().getMessage());
             throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
         }
 
