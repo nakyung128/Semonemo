@@ -225,6 +225,20 @@ public class AssetController implements AssetApi {
 		}
 	}
 
+	@GetMapping("/unsell")
+	public CommonResponse<?> getUnsell(
+		@AuthenticationPrincipal UserDetails userDetails,
+		@RequestParam(required = false) Long cursorId,
+		@RequestParam(defaultValue = "40") int size) {
+		try {
+			Users users = userService.findByAddress(userDetails.getUsername());
+			CursorResult<AssetResponseDto> result = assetService.getUnsell(users.getId(), cursorId, size);
+			return CommonResponse.success(result, "유저 판매 가능 에셋 불러오기 성공");
+		} catch (Exception e) {
+			throw new CustomException(ErrorCode.USERS_LOAD_FAIL);
+		}
+	}
+
 	@GetMapping("/creator")
 	public CommonResponse<?> getCreator(
 		@AuthenticationPrincipal UserDetails userDetails,

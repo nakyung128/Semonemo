@@ -46,4 +46,5 @@ public interface AssetService {
 
 	void assetBuy(Users users, Long assetSellId, BigInteger tradeId);
 
+	CursorResult<AssetResponseDto> getUnsell(Long nowid, Long cursorId, int size);
 }
