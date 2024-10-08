@@ -77,6 +77,7 @@ public class BlockChainServiceImpl implements BlockChainService {
                 Collections.emptyList()
         );
 
+        System.out.println(1);
         String encodedFunction = FunctionEncoder.encode(function);
 
         Credentials credentials = Credentials.create(adminPrivateKey);
@@ -100,6 +101,7 @@ public class BlockChainServiceImpl implements BlockChainService {
         EthSendTransaction ethSendTransaction = web3j.ethSendRawTransaction(hexValue).send();
 
         if (ethSendTransaction.hasError()) {
+            System.out.println(ethSendTransaction);
             throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
         }
 
@@ -185,6 +187,7 @@ public class BlockChainServiceImpl implements BlockChainService {
 
         System.out.println("======Check TX3======");
         if (ethSendTransaction.hasError()) {
+            System.out.println(ethSendTransaction.getError());
             throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
         }
 
