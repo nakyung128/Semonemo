@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Objects;
 
 import com.semonemo.spring_server.domain.asset.dto.*;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.security.core.Authentication;
@@ -47,7 +49,7 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/asset")
 @RequiredArgsConstructor
 public class AssetController implements AssetApi {
-	private final S3Service s3Service;
+    private final S3Service s3Service;
 	private final AssetService assetService;
 	private final UserService userService;
 	private final BlockChainService blockChainService;
@@ -105,6 +107,7 @@ public class AssetController implements AssetApi {
 							TradeEvent.TRADE_RECORDED_EVENT, txLog
 						);
 
+
 						if (eventValues != null) {
 							List<Type> indexedValues = eventValues.getIndexedValues();
 
@@ -118,6 +121,7 @@ public class AssetController implements AssetApi {
 			} else {
 				throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
 			}
+
 			Users users = userService.findByAddress(userDetails.getUsername());
 			assetService.assetBuy(users, assetBuyRequestDto.getAssetSellId(), tradeId);
 			return CommonResponse.success("에셋 구매 성공");
