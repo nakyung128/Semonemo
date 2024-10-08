@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -164,10 +165,15 @@ public class BlockChainServiceImpl implements BlockChainService {
 
         Credentials credentials = Credentials.create(adminPrivateKey);
 
+
+
         BigInteger gasPrice = web3j.ethGasPrice().send().getGasPrice();
-        BigInteger gasLimit = BigInteger.valueOf(300000); // 예상 가스 한도
+
+//        BigInteger gasLimit = BigInteger.valueOf(300000); // 예상 가스 한도
+        BigInteger gasLimit = estimateGasLimit(web3j, credentials.getAddress(), systemContractAddress, encodedFunction);
 
         System.out.println(gasPrice);
+        System.out.println(gasLimit);
 
         BigInteger nonce = web3j.ethGetTransactionCount(credentials.getAddress(), DefaultBlockParameterName.LATEST).send().getTransactionCount();
 
@@ -419,5 +425,24 @@ public class BlockChainServiceImpl implements BlockChainService {
         } catch (Exception e) {
             throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
         }
+    }
+
+    public static BigInteger estimateGasLimit(Web3j web3j, String from, String to, String data) throws IOException {
+        Transaction transaction = Transaction.createFunctionCallTransaction(
+            from,
+            null,
+            null,
+            null,
+            to,
+            data
+        );
+
+        EthEstimateGas ethEstimateGas = web3j.ethEstimateGas(transaction).send();
+        if (ethEstimateGas.hasError()) {
+            throw new IOException("Error estimating gas limit: " + ethEstimateGas.getError().getMessage());
+        }
+
+        BigInteger estimatedGasLimit = ethEstimateGas.getAmountUsed();
+        return estimatedGasLimit.add(BigInteger.valueOf(50000));
     }
 }
