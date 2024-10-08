@@ -26,31 +26,35 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/auction")
 @RequiredArgsConstructor
-public class AuctionController {
+public class AuctionController implements AuctionAPI {
 
 	private final AuctionService auctionService;
 	private final UserService userService;
 
+	@Override
 	@GetMapping("/{auctionId}")
-	public CommonResponse<?> getAuctionById(@PathVariable Long auctionId) {
+	public CommonResponse<AuctionResponseDTO> getAuctionById(@PathVariable Long auctionId) {
 		AuctionResponseDTO response = auctionService.getAuctionById(auctionId);
 		return CommonResponse.success(response, "경매 조회에 성공했습니다.");
 	}
 
+	@Override
 	@GetMapping("/all")
-	public CommonResponse<?> getAllAuctions() {
+	public CommonResponse<List<AuctionResponseDTO>> getAllAuctions() {
 		List<AuctionResponseDTO> response = auctionService.getAllAuctions();
 		return CommonResponse.success(response, "모든 경매 조회에 성공했습니다.");
 	}
 
+	@Override
 	@PostMapping
-	public CommonResponse<?> createAuction(@RequestBody AuctionRequestDTO requestDTO) {
+	public CommonResponse<Auction> createAuction(@RequestBody AuctionRequestDTO requestDTO) {
 		Auction auction = auctionService.convertWithNFT(requestDTO);
 		return CommonResponse.success(auctionService.createAuction(auction, requestDTO.txHash()), "경매 등록에 성공했습니다.");
 	}
 
+	@Override
 	@GetMapping("/{auctionId}/join")
-	public CommonResponse<?> joinAuction(
+	public CommonResponse<AuctionJoinResponseDTO> joinAuction(
 		@PathVariable Long auctionId,
 		@AuthenticationPrincipal UserDetails userDetails
 	) {
@@ -69,12 +73,14 @@ public class AuctionController {
 		return CommonResponse.success(response, "경매 참여에 성공했습니다.");
 	}
 
+	@Override
 	@GetMapping("/{auctionId}/leave")
 	public CommonResponse<?> leaveAuction(@PathVariable Long auctionId) {
 		auctionService.removeParticipant(auctionId);
 		return CommonResponse.success("경매 참여를 취소했습니다.");
 	}
 
+	@Override
 	@GetMapping("/{auctionId}/start")
 	public CommonResponse<?> startAuction(@PathVariable long auctionId) {
 		auctionService.startAuction(auctionId);

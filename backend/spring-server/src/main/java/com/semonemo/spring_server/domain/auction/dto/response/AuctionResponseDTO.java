@@ -11,6 +11,7 @@ public class AuctionResponseDTO {
 	private long id;
 	private AuctionStatus status;
 	private long nftId;
+	private long registerId;
 	private String nftImageUrl;
 	private int participants;
 	private long startPrice;
