@@ -1,7 +1,7 @@
 const { Web3 } = require('web3');
 require('dotenv').config();
 
-const web3 = new Web3('https://rpc.ssafy-blockchain.com');
+const web3 = new Web3('https://j11d109.p.ssafy.io/ganache');
 
 const NFTContractABI = require('../contracts/NFTFrame.json');
 const NFTContractAddress = process.env.NFT_CONTRACT_ADDRESS;
