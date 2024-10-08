@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Objects;
 
 import com.semonemo.spring_server.domain.asset.dto.*;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.security.core.Authentication;
@@ -47,7 +49,8 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/asset")
 @RequiredArgsConstructor
 public class AssetController implements AssetApi {
-	private final S3Service s3Service;
+    private static final Log log = LogFactory.getLog(AssetController.class);
+    private final S3Service s3Service;
 	private final AssetService assetService;
 	private final UserService userService;
 	private final BlockChainService blockChainService;
@@ -94,30 +97,40 @@ public class AssetController implements AssetApi {
 		try {
 			TransactionReceipt transactionResult = blockChainService.waitForTransactionReceipt(assetBuyRequestDto.getTxHash());
 
+            log.info(1);
 			BigInteger tradeId = null;
 
+            log.info(transactionResult);
 			if (Objects.equals(transactionResult.getStatus(), "0x1")) {
+                log.info(18);
 				for (org.web3j.protocol.core.methods.response.Log txLog : transactionResult.getLogs()) {
 					String eventHash = EventEncoder.encode(TradeEvent.TRADE_RECORDED_EVENT);
 
+                    log.info(5);
 					if (txLog.getTopics().get(0).equals(eventHash)) {
 						EventValues eventValues = Contract.staticExtractEventParameters(
 							TradeEvent.TRADE_RECORDED_EVENT, txLog
 						);
+
+                        log.info(1);
 
 						if (eventValues != null) {
 							List<Type> indexedValues = eventValues.getIndexedValues();
 
 							tradeId = (BigInteger) indexedValues.get(0).getValue();
 
+                            log.info(3);
 						} else {
 							throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
 						}
 					}
 				}
 			} else {
+                log.info(2);
 				throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
 			}
+
+            log.info(1);
 			Users users = userService.findByAddress(userDetails.getUsername());
 			assetService.assetBuy(users, assetBuyRequestDto.getAssetSellId(), tradeId);
 			return CommonResponse.success("에셋 구매 성공");

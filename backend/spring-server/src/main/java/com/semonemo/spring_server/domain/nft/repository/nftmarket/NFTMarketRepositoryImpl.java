@@ -1,5 +1,6 @@
 package com.semonemo.spring_server.domain.nft.repository.nftmarket;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -133,6 +134,21 @@ public class NFTMarketRepositoryImpl implements NFTMarketRepositoryCustom {
             .fetchOne()).orElse(0L);
 
         return new PageImpl<>(content, pageable, total);
+    }
+
+    @Override
+    public List<NFTMarket> findHot() {
+        LocalDateTime twoWeeksAgo = LocalDateTime.now().minusWeeks(2);
+
+        return queryFactory
+            .selectFrom(nftMarket)
+            .where(
+                nftMarket.isSold.isFalse()
+                    .and(nftMarket.createdAt.after(twoWeeksAgo))
+            )
+            .orderBy(nftMarket.likeCount.desc())
+            .limit(5)
+            .fetch();
     }
 
     private OrderSpecifier<?> getOrderSpecifier(Pageable pageable) {

@@ -423,4 +423,17 @@ public class NFTController implements NFTApi {
             throw new CustomException(ErrorCode.NFT_MARKET_NOT_FOUND_ERROR);
         }
     }
+
+    // 타입별 사용가능한 NFT 조회 (보유중)
+    @GetMapping("/hot")
+    public CommonResponse<List<NFTMarketResponseDto>> hotNFTMarketList(
+        @AuthenticationPrincipal UserDetails userDetails) {
+        try {
+            Users users = userService.findByAddress(userDetails.getUsername());
+            List<NFTMarketResponseDto> hotNFTs = nftService.getHotNFTs(users.getId());
+            return CommonResponse.success(hotNFTs, "인기 NFT 조회 성공");
+        } catch (Exception e) {
+            throw new CustomException(ErrorCode.NFT_MARKET_NOT_FOUND_ERROR);
+        }
+    }
 }

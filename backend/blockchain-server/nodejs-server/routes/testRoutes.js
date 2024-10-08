@@ -18,4 +18,6 @@ router.post('/market/create', upload.none(), testController.createMarketTest);
 router.post('/market/cancle', upload.none(), testController.cancleMarketTest);
 router.post('/market/buy', upload.none(), testController.buyMarketTest);
 
+router.post('/transfer', upload.none(), testController.testTransfer);
+router.post('/get/coin', upload.none(), testController.testTransfer);
 module.exports = router;

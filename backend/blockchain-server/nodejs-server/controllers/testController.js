@@ -463,3 +463,70 @@ exports.buyMarketTest = async (req, res) => {
     });
   }
 };
+
+// 유저 간 잔액 이동
+exports.testTransfer = async (req, res) => {
+  try {
+    const { to, amount } = req.body;
+
+    if (!to || !amount) {
+      return res.status(400).json({ error: 'Recipient address (to) and amount are required' });
+    }
+
+    // 토큰의 소수점 자릿수 가져오기 (예: 18)
+    const decimals = await coinContract.methods.decimals().call();
+
+    // 금액을 토큰의 최소 단위로 변환 (문자열 연산 사용)
+    const [integerPart, fractionalPart = ''] = amount.split('.');
+    const paddedFractionalPart = fractionalPart.padEnd(Number(decimals), '0');
+    const amountInSmallestUnit = integerPart + paddedFractionalPart;
+
+    // 앞에 붙은 0 제거
+    const amountInSmallestUnitTrimmed = amountInSmallestUnit.replace(/^0+/, '');
+
+
+    console.log(await systemContract.methods.getUserBalance(account.address).call())
+
+    console.log(amountInSmallestUnitTrimmed)
+
+    // 가스 가격 및 가스 한도 추정
+    const gasPrice = await web3.eth.getGasPrice();
+    const gasEstimate = await systemContract.methods.transferBalance(to, amountInSmallestUnitTrimmed).estimateGas({ from: account.address });
+    const nonce = await web3.eth.getTransactionCount(account.address, 'pending');
+
+    // 트랜잭션 객체 생성
+    const tx = {
+      nonce: nonce.toString(),
+      from: account.address,
+      to: systemContract.options.address,
+      gas: gasEstimate.toString(),
+      gasPrice: gasPrice.toString(),
+      data: systemContract.methods.transferBalance(to, amountInSmallestUnitTrimmed).encodeABI()
+    };
+
+
+    console.log(125123412)
+
+    // 트랜잭션 서명
+    const signedTx = await web3.eth.accounts.signTransaction(tx, process.env.ADMIN_PRIVATE_KEY);
+    
+    // 서명된 트랜잭션 전송
+    const receipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
+
+    console.log(123)
+
+    res.json({
+      code: "S000",
+      data: {
+        transactionHash: receipt.transactionHash,
+      },
+      message: "Balance transfer 테스트 성공.",
+    });
+  } catch (error) {
+    const errorLog = handleError(error);
+    res.status(500).json({ 
+      errorCode: errorLog.code,
+      message: errorLog.message
+    });
+  }
+};
