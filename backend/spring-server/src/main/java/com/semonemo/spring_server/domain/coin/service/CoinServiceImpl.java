@@ -136,7 +136,6 @@ public class CoinServiceImpl implements CoinService {
         List<TradeLogResponseDto> dtos = new ArrayList<>();
 
         for (TradeLog tradeLog : tradeLogs.getContent()) {
-            log.info(tradeLog.getCreatedAt());
             TradeLogResponseDto dto = tradeLogConvertToDto(tradeLog);
             dtos.add(dto);
         }
