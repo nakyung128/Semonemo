@@ -69,4 +69,34 @@ public class AssetImageRepositoryImpl implements AssetImageRepositoryCustom {
 			.fetch();
 	}
 
+	@Override
+	public List<AssetImage> findByNowIdTopN(Long nowId, int size) {
+		return queryFactory
+			.selectFrom(assetImage)
+			.where(assetImage.creator.eq(nowId)
+				.and(assetImage.Id.notIn(
+					JPAExpressions
+						.select(assetSell.assetId)
+						.from(assetSell)
+				)))
+			.orderBy(assetImage.Id.desc())
+			.limit(size)
+			.fetch();
+	}
+
+	@Override
+	public List<AssetImage> findByNowIdNextN(Long nowId, Long cursorId, int size) {
+		return queryFactory
+			.selectFrom(assetImage)
+			.where(assetImage.creator.eq(nowId)
+				.and(assetImage.Id.notIn(
+					JPAExpressions
+						.select(assetSell.assetId)
+						.from(assetSell)
+				))
+				.and(assetImage.Id.lt(cursorId)))
+			.orderBy(assetImage.Id.desc())
+			.limit(size)
+			.fetch();
+	}
 }
