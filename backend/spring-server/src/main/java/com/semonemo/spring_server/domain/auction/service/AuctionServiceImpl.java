@@ -132,6 +132,7 @@ public class AuctionServiceImpl implements AuctionService {
                 .id(auction.getId())
                 .status(auction.getStatus())
                 .nftId(auction.getNft().getNftId())
+                .registerId(auction.getNft().getOwner().getId())
                 .nftImageUrl(nftInfo.getData().getImage())
                 .participants(getParticipantCount(auctionId))
                 .startPrice(auction.getStartPrice())
@@ -164,6 +165,7 @@ public class AuctionServiceImpl implements AuctionService {
                     .id(auction.getId())
                     .status(auction.getStatus())
                     .nftId(auction.getNft().getNftId())
+                    .registerId(auction.getNft().getOwner().getId())
                     .nftImageUrl(nftInfo.getData().getImage())
                     .participants(getParticipantCount(auction.getId()))
                     .startPrice(auction.getStartPrice())
@@ -361,7 +363,9 @@ public class AuctionServiceImpl implements AuctionService {
 
             try {
                 BigInteger convertedAmount = blockChainService.convertToSmallestUnit(BigInteger.valueOf(lastBid.getBidAmount()));
+                System.out.println("======Check 1======");
                 BigInteger tradeId = blockChainService.endAuction(user.getAddress(), nft.getTokenId(), convertedAmount);
+                System.out.println("======Check 2======");
                 TradeLog tradeLog = TradeLog.builder()
                         .tradeId(tradeId)
                         .fromUser(user)
@@ -370,8 +374,10 @@ public class AuctionServiceImpl implements AuctionService {
                         .tradeType("NFT 경매")
                         .build();
                 tradeLogRepository.save(tradeLog);
+                System.out.println("======Check 3======");
                 nft.changeOwner(user);
                 nft.toggleOnSale(false);
+                System.out.println("======Check 4======");
             } catch (Exception e) {
                 throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
             }
