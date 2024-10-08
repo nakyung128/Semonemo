@@ -77,6 +77,7 @@ public enum ErrorCode {
 	NOT_ENOUGH_BALANCE("AS013","보유 자산이 부족합니다",HttpStatus.BAD_REQUEST),
 	ASSET_BUY_FAIL("AS014", "에셋 구매 실패하였습니다.", HttpStatus.BAD_REQUEST),
 	CREATORS_LOAD_FAIL("AS015", "유저 생성 에셋 조회 실패했습니다", HttpStatus.NOT_FOUND),
+	ALREADY_PURCHASED_ASSET("AS016","이미 구매한 에셋입니다",HttpStatus.NOT_FOUND),
 
 	// Auction
 	BID_AMOUNT_LESS_THAN_HIGHEST("AU001", "최고 입찰가보다 낮은 금액으로 입찰할 수 없습니다.", HttpStatus.BAD_REQUEST),
