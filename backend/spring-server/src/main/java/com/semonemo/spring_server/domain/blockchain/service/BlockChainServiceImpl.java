@@ -162,13 +162,18 @@ public class BlockChainServiceImpl implements BlockChainService {
         );
 
         System.out.println("======Check TX1======");
+        System.out.println(buyer);
+        System.out.println(tokenId);
+        System.out.println(amount);
         String encodedFunction = FunctionEncoder.encode(function);
 
         Credentials credentials = Credentials.create(adminPrivateKey);
 
-//        BigInteger gasPrice = web3j.ethGasPrice().send().getGasPrice();
-        BigInteger gasPrice = BigInteger.valueOf(0);
+        BigInteger gasPrice = web3j.ethGasPrice().send().getGasPrice();
+//        BigInteger gasPrice = BigInteger.valueOf(0);
         BigInteger gasLimit = BigInteger.valueOf(300000); // 예상 가스 한도
+
+        System.out.println(gasPrice);
 
         BigInteger nonce = web3j.ethGetTransactionCount(credentials.getAddress(), DefaultBlockParameterName.LATEST).send().getTransactionCount();
 
