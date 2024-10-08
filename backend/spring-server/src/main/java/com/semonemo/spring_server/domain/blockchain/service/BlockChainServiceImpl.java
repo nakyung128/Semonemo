@@ -77,7 +77,6 @@ public class BlockChainServiceImpl implements BlockChainService {
                 Collections.emptyList()
         );
 
-        System.out.println(1);
         String encodedFunction = FunctionEncoder.encode(function);
 
         Credentials credentials = Credentials.create(adminPrivateKey);
@@ -101,7 +100,6 @@ public class BlockChainServiceImpl implements BlockChainService {
         EthSendTransaction ethSendTransaction = web3j.ethSendRawTransaction(hexValue).send();
 
         if (ethSendTransaction.hasError()) {
-            System.out.println(ethSendTransaction);
             throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
         }
 
@@ -125,8 +123,6 @@ public class BlockChainServiceImpl implements BlockChainService {
         BigInteger gasPrice = web3j.ethGasPrice().send().getGasPrice();
         BigInteger gasLimit = BigInteger.valueOf(300000); // 예상 가스 한도
 
-        System.out.println(gasPrice);
-
         BigInteger nonce = web3j.ethGetTransactionCount(credentials.getAddress(), DefaultBlockParameterName.LATEST).send().getTransactionCount();
 
         RawTransaction rawTransaction = RawTransaction.createTransaction(
@@ -143,9 +139,6 @@ public class BlockChainServiceImpl implements BlockChainService {
         EthSendTransaction ethSendTransaction = web3j.ethSendRawTransaction(hexValue).send();
 
         if (ethSendTransaction.hasError()) {
-            System.out.println(ethSendTransaction.getError().getMessage());
-            System.out.println(ethSendTransaction.getError().getCode());
-            System.out.println(ethSendTransaction.getError().getData());
             throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
         }
 
@@ -166,19 +159,13 @@ public class BlockChainServiceImpl implements BlockChainService {
             Collections.emptyList()
         );
 
-        System.out.println("======Check TX1======");
-        System.out.println(buyer);
-        System.out.println(tokenId);
-        System.out.println(amount);
         String encodedFunction = FunctionEncoder.encode(function);
 
         Credentials credentials = Credentials.create(adminPrivateKey);
 
         BigInteger gasPrice = web3j.ethGasPrice().send().getGasPrice();
-//        BigInteger gasPrice = BigInteger.valueOf(0);
         BigInteger gasLimit = BigInteger.valueOf(300000); // 예상 가스 한도
 
-        System.out.println(gasPrice);
 
         BigInteger nonce = web3j.ethGetTransactionCount(credentials.getAddress(), DefaultBlockParameterName.LATEST).send().getTransactionCount();
 
@@ -190,28 +177,21 @@ public class BlockChainServiceImpl implements BlockChainService {
                 encodedFunction
         );
 
-        System.out.println("======Check TX2======");
         byte[] signedMessage = TransactionEncoder.signMessage(rawTransaction, credentials);
         String hexValue = Numeric.toHexString(signedMessage);
 
         EthSendTransaction ethSendTransaction = web3j.ethSendRawTransaction(hexValue).send();
 
-        System.out.println("======Check TX3======");
         if (ethSendTransaction.hasError()) {
-            System.out.println(ethSendTransaction.getError().getMessage());
-            System.out.println(ethSendTransaction.getError().getCode());
-            System.out.println(ethSendTransaction.getError().getData());
             throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
         }
 
-        System.out.println("======Check TX4======");
         String transactionHash = ethSendTransaction.getTransactionHash();
 
         TransactionReceipt transactionResult = waitForTransactionReceipt(transactionHash);
 
         BigInteger tradeId = null;
 
-        System.out.println("======Check TX5======");
         if (Objects.equals(transactionResult.getStatus(), "0x1")) {
             for (org.web3j.protocol.core.methods.response.Log txLog : transactionResult.getLogs()) {
                 String recordEventHash = EventEncoder.encode(TradeEvent.TRADE_RECORDED_EVENT);
@@ -220,19 +200,16 @@ public class BlockChainServiceImpl implements BlockChainService {
                             TradeEvent.TRADE_RECORDED_EVENT, txLog
                     );
 
-                    System.out.println("======Check TX6======");
                     if (eventValues != null) {
                         List<Type> indexedValues = eventValues.getIndexedValues();
                         ;
                         tradeId = (BigInteger) indexedValues.get(0).getValue();
                     } else {
-                        System.out.println("======Check TX7======");
                         throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
                     }
                 }
             }
         } else {
-            System.out.println("======Check TX8======");
             throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
         }
 
