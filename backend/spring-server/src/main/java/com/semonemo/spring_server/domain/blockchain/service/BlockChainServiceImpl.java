@@ -169,8 +169,8 @@ public class BlockChainServiceImpl implements BlockChainService {
 
         Credentials credentials = Credentials.create(adminPrivateKey);
 
-        BigInteger gasPrice = web3j.ethGasPrice().send().getGasPrice();
-//        BigInteger gasPrice = BigInteger.valueOf(0);
+//        BigInteger gasPrice = web3j.ethGasPrice().send().getGasPrice();
+        BigInteger gasPrice = BigInteger.valueOf(0);
         BigInteger gasLimit = BigInteger.valueOf(300000); // 예상 가스 한도
 
         System.out.println(gasPrice);
