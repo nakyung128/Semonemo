@@ -666,6 +666,39 @@ public class NFTServiceImpl implements NFTService {
         return new PageImpl<>(dtos, pageable, userNFTs.getTotalElements());
     }
 
+    @Transactional
+    @Override
+    public List<NFTMarketResponseDto> getHotNFTs(Long userId) {
+        List<NFTMarket> hotNFTs = nftMarketRepository.findHot();
+
+        List<NFTMarketResponseDto> dtos = new ArrayList<>();
+
+        List<BigInteger> tokenIds = hotNFTs.stream()
+            .map(nft -> nft.getNftId().getTokenId())
+            .toList();
+
+        List<NFTInfoDto> allNFTInfo;
+        try {
+            allNFTInfo = blockChainService.getNFTsByIds(tokenIds);
+        } catch (Exception e) {
+            throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
+        }
+
+        Map<BigInteger, NFTInfoDto> nftInfoMap = allNFTInfo.stream()
+            .collect(Collectors.toMap(
+                NFTInfoDto::getTokenId,
+                info -> info
+            ));
+
+        for (NFTMarket nft : hotNFTs) {
+            NFTInfoDto nftInfo = nftInfoMap.get(nft.getNftId().getTokenId());
+            NFTMarketResponseDto dto = nftMarketConvertToDto(userId, nft, nftInfo);
+            dtos.add(dto);
+        }
+
+        return dtos;
+    }
+
 	// Utils
 	private NFTMarketResponseDto nftMarketConvertToDto(Long userId, NFTMarket sellingNFT, NFTInfoDto nftInfo) {
 		// 좋아요 여부 확인

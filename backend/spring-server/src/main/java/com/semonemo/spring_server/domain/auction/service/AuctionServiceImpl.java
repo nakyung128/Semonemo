@@ -79,6 +79,8 @@ public class AuctionServiceImpl implements AuctionService {
         auction.setStatus(AuctionStatus.READY);
         Auction savedAuction = auctionRepository.save(auction);
 
+        savedAuction.getNft().toggleOnSale(true);
+
         transactionProcess(txHash, AuctionStatus.READY);
 
         String auctionKey = AUCTION_KEY_PREFIX + savedAuction.getId();
@@ -369,6 +371,7 @@ public class AuctionServiceImpl implements AuctionService {
                         .build();
                 tradeLogRepository.save(tradeLog);
                 nft.changeOwner(user);
+                nft.toggleOnSale(false);
             } catch (Exception e) {
                 throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
             }

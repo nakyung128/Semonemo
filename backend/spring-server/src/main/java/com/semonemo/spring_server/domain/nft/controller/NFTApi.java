@@ -235,4 +235,16 @@ public interface NFTApi {
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "15") int size
     );
+
+    @Operation(summary = "2주 이내 가장 좋아요를 많이받은 게시물 조회", description = "2주 이내 가장 좋아요를 많이받은 게시물 조회")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "조회 성공",
+            content = @Content(schema = @Schema(implementation = NFTMarketResponseDto.class))),
+        @ApiResponse(responseCode = "500", description = "서버 내부 오류",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    CommonResponse<List<NFTMarketResponseDto>> hotNFTMarketList(
+        @AuthenticationPrincipal UserDetails userDetails
+    );
+
 }

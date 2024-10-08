@@ -17,5 +17,7 @@ public interface NFTMarketRepositoryCustom {
 
     Page<NFTMarket> findByLiked(Long userId, Pageable pageable);
 
+    List<NFTMarket> findHot();
+
     boolean existsOnSaleByNftId(Long nftId);
 }
