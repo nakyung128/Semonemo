@@ -162,6 +162,7 @@ public class BlockChainServiceImpl implements BlockChainService {
             Collections.emptyList()
         );
 
+        System.out.println("============================TX1========");
         String encodedFunction = FunctionEncoder.encode(function);
 
         Credentials credentials = Credentials.create(adminPrivateKey);
@@ -181,6 +182,7 @@ public class BlockChainServiceImpl implements BlockChainService {
                 encodedFunction
         );
 
+        System.out.println("============================TX2========");
         byte[] signedMessage = TransactionEncoder.signMessage(rawTransaction, credentials);
         String hexValue = Numeric.toHexString(signedMessage);
 
@@ -197,7 +199,9 @@ public class BlockChainServiceImpl implements BlockChainService {
 
         BigInteger tradeId = null;
 
+        System.out.println("============================TX3========");
         if (Objects.equals(transactionResult.getStatus(), "0x1")) {
+            System.out.println("============================TX4========");
             for (org.web3j.protocol.core.methods.response.Log txLog : transactionResult.getLogs()) {
                 String recordEventHash = EventEncoder.encode(TradeEvent.TRADE_RECORDED_EVENT);
                 if (txLog.getTopics().get(0).equals(recordEventHash)) {
@@ -215,6 +219,7 @@ public class BlockChainServiceImpl implements BlockChainService {
                 }
             }
         } else {
+            System.out.println("============================TX5========");
             throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
         }
 

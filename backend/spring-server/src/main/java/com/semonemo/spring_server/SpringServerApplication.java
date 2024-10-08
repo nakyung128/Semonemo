@@ -10,6 +10,7 @@ import java.util.TimeZone;
 public class SpringServerApplication {
 
 	public static void main(String[] args) {
+        System.out.println("=========================================================");
 		SpringApplication.run(SpringServerApplication.class, args);
 	}
 
