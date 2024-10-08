@@ -240,8 +240,10 @@ public class CoinServiceImpl implements CoinService {
 
 		Long yesterdayPrice = yesterdayHistory != null ? yesterdayHistory.getAveragePrice() : coin.getPrice();
 
+		Random random = new Random(System.currentTimeMillis());
+		double baseChange = random.nextGaussian() * 2; // 평균 0, 표준편차 2의 정규분포
 
-		double changeRate =Math.round((new Random().nextDouble() * 10 - 5) * 100) / 100.0; // -5.00 ~ +5.00
+		double changeRate = Math.max(-2, Math.min(2, baseChange)); //-5.00 ~ +5.00
 		Long newPrice = Math.round( coin.getPrice() * (1 + changeRate / 100));
 
 		// 변동률 (전날 평균가 대비)
