@@ -11,5 +11,6 @@ public class AuctionEndDTO {
     private long auctionId;
     private long finalPrice;
     private Long winner;
+    private int anonym;
     private String endTime;
 }

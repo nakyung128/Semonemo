@@ -54,7 +54,7 @@ contract NFTAuction is TradeBase {
 
         _adjustBalances(buyer, seller, amount);
 
-        nftContract.transferNFTByAdmin(_nftId, address(this), msg.sender);
+        nftContract.transferNFTByAdmin(_nftId, address(this), buyer);
 
         delete auctions[_nftId];
 

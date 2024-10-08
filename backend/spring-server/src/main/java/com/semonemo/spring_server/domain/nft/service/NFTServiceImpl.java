@@ -26,8 +26,7 @@ import com.semonemo.spring_server.domain.nft.repository.ntags.NTagRepository;
 import com.semonemo.spring_server.global.exception.CustomException;
 import com.semonemo.spring_server.global.exception.ErrorCode;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+
 import org.springframework.stereotype.Service;
 
 import com.semonemo.spring_server.domain.blockchain.service.BlockChainService;
@@ -46,9 +45,6 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class NFTServiceImpl implements NFTService {
-
-	private static final Log log = LogFactory.getLog(NFTServiceImpl.class);
-
 	private final NFTRepository nftRepository;
 	private final NFTMarketRepository nftMarketRepository;
 	private final NFTMarketLikeRepository nftMarketLikeRepository;
@@ -251,7 +247,6 @@ public class NFTServiceImpl implements NFTService {
 		List<NFTInfoDto> allNFTInfo;
 		try {
 			allNFTInfo = blockChainService.getNFTsByIds(tokenIds);
-			log.info(allNFTInfo);
 		} catch (Exception e) {
 			throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
 		}
@@ -297,7 +292,6 @@ public class NFTServiceImpl implements NFTService {
 		List<NFTInfoDto> allNFTInfo;
 		try {
 			allNFTInfo = blockChainService.getNFTsByIds(tokenIds);
-			log.info(allNFTInfo);
 		} catch (Exception e) {
 			throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
 		}
@@ -343,7 +337,6 @@ public class NFTServiceImpl implements NFTService {
 		List<NFTInfoDto> allNFTInfo;
 		try {
 			allNFTInfo = blockChainService.getNFTsByIds(tokenIds);
-			log.info(allNFTInfo);
 		} catch (Exception e) {
 			throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
 		}
@@ -380,7 +373,6 @@ public class NFTServiceImpl implements NFTService {
         List<NFTInfoDto> allNFTInfo;
         try {
             allNFTInfo = blockChainService.getNFTsByIds(tokenIds);
-            log.info(allNFTInfo);
         } catch (Exception e) {
             throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
         }
@@ -455,7 +447,6 @@ public class NFTServiceImpl implements NFTService {
 		List<NFTInfoDto> allNFTInfo;
 		try {
 			allNFTInfo = blockChainService.getNFTsByIds(tokenIds);
-			log.info(allNFTInfo);
 		} catch (Exception e) {
 			throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
 		}
@@ -492,7 +483,6 @@ public class NFTServiceImpl implements NFTService {
 		List<NFTInfoDto> allNFTInfo;
 		try {
 			allNFTInfo = blockChainService.getNFTsByIds(tokenIds);
-			log.info(allNFTInfo);
 		} catch (Exception e) {
 			throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
 		}
@@ -646,7 +636,6 @@ public class NFTServiceImpl implements NFTService {
         List<NFTInfoDto> allNFTInfo;
         try {
             allNFTInfo = blockChainService.getNFTsByIds(tokenIds);
-            log.info(allNFTInfo);
         } catch (Exception e) {
             throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
         }

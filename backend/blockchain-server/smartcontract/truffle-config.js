@@ -84,8 +84,7 @@ module.exports = {
       skipDryRun: true
     },
     ec2_ganache: {
-      host: "j11d109.p.ssafy.io",  // EC2 인스턴스의 공개 IP 주소
-      port: 8545,                  // Ganache의 기본 포트
+      provider: () => new HDWalletProvider(process.env.PRIVATE_KEY, "http://j11d109.p.ssafy.io:8545"),
       network_id: "*",             // 모든 네트워크 ID 허용
     },
     // Useful for deploying to a public network.

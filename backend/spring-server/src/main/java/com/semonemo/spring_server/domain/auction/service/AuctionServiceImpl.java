@@ -341,11 +341,14 @@ public class AuctionServiceImpl implements AuctionService {
         NFTs nft = nftRepository.findById(auction.getNft().getNftId())
                 .orElseThrow(() -> new CustomException(ErrorCode.NFT_NOT_FOUND_ERROR));
 
+        int anonym = -1;
+
         // 경매가 유찰된 경우
         if (lastBid == null) {
             auction.setStatus(AuctionStatus.CANCEL);
             try {
                 blockChainService.cancelAuction(nft.getTokenId());
+                nft.toggleOnSale(false);
             } catch (Exception e) {
                 throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
             }
@@ -361,11 +364,14 @@ public class AuctionServiceImpl implements AuctionService {
             user.minusBalance(lastBid.getBidAmount());
             nft.getOwner().plusBalance(lastBid.getBidAmount());
 
+            anonym = Integer.parseInt(String.valueOf(
+                hashOps.get(AUCTION_PARTICIPANT_KEY_PREFIX + auctionId,
+                    String.valueOf(lastBid.getUserId()))
+            ));
+
             try {
                 BigInteger convertedAmount = blockChainService.convertToSmallestUnit(BigInteger.valueOf(lastBid.getBidAmount()));
-                System.out.println("======Check 1======");
                 BigInteger tradeId = blockChainService.endAuction(user.getAddress(), nft.getTokenId(), convertedAmount);
-                System.out.println("======Check 2======");
                 TradeLog tradeLog = TradeLog.builder()
                         .tradeId(tradeId)
                         .fromUser(user)
@@ -374,10 +380,8 @@ public class AuctionServiceImpl implements AuctionService {
                         .tradeType("NFT 경매")
                         .build();
                 tradeLogRepository.save(tradeLog);
-                System.out.println("======Check 3======");
                 nft.changeOwner(user);
                 nft.toggleOnSale(false);
-                System.out.println("======Check 4======");
             } catch (Exception e) {
                 throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
             }
@@ -387,6 +391,7 @@ public class AuctionServiceImpl implements AuctionService {
                 .auctionId(auctionId)
                 .finalPrice(lastBid != null ? lastBid.getBidAmount() : auction.getStartPrice())
                 .winner(lastBid != null ? lastBid.getUserId() : null)
+                .anonym(anonym)
                 .endTime(LocalDateTime.now().format(formatter))
                 .build();
 

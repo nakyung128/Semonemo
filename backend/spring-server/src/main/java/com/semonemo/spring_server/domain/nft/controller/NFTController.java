@@ -16,8 +16,6 @@ import com.semonemo.spring_server.global.common.CommonResponse;
 import com.semonemo.spring_server.global.exception.CustomException;
 import com.semonemo.spring_server.global.exception.ErrorCode;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -38,8 +36,6 @@ import java.util.Objects;
 @RequestMapping("/api/nft")
 @RequiredArgsConstructor
 public class NFTController implements NFTApi {
-    private static final Log log = LogFactory.getLog(NFTController.class);
-
     private final UserService userService;
     private final NFTService nftService;
     private final BlockChainService blockChainService;
