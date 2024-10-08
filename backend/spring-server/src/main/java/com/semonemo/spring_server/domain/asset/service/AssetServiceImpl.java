@@ -339,6 +339,29 @@ public class AssetServiceImpl implements AssetService {
 	}
 
 	@Override
+	public CursorResult<AssetResponseDto> getUnsell(Long nowId, Long cursorId, int size) {
+		List<AssetImage> assetImages;
+		if (cursorId == null) {
+			assetImages = assetImageRepository.findByNowIdTopN(nowId, size + 1);
+		} else {
+			assetImages = assetImageRepository.findByNowIdNextN(nowId, cursorId, size + 1);
+		}
+		List<AssetResponseDto> dtos = new ArrayList<>();
+		boolean hasNext = false;
+		if (assetImages.size() > size) {
+			hasNext = true;
+			assetImages = assetImages.subList(0, size);
+		}
+
+		for (AssetImage assetImage : assetImages) {
+			AssetResponseDto dto = convertToAssetDto(nowId, assetImage.getId());
+			dtos.add(dto);
+		}
+		Long nextCursorId = hasNext ? assetImages.get(assetImages.size() - 1).getId() : null;
+		return new CursorResult<>(dtos, nextCursorId, hasNext);
+	}
+
+	@Override
 	public AssetResponseDto getAssetDetail(Long nowid, Long assetId) {
 		return convertToAssetDto(nowid, assetId);
 	}
