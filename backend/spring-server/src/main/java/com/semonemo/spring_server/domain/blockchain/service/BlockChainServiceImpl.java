@@ -187,7 +187,9 @@ public class BlockChainServiceImpl implements BlockChainService {
 
         System.out.println("======Check TX3======");
         if (ethSendTransaction.hasError()) {
-            System.out.println(ethSendTransaction.getError());
+            System.out.println(ethSendTransaction.getError().getMessage());
+            System.out.println(ethSendTransaction.getError().getCode());
+            System.out.println(ethSendTransaction.getError().getData());
             throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
         }
 
