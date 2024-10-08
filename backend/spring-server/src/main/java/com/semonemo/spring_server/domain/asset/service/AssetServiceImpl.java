@@ -315,6 +315,9 @@ public class AssetServiceImpl implements AssetService {
 			.orElseThrow(() -> new RuntimeException("Asset Sell Not Found"));
 		AssetImage assetImage = assetImageRepository.findById(assetSell.getAssetId())
 			.orElseThrow(() -> new RuntimeException("Asset Image Not Found"));
+		if(assetPurchaseRepository.existsByUserIdAndAssetSellId(users.getId(),assetSellId)){
+			throw new CustomException(ErrorCode.ALREADY_PURCHASED_ASSET);
+		}
 		Users seller = userService.findById(assetImage.getCreator());
 		if(users.getBalance()<assetSell.getPrice()){
 			throw new CustomException(ErrorCode.NOT_ENOUGH_BALANCE);
