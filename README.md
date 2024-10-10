@@ -104,7 +104,7 @@
 
 |촬영|사진 프레임 넣기|
 |:---:|:---:|
-| <img src="" width=200 height=400/> | <img src="" width=200 height=400/> 
+| <img src="" width=200 height=400/> | <img src="https://github.com/user-attachments/assets/75dd5db5-3bef-4a00-aa7f-ce41f0860ada" width=200 height=400/> 
 
 
 
