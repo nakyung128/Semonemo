@@ -37,13 +37,17 @@ class MyPageViewModel
         private var userId = savedStateHandle.get<Long>("userId") ?: -1
 
         init {
-            if (userId == -1L) { // 마이페이지
-                loadUserInfo()
-                loadComponents()
-                loadLikeComponents()
-            } else { // 타사용자 페이지
-                loadOtherUserInfo()
-                loadComponents()
+            viewModelScope.launch {
+                val myId = authDataSource.getUserId()?.toLong()
+
+                if (userId == -1L || userId == myId) { // 마이페이지
+                    loadUserInfo()
+                    loadComponents()
+                    loadLikeComponents()
+                } else { // 타사용자 페이지
+                    loadOtherUserInfo()
+                    loadComponents()
+                }
             }
         }
 
