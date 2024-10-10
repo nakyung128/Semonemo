@@ -146,7 +146,7 @@ public class AuctionServiceImpl implements AuctionService {
     @Override
     @Transactional
     public List<AuctionResponseDTO> getAllAuctions() {
-        List<Auction> auctions = auctionRepository.findAll();
+        List<Auction> auctions = auctionRepository.findAllByOrderByIdDesc();
 
         List<AuctionResponseDTO> auctionResponseDTOs = new ArrayList<>();
         for (Auction auction : auctions) {
