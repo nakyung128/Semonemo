@@ -324,7 +324,7 @@ public class AssetServiceImpl implements AssetService {
 		}
 		users.minusBalance(assetSell.getPrice());
 		seller.plusBalance(assetSell.getPrice());
-		assetSellRepository.updateAssetPurchaseCount(assetSellId,1L);
+		assetSellRepository.updateAssetPurchaseCount(1L,assetSellId);
 		TradeLog tradeLog = TradeLog.builder()
 			.tradeId(tradeId)
 			.fromUser(users)
