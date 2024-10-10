@@ -55,7 +55,7 @@ class AssetDetailViewModel
                             val balance = response.data.payableBalance
                             val event =
                                 if (balance < price) {
-                                    AssetDetailUiEvent.Error("가격이 모자릅니다!!")
+                                    AssetDetailUiEvent.Error("잔액이 부족합니다!!")
                                 } else {
                                     AssetDetailUiEvent.Purchase(price)
                                 }

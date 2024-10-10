@@ -55,7 +55,7 @@ class FrameDetailViewModel
                             val balance = response.data.payableBalance
                             val event =
                                 if (balance < price) {
-                                    FrameDetailUiEvent.Error("가격이 모자릅니다!!")
+                                    FrameDetailUiEvent.Error("잔액이 부족합니다!!")
                                 } else {
                                     FrameDetailUiEvent.LoadCoin(response.data)
                                 }
