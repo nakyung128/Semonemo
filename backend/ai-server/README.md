@@ -9,9 +9,6 @@
 * 카툰 화풍  
     ToonYou : https://civitai.com/models/30240/toonyou  
 
-* 픽셀 화풍  
-    All in one Pixel Model : https://civitai.com/models/34/all-in-one-pixel-model 
-
 * 사람 실사 화풍  
     majicMIX realistic : https://civitai.com/models/43331/majicmix-realistic
     

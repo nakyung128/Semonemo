@@ -62,21 +62,23 @@ sealed class ScreenDestinations(
 
     data object FollowList : ScreenDestinations(route = "followList") {
         override val route: String
-            get() = "followList/{nickname}/{followerList}/{followingList}"
+            get() = "followList/{nickname}/{followerList}/{followingList}/{selectedTabIndex}"
         val arguments =
             listOf(
                 navArgument(name = "nickname") { type = NavType.StringType },
                 navArgument(name = "followerList") { type = UserListNavType() },
                 navArgument(name = "followingList") { type = UserListNavType() },
+                navArgument(name = "selectedTabIndex") { type = NavType.IntType },
             )
 
         fun createRoute(
             nickname: String,
             followerList: List<User>,
             followingList: List<User>,
+            selectedTabIndex: Int,
         ) = "followList/$nickname/${
             Uri.encode(Gson().toJson(followerList))
-        }/${Uri.encode(Gson().toJson(followingList))}"
+        }/${Uri.encode(Gson().toJson(followingList))}/$selectedTabIndex"
     }
 
     data object AiAsset : ScreenDestinations(route = "aiAsset")
@@ -113,13 +115,13 @@ sealed class ScreenDestinations(
 
     data object Detail : ScreenDestinations(route = "detail") {
         override val route: String
-            get() = "detail/{id}"
+            get() = "detail/{marketId}"
         val arguments =
             listOf(
-                navArgument(name = "id") { type = NavType.LongType },
+                navArgument(name = "marketId") { type = NavType.LongType },
             )
 
-        fun createRoute(id: Long) = "detail/$id"
+        fun createRoute(marketId: Long) = "detail/$marketId"
     }
 
     data object Frame : ScreenDestinations(route = "frame")

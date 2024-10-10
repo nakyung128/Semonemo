@@ -32,6 +32,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ExperimentalComposeApi
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -47,6 +48,7 @@ import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -57,6 +59,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.semonemo.presentation.R
 import com.semonemo.presentation.component.AssetButton
 import com.semonemo.presentation.component.ColorPalette
+import com.semonemo.presentation.component.CustomTextField
 import com.semonemo.presentation.component.LoadingDialog
 import com.semonemo.presentation.component.LongBlackButton
 import com.semonemo.presentation.component.PenPalette
@@ -122,7 +125,7 @@ fun DrawAssetContent(
     onErrorSnackBar: (String) -> Unit,
     uiEvent: SharedFlow<DrawAssetUiEvent>,
     isLoading: Boolean,
-    makeDrawAsset: (String) -> Unit,
+    makeDrawAsset: (String, String) -> Unit,
     updateStyle: (String, String) -> Unit,
 ) {
     LaunchedEffect(uiEvent) {
@@ -164,9 +167,9 @@ fun DrawAssetScreen(
     modifier: Modifier = Modifier,
     popUpBackStack: () -> Unit = {},
     onErrorSnackBar: (String) -> Unit = {},
-    makeDrawAsset: (String) -> Unit = {},
+    makeDrawAsset: (String, String) -> Unit = { _, _ -> },
     updateStyle: (String, String) -> Unit = { _, _ -> },
-    navigateToDone: (String) -> Unit,
+    navigateToDone: (String) -> Unit = {},
 ) {
     val captureController = rememberCaptureController()
     val scope = rememberCoroutineScope()
@@ -204,16 +207,24 @@ fun DrawAssetScreen(
 
     var styles =
         listOf(
-            "없음",
             "사람",
             "동물",
         )
 
-    var selectedType by remember { mutableStateOf("없음") }
-    var selectedWhat by remember { mutableStateOf("없음") }
+    val genders =
+        listOf("남자", "여자")
+
+    var selectedType by remember { mutableIntStateOf(0) }
+    var selectedWhat by remember { mutableIntStateOf(0) }
+    var selectedGender by remember { mutableIntStateOf(0) }
+    var animal by remember { mutableStateOf("") }
+
+    LaunchedEffect(selectedType) {
+        selectedWhat = 0
+    }
 
     LaunchedEffect(selectedType, selectedWhat) {
-        updateStyle(selectedType, selectedWhat)
+        updateStyle(titles[selectedType], styles[selectedWhat])
     }
 
     var point by remember { mutableStateOf(Offset.Zero) } // point 위치 추척 state
@@ -234,6 +245,7 @@ fun DrawAssetScreen(
                 .statusBarsPadding()
                 .navigationBarsPadding()
                 .verticalScroll(state),
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Spacer(modifier = Modifier.height(10.dp))
         TopAppBar(
@@ -431,55 +443,114 @@ fun DrawAssetScreen(
             ) {
                 AssetButtonList(
                     titles = titles,
-                    selectedBtn = selectedType,
+                    selectedBtn = titles[selectedType],
                     onBtnSelected = {
                         selectedType = it
                     },
                 )
             }
-            Spacer(modifier = Modifier.height(25.dp))
-            Box(
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 17.dp),
-                contentAlignment = Alignment.CenterStart,
-            ) {
-                Text(
-                    text = "종류",
-                    style = Typography.bodySmall.copy(color = GunMetal, fontSize = 15.sp),
-                )
-            }
-            Spacer(modifier = Modifier.height(10.dp))
-            Box(
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 17.dp),
-                contentAlignment = Alignment.CenterStart,
-            ) {
-                if (selectedType == "없음") {
-                    styles = listOf("없음", "사람", "동물")
-                    AssetButtonList(
-                        titles = styles,
-                        selectedBtn = selectedWhat,
-                        onBtnSelected = {
-                            selectedWhat = it
-                        },
+            if (selectedType != 0) {
+                Spacer(modifier = Modifier.height(25.dp))
+                Box(
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 17.dp),
+                    contentAlignment = Alignment.CenterStart,
+                ) {
+                    Text(
+                        text = "종류",
+                        style = Typography.bodySmall.copy(color = GunMetal, fontSize = 15.sp),
                     )
-                } else {
-                    styles = listOf("사람", "동물")
+                }
+                Spacer(modifier = Modifier.height(10.dp))
+                Box(
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 17.dp),
+                    contentAlignment = Alignment.CenterStart,
+                ) {
                     AssetButtonList(
                         titles = styles,
-                        selectedBtn = selectedWhat,
+                        selectedBtn = styles[selectedWhat],
                         onBtnSelected = {
                             selectedWhat = it
                         },
                     )
                 }
+                Spacer(modifier = Modifier.height(25.dp))
+                if (styles[selectedWhat] == "사람") {
+                    Box(
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 17.dp),
+                        contentAlignment = Alignment.CenterStart,
+                    ) {
+                        Text(
+                            text = "성별",
+                            style = Typography.bodySmall.copy(color = GunMetal, fontSize = 15.sp),
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(10.dp))
+                    Box(
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 17.dp),
+                        contentAlignment = Alignment.CenterStart,
+                    ) {
+                        AssetButtonList(
+                            titles = genders,
+                            selectedBtn = genders[selectedGender],
+                            onBtnSelected = {
+                                selectedGender = it
+                            },
+                        )
+                    }
+                }
+                if (styles[selectedWhat] == "동물") {
+                    Box(
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 17.dp),
+                        contentAlignment = Alignment.CenterStart,
+                    ) {
+                        Text(
+                            text = "어떤 동물인지 영어로 작성해 주세요",
+                            style = Typography.bodySmall.copy(color = GunMetal, fontSize = 15.sp),
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(10.dp))
+                    Box(
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 17.dp),
+                        contentAlignment = Alignment.CenterStart,
+                    ) {
+                        CustomTextField(
+                            placeholder = "ex) cat",
+                            input = animal,
+                            onValueChange = {
+                                animal = it
+                            },
+                            onClearPressed = {
+                                animal = ""
+                            },
+                            focusManager = LocalFocusManager.current,
+                        )
+                    }
+                }
             }
             Spacer(modifier = Modifier.height(30.dp))
             LongBlackButton(
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 15.dp),
                 icon = null,
                 text = stringResource(R.string.draw_done),
                 onClick = {
@@ -489,11 +560,15 @@ fun DrawAssetScreen(
                             val bitmap = bitmapAsync.await().asAndroidBitmap()
                             val base64 = bitmapToBase64(bitmap)
 
-                            if (selectedType == "없음") {
+                            if (selectedType == 0) {
                                 val uri = "data:image/png;base64,$base64"
                                 navigateToDone(Uri.encode(uri))
                             } else {
-                                makeDrawAsset(base64)
+                                if (styles[selectedWhat] == "사람") {
+                                    makeDrawAsset(base64, genders[selectedGender])
+                                } else {
+                                    makeDrawAsset(base64, animal)
+                                }
                             }
                         } catch (error: Throwable) {
                             onErrorSnackBar(error.message ?: "")
@@ -560,15 +635,15 @@ fun DrawNavigateBar(
 fun AssetButtonList(
     titles: List<String>,
     selectedBtn: String,
-    onBtnSelected: (String) -> Unit,
+    onBtnSelected: (Int) -> Unit,
 ) {
     Row(
         modifier = Modifier.wrapContentSize(),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        titles.forEach { title ->
+        titles.forEachIndexed { index, title ->
             AssetButton(
-                onClick = { onBtnSelected(title) },
+                onClick = { onBtnSelected(index) },
                 isSelected = title == selectedBtn,
                 title = title,
             )
@@ -580,6 +655,6 @@ fun AssetButtonList(
 @Composable
 fun DrawAssetPreview() {
     SemonemoTheme {
-//        DrawAssetScreen()
+        DrawAssetScreen()
     }
 }

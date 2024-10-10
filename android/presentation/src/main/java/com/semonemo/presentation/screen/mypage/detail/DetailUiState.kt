@@ -4,6 +4,8 @@ import androidx.compose.runtime.Stable
 
 @Stable
 data class DetailUiState(
+    val userId: Long = 0L,
+    val ownerId: Long = 0L,
     val owner: String = "",
     val profileImg: String = "",
     val tags: List<String> = listOf(),

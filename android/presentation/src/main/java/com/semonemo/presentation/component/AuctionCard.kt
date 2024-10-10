@@ -98,7 +98,7 @@ fun AuctionCard(
                         modifier = Modifier.size(20.dp),
                     )
                     Spacer(modifier = Modifier.width(0.dp))
-                    CountdownTimer(deadline = LocalDateTime.now().plusDays(2))
+                    CustomCountdownTimer(deadline = LocalDateTime.now().plusDays(2))
                 }
             }
             Spacer(modifier = Modifier.height(4.dp))

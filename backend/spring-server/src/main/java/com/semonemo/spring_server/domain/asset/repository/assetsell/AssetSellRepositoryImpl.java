@@ -88,5 +88,13 @@ public class AssetSellRepositoryImpl implements AssetSellRepositoryCustom {
 			.fetch();
 	}
 
+	@Override
+	public void updateAssetPurchaseCount(Long count, Long assetSellId ) {
+		 queryFactory
+			.update(assetSell)
+			.where(assetSell.Id.eq(assetSellId))
+			.set(assetSell.purchaseCount, assetSell.purchaseCount.add(count))
+			.execute();
+	}
 
 }

@@ -77,6 +77,7 @@ public class AuctionServiceImpl implements AuctionService {
     @Transactional
     public Auction createAuction(Auction auction, String txHash) {
         auction.setStatus(AuctionStatus.READY);
+        auction.setStartTime(LocalDateTime.now().plusDays(1));
         Auction savedAuction = auctionRepository.save(auction);
 
         savedAuction.getNft().toggleOnSale(true);

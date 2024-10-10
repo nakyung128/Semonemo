@@ -90,7 +90,7 @@ import java.io.File
 fun MyPageRoute(
     modifier: Modifier = Modifier,
     navigateToDetail: (Long) -> Unit,
-    navigateToFollowList: (String, List<User>, List<User>) -> Unit,
+    navigateToFollowList: (String, List<User>, List<User>, Int) -> Unit,
     navigateToSetting: () -> Unit,
     navigateToAssetDetail: (Long) -> Unit,
     navigateToSaleFrameDetail: (Long) -> Unit,
@@ -151,7 +151,7 @@ fun HandleMyPageUi(
     modifier: Modifier = Modifier,
     uiState: MyPageUiState,
     navigateToDetail: (Long) -> Unit,
-    navigateToFollowList: (String, List<User>, List<User>) -> Unit,
+    navigateToFollowList: (String, List<User>, List<User>, Int) -> Unit,
     navigateToSetting: () -> Unit,
     navigateToAssetDetail: (Long) -> Unit,
     navigateToSaleFrameDetail: (Long) -> Unit,
@@ -192,7 +192,7 @@ fun HandleMyPageUi(
 fun MyPageScreen(
     modifier: Modifier = Modifier,
     navigateToDetail: (Long) -> Unit = {},
-    navigateToFollowList: (String, List<User>, List<User>) -> Unit = { _, _, _ -> },
+    navigateToFollowList: (String, List<User>, List<User>, Int) -> Unit = { _, _, _, _ -> },
     navigateToSetting: () -> Unit = {},
     navigateToAssetDetail: (Long) -> Unit = {},
     navigateToSaleFrameDetail: (Long) -> Unit = {},
@@ -247,7 +247,7 @@ fun MyPageScreen(
         ) {
             Spacer(modifier = Modifier.height(10.dp))
             TopAppBar(
-                modifier = Modifier.fillMaxHeight(0.045f),
+                modifier = Modifier.fillMaxHeight(0.055f),
                 title = {
                     NameWithBadge(
                         name = nickname,
@@ -351,7 +351,7 @@ fun MyPageScreen(
                             .wrapContentWidth()
                             .weight(1f)
                             .noRippleClickable {
-                                navigateToFollowList(nickname, follower, following)
+                                navigateToFollowList(nickname, follower, following, 0)
                             },
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
@@ -371,7 +371,7 @@ fun MyPageScreen(
                             .wrapContentWidth()
                             .weight(1f)
                             .noRippleClickable {
-                                navigateToFollowList(nickname, follower, following)
+                                navigateToFollowList(nickname, follower, following, 1)
                             },
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {

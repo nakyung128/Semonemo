@@ -9,6 +9,7 @@ data class Auction(
     val participants: Int = 0,
     val startPrice: Long = 0L,
     val currentBid: Long = 0L,
+    val finalPrice: Long = 0L,
     val startTime: String? = null,
     val endTime: String? = null,
 )

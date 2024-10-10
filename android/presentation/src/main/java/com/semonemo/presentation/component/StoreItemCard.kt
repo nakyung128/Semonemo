@@ -93,9 +93,15 @@ fun StoreItemCard(
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = "$price ${stringResource(id = R.string.coin_price_unit)}",
+                        text =
+                        String.format(
+                            "%,d ${stringResource(id = R.string.coin_price_unit)}",
+                            price,
+                        ),
                         fontWeight = FontWeight.Bold,
-                        style = Typography.bodyMedium,
+                        style = Typography.bodyMedium.copy(
+                            fontFeatureSettings = "tnum",
+                        ),
                         fontSize = 12.sp,
                     )
                 }
@@ -116,7 +122,7 @@ fun StoreItemCardPreview() {
     StoreItemCard(
         author = "Sample Author",
         imgUrl = "https://example.com/sample_image.jpg",
-        price = 100,
+        price = 1000,
         isLiked = true,
     )
 }

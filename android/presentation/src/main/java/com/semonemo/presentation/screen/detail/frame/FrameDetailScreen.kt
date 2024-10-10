@@ -335,7 +335,7 @@ fun FrameDetailScreen(
                                 .fillMaxWidth()
                                 .weight(1f)
                                 .padding(horizontal = 10.dp),
-                        rows = GridCells.Fixed(2),
+                        rows = GridCells.Fixed(1),
                         verticalArrangement = Arrangement.Center,
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         state = rememberLazyGridState(),

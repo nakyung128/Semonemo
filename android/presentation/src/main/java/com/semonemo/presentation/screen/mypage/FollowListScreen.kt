@@ -37,9 +37,10 @@ fun FollowListScreen(
     nickname: String = "나갱",
     followerList: List<User> = emptyList(),
     followingList: List<User> = emptyList(),
+    selectedTabIndex: Int = 0,
 ) {
     val tabList = listOf("팔로워", "팔로잉")
-    var selectedIndex by remember { mutableIntStateOf(0) }
+    var selectedIndex by remember { mutableIntStateOf(selectedTabIndex) }
 
     Surface(
         modifier = modifier.fillMaxSize(),

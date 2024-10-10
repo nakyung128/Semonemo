@@ -1,7 +1,6 @@
 package com.semonemo.presentation.screen.aiAsset.draw
 
 import android.net.Uri
-import android.util.Log
 import androidx.lifecycle.viewModelScope
 import com.semonemo.domain.model.ApiResponse
 import com.semonemo.domain.repository.AiRepository
@@ -62,13 +61,23 @@ class DrawAssetViewModel
             }
         }
 
-        fun makeDrawAsset(imageUrl: String) {
+        fun makeDrawAsset(
+            imageUrl: String,
+            prompt: String?,
+        ) {
+            val promptEng =
+                when (prompt) {
+                    "남자" -> "asian, 1boy"
+                    "여자" -> "asian, 1girl"
+                    else -> prompt
+                }
+
             viewModelScope.launch {
                 aiRepository
                     .makeAiAsset(
                         request =
                             MakeAiAssetRequest(
-                                prompt = uiState.value.style.prompt,
+                                prompt = uiState.value.style.prompt + ", $promptEng",
                                 negativePrompt = uiState.value.style.negativePrompt,
                                 overrideSettings =
                                     OverrideSettings(
