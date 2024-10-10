@@ -2,6 +2,7 @@ package com.semonemo.presentation.screen.mypage
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
+import com.semonemo.domain.datasource.AuthDataSource
 import com.semonemo.domain.model.Asset
 import com.semonemo.domain.model.FrameDetail
 import com.semonemo.domain.model.SellAssetDetail
@@ -15,6 +16,7 @@ sealed interface MyPageUiState {
 
     @Immutable
     data class Success(
+        val isMe: Boolean = false,
         val userId: Long = 0,
         val nickname: String = "",
         val profileImageUrl: String = "",

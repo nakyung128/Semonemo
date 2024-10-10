@@ -1,6 +1,7 @@
 package com.semonemo.presentation.screen.mypage
 
 import android.net.Uri
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -84,6 +85,7 @@ import com.semonemo.presentation.util.toAbsolutePath
 import com.skydoves.landscapist.glide.GlideImage
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import java.io.File
 
 @Composable
@@ -184,7 +186,7 @@ fun HandleMyPageUi(
                 likedFrames = uiState.likedFrames,
                 navigateToSaleFrameDetail = navigateToSaleFrameDetail,
                 userId = userId,
-                myId = uiState.userId,
+                isMe = uiState.isMe,
             )
     }
 }
@@ -211,10 +213,10 @@ fun MyPageScreen(
     likeAssets: List<SellAssetDetail> = listOf(),
     likedFrames: List<FrameDetail> = listOf(),
     userId: Long = -1L,
-    myId: Long = -1L,
+    isMe: Boolean = false,
 ) {
     val tabs =
-        if (userId == -1L || userId == myId) {
+        if (isMe) {
             listOf("프레임", "에셋", "찜")
         } else {
             listOf("프레임", "에셋")

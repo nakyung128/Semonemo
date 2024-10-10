@@ -1,5 +1,6 @@
 package com.semonemo.presentation.screen.mypage
 
+import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.semonemo.domain.datasource.AuthDataSource
@@ -70,6 +71,7 @@ class MyPageViewModel
 
                             is ApiResponse.Success -> {
                                 currentState.copy(
+                                    isMe = false,
                                     userId = userInfo.data.userId,
                                     profileImageUrl = userInfo.data.profileImage,
                                     nickname = userInfo.data.nickname,
@@ -143,6 +145,7 @@ class MyPageViewModel
 
                             is ApiResponse.Success -> {
                                 currentState.copy(
+                                    isMe = true,
                                     userId = userInfo.data.userId,
                                     profileImageUrl = userInfo.data.profileImage,
                                     nickname = userInfo.data.nickname,
