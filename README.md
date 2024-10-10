@@ -123,12 +123,44 @@
 - ![lottie](https://img.shields.io/badge/lottie-1DA1F2?style=flat-square&logo=lottie&logoColor=white) `lottie` 
 
 ### BE
-- ![Java](https://img.shields.io/badge/Java-ED8B00?style=flat-square&logo=java&logoColor=white) `Java(21)` 
-- ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-6DB33F?style=flat-square&logo=spring-boot&logoColor=white) `Spring Boot(3.2.7)` 
-- ![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=docker&logoColor=white) `Docker(27.0.3)` 
-- ![Jenkins](https://img.shields.io/badge/Jenkins-D24939?style=flat-square&logo=jenkins&logoColor=white) `Jenkins(2.452.3)`
+- ![Java](https://img.shields.io/badge/Java-ED8B00?style=flat-square&logo=openjdk&logoColor=white) `Java(17)` 
+- ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-6DB33F?style=flat-square&logo=spring-boot&logoColor=white) `Spring Boot(3.3.3)` 
+- ![Spring Security](https://img.shields.io/badge/Spring%20Security-6DB33F?style=flat-square&logo=springsecurity&logoColor=white)`Spring Security`
+
+- ![Swagger](https://img.shields.io/badge/Swagger-85EA2D?style=flat-square&logo=swagger&logoColor=white)`Swagger`
+
+- ![Elastic Search](https://img.shields.io/badge/Elastic%20Search-005571?style=flat-square&logo=elasticsearch&logoColor=white)`Elastic Search`
+
+- ![logstash](https://img.shields.io/badge/Logstash-005571?style=flat-square&logo=logstash&logoColor=white)`Logstash`
+
+- ![kibana](https://img.shields.io/badge/Kibana-005571?style=flat-square&logo=kibana&logoColor=white)`Kibana`
+
+- ![MySQL](https://img.shields.io/badge/mysql-4479A1?style=flat-square&logo=mysql&logoColor=white)`MySQL`
+
+- ![Redis](https://img.shields.io/badge/redis-FF4438?style=flat-square&logo=redis&logoColor=white)`Redis`
+
+### Block Chain
+
+- ![IPFS](https://img.shields.io/badge/IPFS-65C2CB?style=flat-square&logo=ipfs&logoColor=white)`IPFS`
+
+- ![IPFS](https://img.shields.io/badge/Solidity-363636?style=flat-square&logo=solidity&logoColor=white)`Solidity`
+
+- `Truffle`
+
+### DevOps
+
+- ![AWS EC2](https://img.shields.io/badge/AWS%20EC2-FF9900?style=flat-square&logo=amazonec2&logoColor=white) `AWS EC2` 
+
+- ![AWS S3](https://img.shields.io/badge/AWS%20S3-569A31?style=flat-square&logo=amazons3&logoColor=white) `AWS S3` 
+
+- ![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=docker&logoColor=white) `Docker(27.2.1)` 
+
+- ![Jenkins](https://img.shields.io/badge/Jenkins-D24939?style=flat-square&logo=jenkins&logoColor=white) `Jenkins(2.476)`
 
 
+## 🔨 시스템 아키텍처
+
+![System Architecture](https://github.com/user-attachments/assets/7af99d54-7d45-4cb0-b074-6c1763ca1b57)
 
 ## 📑 산출물
 |API명세서|디자인|요구사항정의서|ERD|시퀀스다이어그램|
