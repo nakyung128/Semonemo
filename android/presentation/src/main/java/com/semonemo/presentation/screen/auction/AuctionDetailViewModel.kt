@@ -46,7 +46,6 @@ class AuctionDetailViewModel
 
         // 항상 새로운 메세지 관리
         var bidMessageJob: Job? = null
-        var participationMessageJob: Job? = null
 
         // 입찰 관찰자
         var observedBidMessage = mutableStateOf(false)
@@ -310,11 +309,6 @@ class AuctionDetailViewModel
         }
 
         fun validateUserBid() {
-            Log.d(TAG, "validateUserBid: userId : $userId | registerId : $registerId | topUserId : ${topUserId.longValue} ")
-            if (registerId != userId && topUserId.longValue != userId) {
-                validateUserBid.value = true
-            } else {
-                validateUserBid.value = false
-            }
+            validateUserBid.value = registerId != userId && topUserId.longValue != userId
         }
     }

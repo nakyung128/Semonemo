@@ -1,5 +1,6 @@
 package com.semonemo.presentation.component
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -7,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -22,33 +24,40 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.semonemo.presentation.theme.GunMetal
 import com.semonemo.presentation.theme.Typography
+import com.semonemo.presentation.theme.White
 import com.semonemo.presentation.theme.WhiteGray
 import kotlinx.coroutines.delay
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 
+private const val TAG = "CustomCountdownTimer"
 @Composable
-fun CountdownTimer(deadline: LocalDateTime) {
+fun CustomCountdownTimer(deadline: LocalDateTime) {
     var currentTime by remember { mutableStateOf(LocalDateTime.now()) }
-    var remainingTime by remember { mutableStateOf(calculateRemainingTime(currentTime, deadline)) }
-
+    var remainingTime by remember { mutableStateOf(calculateRemainingTime(currentTime, deadline).first) }
+    var breakKey by remember { mutableStateOf(calculateRemainingTime(currentTime, deadline).second) }
     LaunchedEffect(key1 = currentTime) {
         while (true) {
             delay(1000)
             currentTime = LocalDateTime.now()
-            remainingTime = calculateRemainingTime(currentTime, deadline)
+            remainingTime = calculateRemainingTime(currentTime, deadline).first
+            breakKey = calculateRemainingTime(currentTime, deadline).second
+            if(!breakKey) {
+                break
+            }
         }
     }
-
+    if(!breakKey) {
+        remainingTime = RemainingTime(0, 0, 0, 0)
+    }
     Row(
         modifier =
         Modifier
             .background(Color.Unspecified)
-            .padding(4.dp),
-        horizontalArrangement = Arrangement.spacedBy(1.dp),
+            .padding(2.dp),
+
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        TimeUnitBox("D${remainingTime.days}")
-        Separator()
         TimeUnitBox(String.format("%02d", remainingTime.hours))
         Separator()
         TimeUnitBox(String.format("%02d", remainingTime.minutes))
@@ -62,16 +71,13 @@ fun TimeUnitBox(text: String) {
     Box(
         modifier =
         Modifier
-            .background(WhiteGray)
-            .height(28.dp)
-            .width(28.dp)
-            .padding(horizontal = 6.dp, vertical = 4.dp),
+            .background(White)
+            .wrapContentSize(),
         contentAlignment = Alignment.Center,
     ) {
         Text(
             text = text,
-            fontSize = 12.sp,
-            style = Typography.bodySmall,
+            style = Typography.bodyMedium.copy(fontSize = 12.sp, fontFeatureSettings = "tnum"),
             color = GunMetal,
         )
     }
@@ -81,14 +87,15 @@ fun TimeUnitBox(text: String) {
 fun Separator() {
     Box(
         modifier =
-            Modifier
-                .height(28.dp) // TimeUnitBox의 높이에 맞춤
-                .padding(horizontal = 0.dp),
+        Modifier
+            .background(White)
+            .wrapContentSize()
+            .padding(bottom = 1.dp),
         contentAlignment = Alignment.Center,
     ) {
         Text(
             text = ":",
-            fontSize = 16.sp,
+            fontSize = 12.sp,
             style = Typography.bodyLarge,
             color = GunMetal,
         )
@@ -105,13 +112,19 @@ data class RemainingTime(
 fun calculateRemainingTime(
     current: LocalDateTime,
     deadline: LocalDateTime,
-): RemainingTime {
+): Pair<RemainingTime, Boolean> {
     val duration = ChronoUnit.SECONDS.between(current, deadline)
     val days = duration / (24 * 3600)
     val hours = (duration % (24 * 3600)) / 3600
     val minutes = (duration % 3600) / 60
     val seconds = duration % 60
-    return RemainingTime(days, hours, minutes, seconds)
+
+    Log.d(TAG, "calculateRemainingTime: $days, $hours, $minutes, $seconds")
+    if(days < 0L || hours < 0L || minutes < 0L || seconds < 0L) {
+        return Pair(RemainingTime(0, 0, 0, 0), false)
+
+    }
+    return Pair(RemainingTime(days, hours, minutes, seconds), true)
 }
 
 @Preview(showBackground = true)
@@ -124,14 +137,14 @@ fun CountdownTimerPreview() {
             .plusHours(12)
             .plusMinutes(21)
             .plusSeconds(54)
-    CountdownTimer(deadline)
+    CustomCountdownTimer(deadline)
 }
 
 @Preview(showBackground = true)
 @Composable
 fun CountdownTimerNearEndPreview() {
     val deadline = LocalDateTime.now().plusHours(5)
-    CountdownTimer(deadline)
+    CustomCountdownTimer(deadline)
 }
 
 @Preview(showBackground = true)
@@ -143,5 +156,5 @@ fun CountdownTimerDDayPreview() {
             .plusHours(23)
             .plusMinutes(11)
             .plusSeconds(59)
-    CountdownTimer(deadline)
+    CustomCountdownTimer(deadline)
 }

@@ -2,6 +2,7 @@ package com.semonemo.presentation.screen.mypage.detail
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import com.semonemo.domain.datasource.AuthDataSource
 import com.semonemo.domain.model.ApiResponse
 import com.semonemo.domain.repository.NftRepository
 import com.semonemo.presentation.base.BaseViewModel
@@ -23,6 +24,7 @@ class DetailViewModel
     constructor(
         private val nftRepository: NftRepository,
         private val savedStateHandle: SavedStateHandle,
+        private val authDataSource: AuthDataSource,
     ) : BaseViewModel() {
         private val _uiState = MutableStateFlow(DetailUiState())
         val uiState = _uiState.asStateFlow()
@@ -30,7 +32,7 @@ class DetailViewModel
         private val _uiEvent = MutableSharedFlow<DetailUiEvent>()
         val uiEvent = _uiEvent.asSharedFlow()
 
-        private val id = savedStateHandle.get<Long>("id") ?: -1
+        private val id = savedStateHandle.get<Long>("marketId") ?: -1
         private val isSale = savedStateHandle.get<Boolean>("isSale") ?: false
 
         init {
@@ -77,6 +79,8 @@ class DetailViewModel
                                 val data = response.data
                                 _uiState.value =
                                     DetailUiState(
+                                        userId = authDataSource.getUserId()?.toLong() ?: -1L,
+                                        ownerId = data.owner.userId,
                                         owner = data.owner.nickname,
                                         profileImg = data.owner.profileImage,
                                         tags = data.tags,
@@ -92,7 +96,7 @@ class DetailViewModel
                             }
                         }
                     }
-                } else if (isSale) {
+                } else {
                     nftRepository.getSaleNftDetail(marketId = id).collectLatest { response ->
                         when (response) {
                             is ApiResponse.Error -> _uiEvent.emit(DetailUiEvent.Error(response.errorMessage))
@@ -100,6 +104,8 @@ class DetailViewModel
                                 val data = response.data
                                 _uiState.value =
                                     DetailUiState(
+                                        userId = authDataSource.getUserId()?.toLong() ?: -1L,
+                                        ownerId = data.seller.userId,
                                         owner = data.seller.nickname,
                                         profileImg = data.seller.profileImage,
                                         tags = data.tags,

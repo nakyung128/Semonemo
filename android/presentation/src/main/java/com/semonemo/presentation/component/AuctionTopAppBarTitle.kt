@@ -47,6 +47,7 @@ fun AuctionTopAppBarTitle(
 
         AuctionStatus.CANCEL -> {
             fullText = "경매가 유찰되었습니다!"
+            keywords = listOf("유찰")
         }
     }
 

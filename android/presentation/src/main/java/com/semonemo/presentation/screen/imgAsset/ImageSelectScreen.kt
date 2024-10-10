@@ -202,7 +202,7 @@ fun ImageSelectScreen(
                 AssetButtonList(
                     titles = titles,
                     selectedBtn = paintingStyle,
-                    onBtnSelected = { updateStyle(it) },
+                    onBtnSelected = { updateStyle(titles[it]) },
                 )
             }
             Spacer(modifier = Modifier.weight(1f))

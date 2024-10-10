@@ -62,26 +62,28 @@ fun AuctionReadyScreen(
                 style = Typography.bodyMedium,
             )
             Spacer(modifier = Modifier.weight(1f))
-
-            if (viewModel.auctionStatus.value == AuctionStatus.READY) {
-                LongBlackButton(
-                    modifier =
+            if(viewModel.registerId == viewModel.userId) {
+                if (viewModel.auctionStatus.value == AuctionStatus.READY) {
+                    LongBlackButton(
+                        modifier =
                         Modifier
                             .fillMaxWidth(),
-                    text = stringResource(R.string.auction_start_button_title),
-                    icon = null,
-                    onClick = {
-                        viewModel.startAuction()
-                    },
-                )
-            } else {
-                LongUnableButton(
-                    modifier =
+                        text = stringResource(R.string.auction_start_button_title),
+                        icon = null,
+                        onClick = {
+                            viewModel.startAuction()
+                        },
+                    )
+                } else {
+                    LongUnableButton(
+                        modifier =
                         Modifier
                             .fillMaxWidth(),
-                    text = stringResource(R.string.auction_start_button_title),
-                )
+                        text = stringResource(R.string.auction_start_button_title),
+                    )
+                }
             }
+
             Spacer(modifier = Modifier.height(20.dp))
 
             if (viewModel.auctionStatus.value == AuctionStatus.READY && viewModel.userStatus.value == UserStatus.NOT_READY) {

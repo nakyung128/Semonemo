@@ -69,7 +69,6 @@ fun DetailRoute(
     onShowSnackBar: (String) -> Unit,
     popUpBackStack: () -> Unit,
     nftViewModel: NftViewModel = hiltViewModel(),
-    userId: Long,
 ) {
     val uiState = viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -101,7 +100,6 @@ fun DetailRoute(
                 contractAddress = BuildConfig.SYSTEM_CONTRACT_ADDRESS,
             )
         },
-        userId = userId,
     )
 }
 
@@ -114,7 +112,6 @@ fun DetailContent(
     onShowSnackBar: (String) -> Unit,
     popUpBackStack: () -> Unit,
     sendTransaction: () -> Unit = {},
-    userId: Long,
 ) {
     LaunchedEffect(uiEvent) {
         uiEvent.collectLatest { event ->
@@ -132,6 +129,7 @@ fun DetailContent(
 
     DetailScreen(
         modifier = modifier,
+        ownerId = uiState.ownerId,
         owner = uiState.owner,
         profileImg = uiState.profileImg,
         tags = uiState.tags,
@@ -143,7 +141,7 @@ fun DetailContent(
         onPublicClicked = onPublicClicked,
         popUpBackStack = popUpBackStack,
         sendTransaction = sendTransaction,
-        userId = userId,
+        userId = uiState.userId,
     )
     if (uiState.isLoading) {
         Box(
@@ -163,6 +161,7 @@ fun DetailContent(
 @Composable
 fun DetailScreen(
     modifier: Modifier = Modifier,
+    ownerId: Long = 0L,
     owner: String = "",
     profileImg: String = "",
     tags: List<String> = listOf(),
@@ -316,7 +315,7 @@ fun DetailScreen(
             },
         )
         Spacer(modifier = Modifier.height(50.dp))
-        if (userId == -1L) {
+        if (userId == ownerId) {
             if (!isOpen) {
                 LongWhiteButton(
                     modifier =

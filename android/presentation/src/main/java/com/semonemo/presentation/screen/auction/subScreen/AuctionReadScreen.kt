@@ -52,6 +52,7 @@ fun AuctionReadScreen(
                     participants = data.participants,
                     startPrice = data.startPrice,
                     currentBid = data.currentBid,
+                    finalPrice = data.finalPrice,
                     startTime = data.startTime,
                     endTime = data.endTime,
                     onClick = navigateToAuctionDetail,

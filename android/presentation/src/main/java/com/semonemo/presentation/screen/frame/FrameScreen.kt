@@ -234,8 +234,8 @@ fun FrameScreen(
                             titles = sizes,
                             selectedBtn = selectedBtn,
                             onBtnSelected = {
-                                selectedBtn = it
-                                when (it) {
+                                selectedBtn = sizes[it]
+                                when (selectedBtn) {
                                     "1x1" -> frameType = FrameType.OneByOne
                                     "1x4" -> frameType = FrameType.OneByFour
                                     "2x2" -> frameType = FrameType.TwoByTwo

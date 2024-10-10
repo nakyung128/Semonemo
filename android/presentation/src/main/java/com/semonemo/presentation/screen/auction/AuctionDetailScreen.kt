@@ -475,30 +475,35 @@ fun AuctionDetailScreen(
             )
         }
     }
-
-    Box(
-        modifier = modifier.fillMaxSize(),
-        contentAlignment = Alignment.TopCenter,
-    ) {
-        AnimatedVisibility(
-            visible = viewModel.observedBidMessage.value,
-            enter = fadeIn(),
-            exit = fadeOut(),
+    if(viewModel.userStatus.value == UserStatus.IN_PROGRESS) {
+        Box(
+            modifier = modifier.fillMaxSize(),
+            contentAlignment = Alignment.TopCenter,
         ) {
-            AuctionBidMessage(
-                modifier = Modifier.padding(top = 250.dp), // 화면 위에서 조금 아래로 내림
-                icon = R.drawable.ic_color_sene_coin,
-                bidPrice = viewModel.topPrice.longValue,
-                anonym = viewModel.anonym.intValue,
-                user = viewModel.observedBidSubmit.value,
-            )
+            AnimatedVisibility(
+                visible = viewModel.observedBidMessage.value,
+                enter = fadeIn(),
+                exit = fadeOut(),
+            ) {
+                AuctionBidMessage(
+                    modifier = Modifier.padding(top = 250.dp), // 화면 위에서 조금 아래로 내림
+                    icon = R.drawable.ic_color_sene_coin,
+                    bidPrice = viewModel.topPrice.longValue,
+                    anonym = viewModel.anonym.intValue,
+                    user = viewModel.observedBidSubmit.value,
+                )
+            }
         }
     }
+
 
     // Composable이 사라질 때 leaveAuction() 호출
     DisposableEffect(Unit) {
         onDispose {
-            viewModel.leaveAuction()
+            if(viewModel.userStatus.value == UserStatus.READY || viewModel.userStatus.value == UserStatus.IN_PROGRESS) {
+                viewModel.leaveAuction()
+            }
+
         }
     }
 
