@@ -228,6 +228,7 @@ fun FrameScreen(
                             Modifier
                                 .wrapContentSize()
                                 .padding(top = 25.dp),
+                        contentAlignment = Alignment.TopCenter,
                     ) {
                         AssetButtonList(
                             titles = sizes,
@@ -242,6 +243,7 @@ fun FrameScreen(
                             },
                         )
                     }
+                    Spacer(modifier = Modifier.weight(1f))
                 }
 
                 1 -> {
@@ -249,6 +251,7 @@ fun FrameScreen(
                         modifier =
                             Modifier
                                 .fillMaxWidth()
+                                .weight(1f)
                                 .padding(horizontal = 24.dp),
                         horizontalAlignment = Alignment.Start,
                     ) {
@@ -279,7 +282,7 @@ fun FrameScreen(
                         modifier =
                             Modifier
                                 .fillMaxWidth()
-                                .wrapContentHeight()
+                                .weight(1f)
                                 .padding(horizontal = 20.dp, vertical = 20.dp),
                         columns = GridCells.Fixed(4),
                         state = rememberLazyGridState(),
@@ -316,7 +319,6 @@ fun FrameScreen(
                     }
                 }
             }
-            Spacer(modifier = Modifier.weight(1f))
             LongBlackButton(
                 icon = null,
                 text = stringResource(R.string.frame_done_btn_title),
@@ -333,7 +335,7 @@ fun FrameScreen(
                     navigateToFrameDone()
                 },
             )
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(10.dp))
         }
     }
 }

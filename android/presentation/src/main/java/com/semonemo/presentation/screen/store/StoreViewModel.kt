@@ -42,8 +42,8 @@ class StoreViewModel
             viewModelScope.launch {
                 combine(
                     nftRepository.getHotNft(),
-                    nftRepository.getAllSaleNft(orderBy = "oldest"),
-                    assetRepository.getAllSellAssets(option = "oldest"),
+                    nftRepository.getAllSaleNft(orderBy = "latest"),
+                    assetRepository.getAllSellAssets(option = "latest"),
                 ) { hotFrame, saleFrame, saleAsset ->
                     var currentState = StoreUiState()
 
