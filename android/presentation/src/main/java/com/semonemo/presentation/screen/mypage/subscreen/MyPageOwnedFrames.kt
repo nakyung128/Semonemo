@@ -28,7 +28,7 @@ import com.skydoves.landscapist.glide.GlideImage
 fun MyPageOwnedFrames(
     modifier: Modifier = Modifier,
     frameList: List<MyFrame>,
-    navigateToDetail: (Long, Boolean) -> Unit,
+    navigateToDetail: (Long) -> Unit,
 ) {
     LazyVerticalGrid(
         modifier =
@@ -57,7 +57,7 @@ fun MyPageOwnedFrames(
                             shape = RoundedCornerShape(10.dp),
                             color = Gray03,
                         ).noRippleClickable {
-                            navigateToDetail(frame.nftId, false)
+                            navigateToDetail(frame.nftId)
                         },
                 imageModel = imgUrl,
                 contentScale = ContentScale.Inside,

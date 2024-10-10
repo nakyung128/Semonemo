@@ -69,6 +69,7 @@ fun DetailRoute(
     onShowSnackBar: (String) -> Unit,
     popUpBackStack: () -> Unit,
     nftViewModel: NftViewModel = hiltViewModel(),
+    userId: Long,
 ) {
     val uiState = viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -100,6 +101,7 @@ fun DetailRoute(
                 contractAddress = BuildConfig.SYSTEM_CONTRACT_ADDRESS,
             )
         },
+        userId = userId,
     )
 }
 
@@ -112,6 +114,7 @@ fun DetailContent(
     onShowSnackBar: (String) -> Unit,
     popUpBackStack: () -> Unit,
     sendTransaction: () -> Unit = {},
+    userId: Long,
 ) {
     LaunchedEffect(uiEvent) {
         uiEvent.collectLatest { event ->
@@ -140,6 +143,7 @@ fun DetailContent(
         onPublicClicked = onPublicClicked,
         popUpBackStack = popUpBackStack,
         sendTransaction = sendTransaction,
+        userId = userId,
     )
     if (uiState.isLoading) {
         Box(
@@ -170,6 +174,7 @@ fun DetailScreen(
     onPublicClicked: () -> Unit = {},
     popUpBackStack: () -> Unit = {},
     sendTransaction: () -> Unit = {},
+    userId: Long = 0L,
 ) {
     val scrollState = rememberScrollState()
     var showDialog by remember { mutableStateOf<DialogType?>(null) }
@@ -311,47 +316,49 @@ fun DetailScreen(
             },
         )
         Spacer(modifier = Modifier.height(50.dp))
-        if (!isOpen) {
-            LongWhiteButton(
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 20.dp),
-                icon = null,
-                text = stringResource(R.string.change_to_public_nft),
-                onClick = { showDialog = DialogType.PUBLIC },
-            )
-        } else {
-            if (!isOnSale) {
+        if (userId == -1L) {
+            if (!isOpen) {
                 LongWhiteButton(
                     modifier =
                         Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 20.dp),
                     icon = null,
-                    text = stringResource(R.string.change_to_private_nft),
+                    text = stringResource(R.string.change_to_public_nft),
                     onClick = { showDialog = DialogType.PUBLIC },
                 )
             } else {
-                LongWhiteButton(
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 20.dp),
-                    icon = null,
-                    text = stringResource(id = R.string.change_to_private_nft),
-                    onClick = { showDialog = DialogType.PUBLIC },
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                LongWhiteButton(
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 20.dp),
-                    icon = null,
-                    text = stringResource(R.string.change_to_not_sale_nft),
-                    onClick = { showDialog = DialogType.SALE },
-                )
+                if (!isOnSale) {
+                    LongWhiteButton(
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 20.dp),
+                        icon = null,
+                        text = stringResource(R.string.change_to_private_nft),
+                        onClick = { showDialog = DialogType.PUBLIC },
+                    )
+                } else {
+                    LongWhiteButton(
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 20.dp),
+                        icon = null,
+                        text = stringResource(id = R.string.change_to_private_nft),
+                        onClick = { showDialog = DialogType.PUBLIC },
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    LongWhiteButton(
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 20.dp),
+                        icon = null,
+                        text = stringResource(R.string.change_to_not_sale_nft),
+                        onClick = { showDialog = DialogType.SALE },
+                    )
+                }
             }
         }
     }
@@ -381,11 +388,11 @@ fun DetailScreen(
         }
 
         DialogType.SALE -> {
-            val dialogTitle =stringResource(R.string.sale_dialog_title)
+            val dialogTitle = stringResource(R.string.sale_dialog_title)
             val dialogContent = stringResource(R.string.sale_dialog_content)
 
-            val titleKeywords =  listOf("비판매")
-            val contentKeywords =  listOf("구매할 수 없게", "판매로 변경")
+            val titleKeywords = listOf("비판매")
+            val contentKeywords = listOf("구매할 수 없게", "판매로 변경")
 
             showCustomDialog(
                 title = dialogTitle,
