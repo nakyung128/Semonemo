@@ -290,12 +290,9 @@ fun MainNavHost(
 
             MyPageRoute(
                 modifier = modifier,
-                navigateToDetail = { id, isSale ->
+                navigateToDetail = { id ->
                     navController.navigate(
-                        ScreenDestinations.Detail.createRoute(
-                            id,
-                            isSale,
-                        ),
+                        ScreenDestinations.Detail.createRoute(id),
                     )
                 },
                 navigateToFollowList = { nickname, followerList, followingList ->
@@ -433,7 +430,13 @@ fun MainNavHost(
         ) {
             PromptRoute(
                 modifier = modifier,
-                navigateToDone = { navController.navigate(ScreenDestinations.AssetDone.createRoute(it)) },
+                navigateToDone = {
+                    navController.navigate(
+                        ScreenDestinations.AssetDone.createRoute(
+                            it,
+                        ),
+                    )
+                },
                 popUpBackStack = navController::popBackStack,
                 onErrorSnackBar = onShowErrorSnackBar,
             )
@@ -442,11 +445,13 @@ fun MainNavHost(
         composable(
             route = ScreenDestinations.Detail.route,
             arguments = ScreenDestinations.Detail.arguments,
-        ) {
+        ) { navBackStackEntry ->
+            val userId = navBackStackEntry.arguments?.getLong("userId")
             DetailRoute(
                 modifier = modifier,
                 onShowSnackBar = onShowErrorSnackBar,
                 popUpBackStack = navController::popBackStack,
+                userId = userId ?: -1,
             )
         }
 

@@ -27,7 +27,6 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -80,7 +79,6 @@ import com.semonemo.presentation.theme.Gray03
 import com.semonemo.presentation.theme.Main01
 import com.semonemo.presentation.theme.SemonemoTheme
 import com.semonemo.presentation.theme.Typography
-import com.semonemo.presentation.theme.WhiteGray
 import com.semonemo.presentation.util.noRippleClickable
 import com.semonemo.presentation.util.toAbsolutePath
 import com.skydoves.landscapist.glide.GlideImage
@@ -91,7 +89,7 @@ import java.io.File
 @Composable
 fun MyPageRoute(
     modifier: Modifier = Modifier,
-    navigateToDetail: (Long, Boolean) -> Unit,
+    navigateToDetail: (Long) -> Unit,
     navigateToFollowList: (String, List<User>, List<User>) -> Unit,
     navigateToSetting: () -> Unit,
     navigateToAssetDetail: (Long) -> Unit,
@@ -152,7 +150,7 @@ fun HandleMyPageEvent(
 fun HandleMyPageUi(
     modifier: Modifier = Modifier,
     uiState: MyPageUiState,
-    navigateToDetail: (Long, Boolean) -> Unit,
+    navigateToDetail: (Long) -> Unit,
     navigateToFollowList: (String, List<User>, List<User>) -> Unit,
     navigateToSetting: () -> Unit,
     navigateToAssetDetail: (Long) -> Unit,
@@ -173,7 +171,6 @@ fun HandleMyPageUi(
                 navigateToAssetDetail = navigateToAssetDetail,
                 nickname = uiState.nickname,
                 profileImageUrl = uiState.profileImageUrl,
-                amount = uiState.amount,
                 follower = uiState.follower,
                 following = uiState.following,
                 updateProfileImage = updateProfileImage,
@@ -194,14 +191,13 @@ fun HandleMyPageUi(
 @Composable
 fun MyPageScreen(
     modifier: Modifier = Modifier,
-    navigateToDetail: (Long, Boolean) -> Unit = { _, _ -> },
+    navigateToDetail: (Long) -> Unit = {},
     navigateToFollowList: (String, List<User>, List<User>) -> Unit = { _, _, _ -> },
     navigateToSetting: () -> Unit = {},
     navigateToAssetDetail: (Long) -> Unit = {},
     navigateToSaleFrameDetail: (Long) -> Unit = {},
     nickname: String = "짜이한",
     profileImageUrl: String = "",
-    amount: Int = 0,
     follower: List<User> = emptyList(),
     following: List<User> = emptyList(),
     updateProfileImage: (Uri) -> Unit = {},
@@ -289,7 +285,7 @@ fun MyPageScreen(
             )
 
             Spacer(modifier = Modifier.fillMaxHeight(0.04f))
-            Box{
+            Box {
                 GlideImage(
                     imageModel = profileImageUrl.toUri(),
                     contentScale = ContentScale.Crop,
@@ -417,7 +413,12 @@ fun MyPageScreen(
             ) { targetIndex ->
                 when (targetIndex) {
                     0 -> {
-                        Column(modifier = Modifier.fillMaxWidth()) {
+                        Column(
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 60.dp),
+                        ) {
                             Box(
                                 modifier =
                                     Modifier
@@ -457,12 +458,20 @@ fun MyPageScreen(
 
                     1 -> {
                         // 애셋
-                        MyPageOwnedAssets(modifier = Modifier, assetList = assetList)
+                        MyPageOwnedAssets(
+                            modifier = Modifier.padding(bottom = 60.dp),
+                            assetList = assetList,
+                        )
                     }
 
                     2 -> {
                         // 찜
-                        Column(modifier = Modifier.fillMaxWidth()) {
+                        Column(
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 60.dp),
+                        ) {
                             Box(
                                 modifier =
                                     Modifier
@@ -507,7 +516,6 @@ fun MyPageScreen(
                     }
                 }
             }
-            Spacer(modifier = Modifier.fillMaxHeight(0.07f))
         }
     }
 }
