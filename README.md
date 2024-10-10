@@ -97,14 +97,14 @@
 
 |경매 등록|경매 진행|
 |:---:|:---:|
-| <img src="" width=200 height=400/> | <img src="" width=200 height=400/> 
+| <img src="https://github.com/user-attachments/assets/576a7c33-7f11-432c-8f1e-b34b8a2e2088" width=200 height=400/> | <img src="https://github.com/user-attachments/assets/0af3b10b-3e97-42c0-8e4b-c193c982febf" width=400 height=400/> 
 
 
 ### 촬영
 
 |촬영|사진 프레임 넣기|
 |:---:|:---:|
-| <img src="" width=200 height=400/> | <img src="https://github.com/user-attachments/assets/75dd5db5-3bef-4a00-aa7f-ce41f0860ada" width=200 height=400/> 
+| <img src="https://github.com/user-attachments/assets/eaec36cf-83b8-4fa2-94dd-d165418b00a2" width=200 height=400/> | <img src="https://github.com/user-attachments/assets/75dd5db5-3bef-4a00-aa7f-ce41f0860ada" width=200 height=400/> 
 
 
 
