@@ -444,7 +444,8 @@ fun MyPageScreen(
                                 MyPageSellFrames(
                                     modifier = Modifier,
                                     sellFrameList = sellFrameList,
-                                    navigateToSaleFrameDetail = navigateToSaleFrameDetail,
+                                    navigateToDetail = if (userId == -1L) navigateToDetail else navigateToSaleFrameDetail,
+                                    isMy = userId == -1L,
                                 )
                             } else {
                                 MyPageOwnedFrames(
