@@ -16,6 +16,7 @@ public class AuctionResponseDTO {
 	private int participants;
 	private long startPrice;
 	private Long currentBid;
+	private long finalPrice;
 	private String startTime;
 	private String endTime;
 }

@@ -137,6 +137,7 @@ public class AuctionServiceImpl implements AuctionService {
                 .participants(getParticipantCount(auctionId))
                 .startPrice(auction.getStartPrice())
                 .currentBid(currentBid)
+                .finalPrice(auction.getFinalPrice() != null ? auction.getFinalPrice() : 0)
                 .startTime(auction.getStartTime() != null ? auction.getStartTime().format(formatter) : null)
                 .endTime(auction.getEndTime() != null ? auction.getEndTime().format(formatter) : null)
                 .build();
@@ -170,6 +171,7 @@ public class AuctionServiceImpl implements AuctionService {
                     .participants(getParticipantCount(auction.getId()))
                     .startPrice(auction.getStartPrice())
                     .currentBid(currentBid)
+                    .finalPrice(auction.getFinalPrice() != null ? auction.getFinalPrice() : 0)
                     .startTime(auction.getStartTime() != null ? auction.getStartTime().format(formatter) : null)
                     .endTime(auction.getEndTime() != null ? auction.getEndTime().format(formatter) : null)
                     .build();
