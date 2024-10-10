@@ -19,6 +19,8 @@ public interface AssetSellRepositoryCustom {
 	List<AssetSell> findByCreatorTopN( Long userid, int size);
 
 	List<AssetSell> findByCreatorIdNextN( Long userid, Long cursorId, int size);
+
+	void updateAssetPurchaseCount(Long count, Long assetSellId);
 }
 
 
