@@ -1,13 +1,13 @@
 package com.semonemo.presentation.screen.auction.subScreen
 
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Surface
@@ -34,17 +34,19 @@ fun AuctionReadScreen(
         color = Color.White,
     ) {
         LazyRow(
-            modifier = Modifier.padding(vertical = 8.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
             contentPadding = PaddingValues(horizontal = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             items(auctionDataList) { data ->
-                Log.d(TAG, "AuctionReadScreen: $data")
                 LiveAuctionCard(
                     modifier =
                         Modifier
-                            .width(160.dp)
-                            .height(300.dp),
+                            .width(200.dp)
+                            .wrapContentSize(),
                     id = data.id,
                     status = data.status,
                     nftId = data.nftId,
