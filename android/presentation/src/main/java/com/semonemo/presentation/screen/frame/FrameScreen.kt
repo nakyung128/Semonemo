@@ -674,15 +674,17 @@ fun ShowAssets(
     overlayAssets.forEach { asset ->
         var position by remember(asset.uuid) { mutableStateOf(assetPositions.getOrPut(asset.uuid) { AssetPosition() }) }
 
-        val imageTransformableState = rememberTransformableState { zoomChange, offsetChange, rotationChange ->
-            position = position.copy(
-                scale = (position.scale * zoomChange).coerceIn(0.1f, 5f),
-                rotation = position.rotation + rotationChange,
-                offsetX = position.offsetX + offsetChange.x * position.scale,
-                offsetY = position.offsetY + offsetChange.y * position.scale
-            )
-            assetPositions[asset.uuid] = position
-        }
+        val imageTransformableState =
+            rememberTransformableState { zoomChange, offsetChange, rotationChange ->
+                position =
+                    position.copy(
+                        scale = (position.scale * zoomChange).coerceIn(0.1f, 5f),
+                        rotation = position.rotation + rotationChange,
+                        offsetX = position.offsetX + offsetChange.x * position.scale,
+                        offsetY = position.offsetY + offsetChange.y * position.scale,
+                    )
+                assetPositions[asset.uuid] = position
+            }
 
         val isSelected = selectedAssetId == asset.uuid
 
