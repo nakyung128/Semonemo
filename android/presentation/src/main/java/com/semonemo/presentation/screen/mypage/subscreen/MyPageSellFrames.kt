@@ -28,7 +28,7 @@ import com.skydoves.landscapist.glide.GlideImage
 fun MyPageSellFrames(
     modifier: Modifier = Modifier,
     sellFrameList: List<FrameDetail>,
-    navigateToDetail: (Long) -> Unit,
+    navigateToSaleFrameDetail: (Long) -> Unit,
 ) {
     LazyVerticalGrid(
         modifier =
@@ -57,7 +57,7 @@ fun MyPageSellFrames(
                             shape = RoundedCornerShape(10.dp),
                             color = Gray03,
                         ).noRippleClickable {
-                            navigateToDetail(frame.marketId)
+                            navigateToSaleFrameDetail(frame.marketId)
                         },
                 imageModel = imgUrl,
                 contentScale = ContentScale.Inside,
