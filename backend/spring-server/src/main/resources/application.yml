@@ -1,0 +1,45 @@
+server:
+  port: 8081
+
+springdoc:
+  api-docs:
+    path: /api/api-docs
+  swagger-ui:
+    path: /api/swagger-ui
+    operations-sorter: alpha
+    tags-sorter: alpha
+
+spring:
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://{domain}:3306/{schema}?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    username: {username}
+    password: {password}
+  jpa:
+    properties:
+      hibernate.format_sql: true
+      dialect: org.hibernate.dialect.MySQL8InnoDBDialect
+#    hibernate:
+#      ddl-auto: create
+cloud:
+  aws:
+    s3:
+      bucket: semonemo
+    stack.auto: false
+    region.static: us-east-1
+    credentials:
+      accessKey: {s3-access-key}
+      secretKey: {s3-secret-key}
+elasticsearch:
+  server: { url }
+  id: { elastic-id }
+  password: { elastic-password }
+jwt:
+  secret: {jwt-secret-key}
+  access-token-expiration: 7200000 # 2h
+  refresh-token-expiration: 604800000 # 7d
