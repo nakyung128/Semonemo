@@ -105,6 +105,7 @@ fun FrameDoneRoute(
             )
         },
         nftEvent = nftViewModel.nftEvent,
+        onErrorSnackBar = onErrorSnackBar,
     )
 }
 
@@ -157,9 +158,9 @@ fun FrameDoneContent(
     if (uiState.isLoading) {
         Box(
             modifier =
-            Modifier
-                .fillMaxSize()
-                .clickable(enabled = false) {},
+                Modifier
+                    .fillMaxSize()
+                    .clickable(enabled = false) {},
         )
         LoadingDialog(
             lottieRes = R.raw.normal_load,
@@ -188,17 +189,17 @@ fun FrameDoneScreen(
 
     Surface(
         modifier =
-        modifier
-            .fillMaxSize()
-            .verticalScroll(state = scrollState),
+            modifier
+                .fillMaxSize()
+                .verticalScroll(state = scrollState),
         color = Color.White,
     ) {
         Column(
             modifier =
-            modifier
-                .fillMaxSize()
-                .navigationBarsPadding()
-                .statusBarsPadding(),
+                modifier
+                    .fillMaxSize()
+                    .navigationBarsPadding()
+                    .statusBarsPadding(),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Spacer(modifier = Modifier.height(30.dp))
