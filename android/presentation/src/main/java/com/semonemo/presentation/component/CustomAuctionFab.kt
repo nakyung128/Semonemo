@@ -62,18 +62,11 @@ fun CustomAuctionFAB(
         ) {
             CustomAuctionSubFAB(
                 visible = expanded,
-                delayMillis = 100,
-                textLabel = stringResource(id = R.string.fab_label_register_long_auction),
-                imgRes = R.drawable.ic_fab_long_auction,
-            )
-            CustomAuctionSubFAB(
-                visible = expanded,
                 delayMillis = 0,
                 textLabel = stringResource(id = R.string.fab_label_register_short_auction),
                 imgRes = R.drawable.ic_fab_short_auction,
                 onClick = navigateToAuctionRegister,
             )
-
 
             // 메인 FAB 버튼
             FloatingActionButton(
@@ -120,8 +113,6 @@ fun CustomAuctionSubFAB(
             isVisible = false
         }
     }
-
-
 
     AnimatedVisibility(
         visible = isVisible,

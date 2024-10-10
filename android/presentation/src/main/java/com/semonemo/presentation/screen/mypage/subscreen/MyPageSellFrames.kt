@@ -13,7 +13,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import com.semonemo.domain.model.FrameDetail
@@ -29,6 +28,7 @@ fun MyPageSellFrames(
     modifier: Modifier = Modifier,
     sellFrameList: List<FrameDetail>,
     navigateToDetail: (Long) -> Unit,
+    isMy : Boolean = true
 ) {
     LazyVerticalGrid(
         modifier =
@@ -57,7 +57,11 @@ fun MyPageSellFrames(
                             shape = RoundedCornerShape(10.dp),
                             color = Gray03,
                         ).noRippleClickable {
-                            navigateToDetail(frame.marketId)
+                            if(isMy) {
+                                navigateToDetail(frame.nftId)
+                            } else {
+                                navigateToDetail(frame.marketId)
+                            }
                         },
                 imageModel = imgUrl,
                 contentScale = ContentScale.Inside,

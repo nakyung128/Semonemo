@@ -184,6 +184,7 @@ fun HandleMyPageUi(
                 likedFrames = uiState.likedFrames,
                 navigateToSaleFrameDetail = navigateToSaleFrameDetail,
                 userId = userId,
+                myId = uiState.userId,
             )
     }
 }
@@ -210,9 +211,10 @@ fun MyPageScreen(
     likeAssets: List<SellAssetDetail> = listOf(),
     likedFrames: List<FrameDetail> = listOf(),
     userId: Long = -1L,
+    myId: Long = -1L,
 ) {
     val tabs =
-        if (userId == -1L) {
+        if (userId == -1L || userId == myId) {
             listOf("프레임", "에셋", "찜")
         } else {
             listOf("프레임", "에셋")
@@ -413,6 +415,7 @@ fun MyPageScreen(
             ) { targetIndex ->
                 when (targetIndex) {
                     0 -> {
+                        likeCategory = "프레임"
                         Column(
                             modifier =
                                 Modifier
@@ -444,7 +447,8 @@ fun MyPageScreen(
                                 MyPageSellFrames(
                                     modifier = Modifier,
                                     sellFrameList = sellFrameList,
-                                    navigateToDetail = navigateToDetail,
+                                    navigateToDetail = if (userId == -1L) navigateToDetail else navigateToSaleFrameDetail,
+                                    isMy = userId == -1L,
                                 )
                             } else {
                                 MyPageOwnedFrames(
@@ -457,6 +461,9 @@ fun MyPageScreen(
                     }
 
                     1 -> {
+                        likeCategory = "프레임"
+                        isSell = false
+
                         // 애셋
                         MyPageOwnedAssets(
                             modifier = Modifier.padding(bottom = 60.dp),
@@ -466,6 +473,7 @@ fun MyPageScreen(
 
                     2 -> {
                         // 찜
+                        isSell = false
                         Column(
                             modifier =
                                 Modifier

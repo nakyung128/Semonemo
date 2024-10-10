@@ -554,6 +554,9 @@ fun MainNavHost(
                 navigateToDetail = {
                     navController.navigate(ScreenDestinations.FrameDetail.createRoute(it))
                 },
+                navigateToProfile = {
+                    navController.navigate(ScreenDestinations.MyPage.createRoute(it))
+                },
             )
         }
 
@@ -567,6 +570,9 @@ fun MainNavHost(
                 onShowSnackBar = onShowErrorSnackBar,
                 navigateToDetail = {
                     navController.navigate(ScreenDestinations.AssetDetail.createRoute(it))
+                },
+                navigateToProfile = {
+                    navController.navigate(ScreenDestinations.MyPage.createRoute(it))
                 },
             )
         }
