@@ -571,6 +571,9 @@ fun MainNavHost(
                 navigateToDetail = {
                     navController.navigate(ScreenDestinations.AssetDetail.createRoute(it))
                 },
+                navigateToProfile = {
+                    navController.navigate(ScreenDestinations.MyPage.createRoute(it))
+                },
             )
         }
 

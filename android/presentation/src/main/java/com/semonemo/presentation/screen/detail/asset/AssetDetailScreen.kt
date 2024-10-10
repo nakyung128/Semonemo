@@ -79,6 +79,7 @@ fun AssetDetailRoute(
     viewModel: AssetDetailViewModel = hiltViewModel(),
     nftViewModel: NftViewModel = hiltViewModel(),
     navigateToDetail: (Long) -> Unit = {},
+    navigateToProfile: (Long) -> Unit = {},
 ) {
     val uiState = viewModel.uiState.collectAsStateWithLifecycle()
     AssetDetailContent(
@@ -113,6 +114,9 @@ fun AssetDetailRoute(
             )
         },
         navigateToDetail = navigateToDetail,
+        navigateToProfile = {
+            navigateToProfile(uiState.value.asset.creator.userId)
+        },
     )
 }
 
@@ -127,6 +131,7 @@ fun AssetDetailContent(
     onClickedLikeAsset: (Boolean) -> Unit = {},
     sendTransaction: (Long) -> Unit = {},
     navigateToDetail: (Long) -> Unit = {},
+    navigateToProfile: () -> Unit = {},
 ) {
     LaunchedEffect(uiEvent) {
         uiEvent.collectLatest { event ->
@@ -155,6 +160,7 @@ fun AssetDetailContent(
         canPurchase = (uiState.userId == asset.creator.userId).not(),
         creatorAssets = uiState.creatorAssets,
         navigateToDetail = navigateToDetail,
+        navigateToProfile = navigateToProfile,
     )
     if (uiState.isLoading) {
         Box(
@@ -188,6 +194,7 @@ fun AssetDetailScreen(
     canPurchase: Boolean = true,
     creatorAssets: List<SellAssetDetail> = listOf(),
     navigateToDetail: (Long) -> Unit = {},
+    navigateToProfile: () -> Unit = {},
 ) {
     Surface(
         modifier =
@@ -247,7 +254,10 @@ fun AssetDetailScreen(
                     modifier =
                         Modifier
                             .align(Alignment.Start)
-                            .padding(horizontal = 10.dp),
+                            .padding(horizontal = 10.dp)
+                            .noRippleClickable {
+                                navigateToProfile()
+                            },
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(5.dp),
                 ) {
