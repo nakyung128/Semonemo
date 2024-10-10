@@ -49,6 +49,7 @@ import com.semonemo.presentation.component.HashTag
 import com.semonemo.presentation.component.HashTagTextField
 import com.semonemo.presentation.component.LoadingDialog
 import com.semonemo.presentation.component.LongBlackButton
+import com.semonemo.presentation.component.LongUnableButton
 import com.semonemo.presentation.component.ScriptTextField
 import com.semonemo.presentation.screen.nft.NftEvent
 import com.semonemo.presentation.screen.nft.NftViewModel
@@ -156,9 +157,9 @@ fun FrameDoneContent(
     if (uiState.isLoading) {
         Box(
             modifier =
-                Modifier
-                    .fillMaxSize()
-                    .clickable(enabled = false) {},
+            Modifier
+                .fillMaxSize()
+                .clickable(enabled = false) {},
         )
         LoadingDialog(
             lottieRes = R.raw.normal_load,
@@ -187,17 +188,17 @@ fun FrameDoneScreen(
 
     Surface(
         modifier =
-            modifier
-                .fillMaxSize()
-                .verticalScroll(state = scrollState),
+        modifier
+            .fillMaxSize()
+            .verticalScroll(state = scrollState),
         color = Color.White,
     ) {
         Column(
             modifier =
-                modifier
-                    .fillMaxSize()
-                    .navigationBarsPadding()
-                    .statusBarsPadding(),
+            modifier
+                .fillMaxSize()
+                .navigationBarsPadding()
+                .statusBarsPadding(),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Spacer(modifier = Modifier.height(30.dp))
@@ -293,15 +294,19 @@ fun FrameDoneScreen(
                 focusManager = focusManager,
             )
             Spacer(modifier = Modifier.height(40.dp))
-            LongBlackButton(
-                icon = null,
-                text = stringResource(R.string.frame_save_btn_title),
-                onClick = {
-                    bitmap?.let {
-                        onClick(converterFile(it))
-                    }
-                },
-            )
+            if (tags.isNotEmpty() && title.isNotBlank() && script.isNotBlank()) {
+                LongBlackButton(
+                    icon = null,
+                    text = stringResource(R.string.frame_save_btn_title),
+                    onClick = {
+                        bitmap?.let {
+                            onClick(converterFile(it))
+                        }
+                    },
+                )
+            } else {
+                LongUnableButton(text = stringResource(R.string.frame_save_btn_title))
+            }
             Spacer(modifier = Modifier.height(10.dp))
             Text(
                 text = stringResource(R.string.frame_save_btn_script),

@@ -28,6 +28,8 @@ import com.semonemo.presentation.component.LiveAuctionCard
 import com.semonemo.presentation.screen.auction.AuctionViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 @Preview(showBackground = true, name = "AuctionReadScreen")
 @Composable
@@ -112,6 +114,7 @@ fun ShortAuctionReadScreen(
                     participants = data.participants,
                     startPrice = data.startPrice,
                     currentBid = data.currentBid,
+                    finalPrice = data.finalPrice,
                     startTime = data.startTime,
                     endTime = data.endTime,
                     onClick = navigateToAuctionDetail,

@@ -304,7 +304,7 @@ fun AssetSaleScreen(
                     },
                 )
                 Spacer(modifier = Modifier.height(30.dp))
-                if (selectedAsset != "" && price != 0L) {
+                if (selectedAsset != "" && price != 0L && tags.isNotEmpty()) {
                     LongBlackButton(
                         modifier =
                             Modifier

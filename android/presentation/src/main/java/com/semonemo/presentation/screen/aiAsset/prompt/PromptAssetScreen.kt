@@ -16,6 +16,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -123,10 +124,10 @@ fun PromptAssetScreen(
         listOf(
             "사람",
             "동물",
-            "기타"
+            "기타",
         )
-    var selectedStyle by remember { mutableStateOf("실사") }
-    var selectedType by remember { mutableStateOf("사람") }
+    var selectedStyle by remember { mutableIntStateOf(0) }
+    var selectedType by remember { mutableIntStateOf(0) }
 
     Surface(
         modifier =
@@ -198,10 +199,10 @@ fun PromptAssetScreen(
                 ) {
                     AssetButtonList(
                         titles = styles,
-                        selectedBtn = selectedStyle,
+                        selectedBtn = styles[selectedStyle],
                         onBtnSelected = {
                             selectedStyle = it
-                            updateStyle(selectedStyle, selectedType)
+                            updateStyle(styles[selectedStyle], types[selectedType])
                         },
                     )
                 }
@@ -226,10 +227,10 @@ fun PromptAssetScreen(
                 ) {
                     AssetButtonList(
                         titles = types,
-                        selectedBtn = selectedType,
+                        selectedBtn = types[selectedType],
                         onBtnSelected = {
                             selectedType = it
-                            updateStyle(selectedStyle, selectedType)
+                            updateStyle(styles[selectedStyle], types[selectedType])
                         },
                     )
                 }

@@ -60,7 +60,6 @@ class AuctionViewModel
                                     cancelAuctionList = allAuctionList.filter { AuctionStatus.valueOf(it.status) == AuctionStatus.CANCEL },
                                 )
                             }
-//                            shortAuctionList.value = response.data
                         }
                     }
                 }

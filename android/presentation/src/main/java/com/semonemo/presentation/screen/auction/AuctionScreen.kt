@@ -135,7 +135,7 @@ fun AuctionScreen(
                 )
             }
             Spacer(modifier = Modifier.height(10.dp))
-            // 준비된 경매
+            // 예정된 경매
             SectionHeader(
                 modifier = Modifier.padding(10.dp),
                 text = stringResource(R.string.auction_ready_header),
@@ -149,7 +149,7 @@ fun AuctionScreen(
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
-                        text = "현재 준비된 경매가 없어요! 🥲",
+                        text = "현재 예정된 경매가 없어요! 🥲",
                         style = Typography.labelLarge,
                         color = Gray02,
                     )
@@ -162,7 +162,7 @@ fun AuctionScreen(
             }
 
             Spacer(modifier = Modifier.height(10.dp))
-            // 종료된 경매
+            // 낙찰된 경매
             SectionHeader(
                 modifier = Modifier.padding(10.dp),
                 text = stringResource(R.string.auction_end_header),
@@ -176,7 +176,7 @@ fun AuctionScreen(
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
-                        text = "현재 종료된 경매가 없어요! 🥲",
+                        text = "현재 낙찰된 경매가 없어요! 🥲",
                         style = Typography.labelLarge,
                         color = Gray02,
                     )

@@ -125,7 +125,7 @@ fun AssetDoneScreen(
     val context = LocalContext.current
 
     val focusManager = LocalFocusManager.current
-    var isRemoveBg =
+    val isRemoveBg =
         remember {
             mutableStateOf(false)
         }

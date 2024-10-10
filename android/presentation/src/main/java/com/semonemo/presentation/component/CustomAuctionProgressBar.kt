@@ -54,12 +54,15 @@ fun CustomAuctionProgressBar(
         }
 
     LaunchedEffect(endTimeMillis) {
-        if(auctionStatus == AuctionStatus.PROGRESS) {
-            while (timeLeft > 0) {
-                val currentTimeMillis = System.currentTimeMillis()
+        if (auctionStatus == AuctionStatus.PROGRESS) {
+            while (true) {
+                val currentTimeMillis = parseLocalDateTimeToLong(LocalDateTime.now())
                 val updatedTime = max(0f, (endTimeMillis - currentTimeMillis) / 1000f)
-                timeLeft = updatedTime
+                timeLeft = if(updatedTime < 0L) 0f else updatedTime
                 delay(100L) // 0.1초마다 업데이트
+                if(auctionStatus == AuctionStatus.END) {
+                    break
+                }
             }
         }
     }
@@ -115,4 +118,10 @@ fun CustomAuctionProgressBarPreview() {
         initialTime = 15f,
         endTime = exampleEndTime,
     )
+}
+
+/** LocalDateTime을 Long으로 파싱 **/
+fun parseLocalDateTimeToLong(localDateTime: LocalDateTime): Long {
+    return localDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+    // systemDefault는 현재 디바이스의 지역을 의미함
 }
