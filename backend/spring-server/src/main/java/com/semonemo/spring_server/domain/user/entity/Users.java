@@ -36,6 +36,7 @@ public class Users extends BaseTimeEntity {
 	private String password;
 	private String nickname;
 	private String profileImage;
+    private boolean isActive;
 
 	@Column(columnDefinition = "BIGINT DEFAULT 0")
     private Long balance;
@@ -80,5 +81,9 @@ public class Users extends BaseTimeEntity {
 
     public void minusBalance(Long amount) {
         this.balance -= amount;
+    }
+
+    public void toggleActive(boolean activeStatus) {
+        this.isActive = activeStatus;
     }
 }

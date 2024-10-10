@@ -84,6 +84,7 @@ public enum ErrorCode {
 	INSUFFICIENT_BALANCE("AU002", "잔액이 부족합니다.", HttpStatus.BAD_REQUEST),
 	INVALID_AUCTION_STATUS("AU003", "유효하지 않은 경매 상태입니다.", HttpStatus.BAD_REQUEST),
 	AUCTION_NOT_FOUND("AU004", "경매를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+    IS_ON_AUCTION("AU005", "경매에 참여중입니다.", HttpStatus.BAD_REQUEST)
 	;
 
 	private final String code;
