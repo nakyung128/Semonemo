@@ -84,6 +84,7 @@ fun FrameDetailRoute(
     viewModel: FrameDetailViewModel = hiltViewModel(),
     nftViewModel: NftViewModel = hiltViewModel(),
     navigateToDetail: (Long) -> Unit = {},
+    navigateToProfile: (Long) -> Unit = {},
 ) {
     val uiState = viewModel.uiState.collectAsStateWithLifecycle()
     FrameDetailContent(
@@ -113,6 +114,9 @@ fun FrameDetailRoute(
         },
         frame = uiState.value.frame,
         navigateToDetail = navigateToDetail,
+        navigateToProfile = {
+            navigateToProfile(uiState.value.frame.seller.userId)
+        },
     )
 }
 
@@ -128,6 +132,7 @@ fun FrameDetailContent(
     sendTransaction: () -> Unit = {},
     frame: FrameDetail = FrameDetail(),
     navigateToDetail: (Long) -> Unit = {},
+    navigateToProfile: () -> Unit = {},
 ) {
     LaunchedEffect(uiEvent) {
         uiEvent.collectLatest { event ->
@@ -158,6 +163,7 @@ fun FrameDetailContent(
         creatorFrames = uiState.creatorFrames,
         navigateToDetail = navigateToDetail,
         canPurchase = (uiState.userId == frame.seller.userId).not(),
+        navigateToProfile = navigateToProfile,
     )
     if (uiState.isLoading) {
         LoadingDialog(
@@ -187,6 +193,7 @@ fun FrameDetailScreen(
     creatorFrames: List<FrameDetail> = listOf(),
     navigateToDetail: (Long) -> Unit = {},
     canPurchase: Boolean = false,
+    navigateToProfile: () -> Unit = {},
 ) {
     val (expanded, isExpanded) =
         remember {
@@ -195,17 +202,17 @@ fun FrameDetailScreen(
     val maxLines = 2
     Surface(
         modifier =
-        Modifier
-            .fillMaxSize(),
+            Modifier
+                .fillMaxSize(),
         color = Color.White,
     ) {
         Column(
             modifier =
-            Modifier
-                .fillMaxSize()
-                .background(color = Color.White)
-                .statusBarsPadding()
-                .navigationBarsPadding(),
+                Modifier
+                    .fillMaxSize()
+                    .background(color = Color.White)
+                    .statusBarsPadding()
+                    .navigationBarsPadding(),
         ) {
             Spacer(modifier = Modifier.height(10.dp))
             TopAppBar(
@@ -253,7 +260,10 @@ fun FrameDetailScreen(
                 )
                 Spacer(modifier = Modifier.fillMaxHeight(0.05f))
                 Row(
-                    modifier = Modifier.align(Alignment.Start),
+                    modifier =
+                        Modifier.align(Alignment.Start).noRippleClickable {
+                            navigateToProfile()
+                        },
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(5.dp),
                 ) {
