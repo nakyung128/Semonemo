@@ -105,8 +105,8 @@ fun ShortAuctionReadScreen(
                 LiveAuctionCard(
                     modifier =
                         Modifier
-                            .width(160.dp) // 카드의 너비 설정
-                            .height(300.dp),
+                            .width(300.dp) // 카드의 너비 설정
+                            .height(400.dp),
                     id = data.id,
                     status = data.status,
                     nftId = data.nftId,
