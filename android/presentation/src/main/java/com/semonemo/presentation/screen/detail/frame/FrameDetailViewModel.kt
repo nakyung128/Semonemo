@@ -187,4 +187,28 @@ class FrameDetailViewModel
                     }
             }
         }
+
+        fun cancelSaleNft(
+            txHash: String,
+            marketId: Long,
+        ) {
+            viewModelScope.launch {
+                nftRepository
+                    .cancelSaleNft(
+                        txHash = txHash,
+                        marketId = marketId,
+                    ).onStart {
+                        _uiState.update { it.copy(isLoading = true) }
+                    }.onCompletion {
+                        _uiState.update { it.copy(isLoading = false) }
+                    }.collectLatest { response ->
+                        when (response) {
+                            is ApiResponse.Error -> _uiEvent.emit(FrameDetailUiEvent.Error(errorMessage = response.errorMessage))
+                            is ApiResponse.Success -> {
+                                _uiEvent.emit(FrameDetailUiEvent.CancelSale(errorMessage = "판매가 취소되었습니다."))
+                            }
+                        }
+                    }
+            }
+        }
     }

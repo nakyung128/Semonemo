@@ -18,4 +18,9 @@ sealed interface FrameDetailUiEvent {
 
     @Immutable
     data object Success : FrameDetailUiEvent
+
+    @Immutable
+    data class CancelSale(
+        val errorMessage: String,
+    ) : FrameDetailUiEvent
 }
