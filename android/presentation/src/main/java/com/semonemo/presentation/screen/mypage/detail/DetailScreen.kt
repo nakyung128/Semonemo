@@ -347,16 +347,6 @@ fun DetailScreen(
                         text = stringResource(id = R.string.change_to_private_nft),
                         onClick = { showDialog = DialogType.PUBLIC },
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    LongWhiteButton(
-                        modifier =
-                            Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 20.dp),
-                        icon = null,
-                        text = stringResource(R.string.change_to_not_sale_nft),
-                        onClick = { showDialog = DialogType.SALE },
-                    )
                 }
             }
         }
