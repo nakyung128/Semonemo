@@ -9,6 +9,6 @@ import org.web3j.protocol.http.HttpService;
 public class Web3Config {
     @Bean
     public Web3j web3j() {
-        return Web3j.build(new HttpService("https://j11d109.p.ssafy.io/chain"));
+        return Web3j.build(new HttpService("https://rpc.ssafy-blockchain.com"));
     }
 }
