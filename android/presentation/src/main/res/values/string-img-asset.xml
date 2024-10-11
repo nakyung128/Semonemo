@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="img_asset_title1">갤러리 속 사진으로 만드는</string>
+    <string name="img_asset_title2">이미지 에셋</string>
+    <string name="img_asset_script1">스티커로 만들고 싶은 이미지를 고르면</string>
+    <string name="img_asset_script2">AI가 배경을 제거해 에셋으로 만들어 줘요!</string>
+    <string name="img_asset_btn_title">앨범에서 이미지 선택하기</string>
+</resources>

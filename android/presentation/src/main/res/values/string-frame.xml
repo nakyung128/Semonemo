@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="frame_description">프레임은 아래와 같이 제작돼요!</string>
+    <string name="frame_size">사이즈</string>
+    <string name="frame_background">배경색</string>
+    <string name="frame_asset">에셋</string>
+    <string name="frame_one_by_one">1x1</string>
+    <string name="frame_one_by_four">1x4</string>
+    <string name="frame_two_by_two">2x2</string>
+    <string name="frame_done_title">나만의 프레임 완성!</string>
+    <string name="frame_done_script">멋진 프레임을 제작했네요. ✪ ω ✪\n프레임의 제목과 설명을 입력해 주세요.</string>
+    <string name="frame_title_placeholder">제목</string>
+    <string name="frame_script_placeholder">설명을 적어 주세요</string>
+    <string name="frame_save_btn_title">저장하고 홈으로 돌아가기</string>
+    <string name="frame_save_btn_script">제작된 프레임은 마이페이지에서 확인할 수 있어요.</string>
+    <string name="frame_done_btn_title">완성했어요!</string>
+    <string name="frame_loading_title">프레임을 열심히 제작하고 있어요!</string>
+    <string name="frame_sale_register_title">프레임을 상점에 등록하고 있어요!</string>
+    <string name="frame_purchase_loading_title">프레임 구매중이에요!</string>
+    <string name="frame_cancel_loading_title">프레임 판매 취소 처리중이에요!</string>
+</resources>

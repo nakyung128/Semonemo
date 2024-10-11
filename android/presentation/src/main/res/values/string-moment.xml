@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ai_asset_label">AI 에셋</string>
+    <string name="make_title">제작하기</string>
+    <string name="img_asset_label">이미지 에셋</string>
+    <string name="my_frame_label">나만의 프레임 NFT</string>
+    <string name="picture_label">세모내모 사진</string>
+    <string name="frame_label_2">만들어 보기</string>
+    <string name="picture_label2">촬영하기</string>
+    <string name="draw_done">이대로 제작할래요</string>
+    <string name="asset_done_title">AI가 에셋 제작을 완료했어요!</string>
+    <string name="asset_done_title2">보관함에 넣거나 다시 제작할 수 있어요</string>
+    <string name="asset_done_script">완성된 에셋이에요!</string>
+    <string name="remake_asset">다시 제작해 주세요</string>
+    <string name="save_asset">보관함에 넣을게요</string>
+    <string name="tag_placeholder">태그 입력 (최소 1개)</string>
+</resources>

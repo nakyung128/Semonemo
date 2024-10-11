@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="shop_title">상점</string>
+    <string name="auction_title">경매</string>
+    <string name="moment_title">모먼트</string>
+    <string name="wallet_title">지갑</string>
+    <string name="my_title">마이</string>
+</resources>

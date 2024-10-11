@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="edit_title">닉네임 변경</string>
+    <string name="edit_button_message">변경하기</string>
+    <string name="edit_place_holder">변경할 닉네임을 입력해 주세요</string>
+    <string name="logout_message">로그아웃</string>
+    <string name="delete_user_message">회원탈퇴</string>
+    <string name="setting_title">설정</string>
+</resources>

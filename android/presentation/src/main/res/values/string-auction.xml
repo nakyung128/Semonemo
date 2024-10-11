@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="auction_progress_header">💥 진행중 경매</string>
+    <string name="auction_ready_header">⌛ 예정된 경매</string>
+    <string name="auction_end_header">🎖 낙찰된 경매</string>
+    <string name="auction_cancel_header">🎣 유찰된 경매</string>
+    <string name="in_progress_long_action">진행 중인 장기 경매"</string>
+    <string name="reload_label">새로고침</string>
+
+    <string name="label_register_auction">경매 등록</string>
+    <string name="fab_label_register_short_auction">단기경매 등록</string>
+    <string name="fab_label_register_long_auction">장기경매 등록</string>
+    <string name="frame_auction_register_title">프레임을 경매에 등록하고 있어요!</string>
+
+    <string name="auction_bid_give_up_button">입찰포기</string>
+    <string name="auction_bid_give_up_title">해당 경매의 입찰을 포기하시겠습니까?</string>
+    <string name="auction_bid_give_up_content">입찰을 포기 하시면 경매를 관찰할 수 없어요.</string>
+    <string name="auction_bid_give_up_confirm">포기</string>
+    <string name="auction_bid_give_up_dismiss">취소</string>
+
+    <!-- 경매 pager !-->
+    <string name="auction_start_button_title">경매 시작</string>
+    <string name="user_ready_button_title">READY</string>
+    <string name="user_start_button_title">START</string>
+    <string name="auction_leave_button_title">경매 나가기</string>
+
+    <string name="short_auction_register_title">단기 경매</string>
+    <string name="long_auction_register_title">장기 경매</string>
+    <string name="auction_add_title">경매에 등록할\n프레임을 추가하세요</string>
+
+    <string name="is_user_bid_mark">(MY)</string>
+</resources>
