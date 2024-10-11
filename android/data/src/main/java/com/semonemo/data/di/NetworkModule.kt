@@ -53,9 +53,9 @@ object NetworkModule {
         addInterceptor(ErrorHandlingInterceptor())
         addInterceptor(accessTokenInterceptor)
         authenticator(jwtAuthenticator)
-        connectTimeout(30, TimeUnit.SECONDS)
-        readTimeout(30, TimeUnit.SECONDS)
-        writeTimeout(30, TimeUnit.SECONDS)
+        connectTimeout(5, TimeUnit.MINUTES)
+        readTimeout(5, TimeUnit.MINUTES)
+        writeTimeout(5, TimeUnit.MINUTES)
         build()
     }
 
@@ -67,9 +67,9 @@ object NetworkModule {
             addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
             addInterceptor(accessTokenInterceptor)
             addInterceptor(ErrorHandlingInterceptor())
-            connectTimeout(30, TimeUnit.SECONDS)
-            readTimeout(30, TimeUnit.SECONDS)
-            writeTimeout(30, TimeUnit.SECONDS)
+            connectTimeout(5, TimeUnit.MINUTES)
+            readTimeout(5, TimeUnit.MINUTES)
+            writeTimeout(5, TimeUnit.MINUTES)
             build()
         }
 
@@ -84,9 +84,9 @@ object NetworkModule {
         addInterceptor(ErrorHandlingInterceptor())
         addInterceptor(accessTokenInterceptor)
         authenticator(jwtAuthenticator)
-        connectTimeout(30, TimeUnit.SECONDS)
-        readTimeout(30, TimeUnit.SECONDS)
-        writeTimeout(30, TimeUnit.SECONDS)
+        connectTimeout(5, TimeUnit.MINUTES)
+        readTimeout(5, TimeUnit.MINUTES)
+        writeTimeout(5, TimeUnit.MINUTES)
         build()
     }
 
@@ -101,9 +101,9 @@ object NetworkModule {
         addInterceptor(ErrorHandlingInterceptor())
         addInterceptor(accessTokenInterceptor)
         authenticator(jwtAuthenticator)
-        connectTimeout(30, TimeUnit.SECONDS)
-        readTimeout(30, TimeUnit.SECONDS)
-        writeTimeout(30, TimeUnit.SECONDS)
+        connectTimeout(5, TimeUnit.MINUTES)
+        readTimeout(5, TimeUnit.MINUTES)
+        writeTimeout(5, TimeUnit.MINUTES)
         build()
     }
 
