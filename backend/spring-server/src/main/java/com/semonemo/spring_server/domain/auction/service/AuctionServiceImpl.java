@@ -345,6 +345,23 @@ public class AuctionServiceImpl implements AuctionService {
                 .orElseThrow(() -> new CustomException(ErrorCode.NFT_NOT_FOUND_ERROR));
 
         int anonym = -1;
+        if (lastBid != null
+                && hashOps.hasKey(AUCTION_PARTICIPANT_KEY_PREFIX + auctionId, String.valueOf(lastBid.getUserId()))) {
+            anonym = Integer.parseInt(String.valueOf(
+                    hashOps.get(AUCTION_PARTICIPANT_KEY_PREFIX + auctionId,
+                            String.valueOf(lastBid.getUserId()))
+            ));
+        }
+
+        AuctionEndDTO response = AuctionEndDTO.builder()
+                .auctionId(auctionId)
+                .finalPrice(lastBid != null ? lastBid.getBidAmount() : auction.getStartPrice())
+                .winner(lastBid != null ? lastBid.getUserId() : null)
+                .anonym(anonym)
+                .endTime(LocalDateTime.now().format(formatter))
+                .build();
+
+        messagingTemplate.convertAndSend("/topic/auction/" + auctionId + "/end", response);
 
         // 경매가 유찰된 경우
         if (lastBid == null) {
@@ -368,8 +385,8 @@ public class AuctionServiceImpl implements AuctionService {
             nft.getOwner().plusBalance(lastBid.getBidAmount());
 
             anonym = Integer.parseInt(String.valueOf(
-                hashOps.get(AUCTION_PARTICIPANT_KEY_PREFIX + auctionId,
-                    String.valueOf(lastBid.getUserId()))
+                    hashOps.get(AUCTION_PARTICIPANT_KEY_PREFIX + auctionId,
+                            String.valueOf(lastBid.getUserId()))
             ));
 
             try {
@@ -389,16 +406,6 @@ public class AuctionServiceImpl implements AuctionService {
                 throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
             }
         }
-
-        AuctionEndDTO response = AuctionEndDTO.builder()
-                .auctionId(auctionId)
-                .finalPrice(lastBid != null ? lastBid.getBidAmount() : auction.getStartPrice())
-                .winner(lastBid != null ? lastBid.getUserId() : null)
-                .anonym(anonym)
-                .endTime(LocalDateTime.now().format(formatter))
-                .build();
-
-        messagingTemplate.convertAndSend("/topic/auction/" + auctionId + "/end", response);
 
         // 경매 종료 후 Redis 에서 경매 로그 데이터 삭제
         redisTemplate.delete(logKey);
