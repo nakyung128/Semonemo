@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="login_message">메타마스크 연동하기</string>
+    <string name="login_title">오늘의 추억을 프레임 속에 담다</string>
+    <string name="brush_moment">추억</string>
+    <string name="brush_frame">프레임</string>
+    <string name="login_dialog_title">MetaMask를 설치하러가시겠습니까?</string>
+    <string name="login_dialog_confirm_message">네</string>
+    <string name="login_dialog_dismiss_message">취소</string>
+    <string name="login_title_keywords">MetaMask</string>
+    <string name="login_content_keywords">필수적</string>
+    <string name="login_dialog_content">"세모네모를 이용하기 위해서는\nMetaMask 연동이 필수적이에요.   "</string>
+    <string name="signup_loading_message">"회원가입 진행중이에요! "</string>
+</resources>

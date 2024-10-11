@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="private_tag">비공개</string>
+    <string name="not_sale_tag">비판매</string>
+    <string name="mypage_change_title">변경</string>
+    <string name="mypage_cancel_tag">취소</string>
+    <string name="change_to_public_nft">공개 NFT로 변경하기</string>
+    <string name="change_to_private_nft">비공개 NFT로 변경하기</string>
+    <string name="change_to_sale_nft">판매 가능한 NFT로 변경하기</string>
+    <string name="change_to_not_sale_nft">비판매 NFT로 변경하기</string>
+    <string name="public_dialog_title">해당 NFT를 공개로 변경하시겠습니까?</string>
+    <string name="private_dialog_title">해당 NFT를 비공개로 변경하시겠습니까?</string>
+    <string name="public_dialog_content">NFT 공개 변경 시 사용자들에게 판매할 수 있으며,\n원할 때 언제든 다시 비공개로 변경할 수 있어요.</string>
+    <string name="private_dialog_content">NFT 비공개 변경 시 다른 사용자들이 볼 수 없으며,\n원할 때 언제든 다시 공개로 변경할 수 있어요.</string>
+    <string name="sale_dialog_title">해당 NFT를 판매하시겠습니까?</string>
+    <string name="not_sale_dialog_title">해당 NFT를 비판매하시겠습니까?</string>
+    <string name="sale_dialog_content">사용자들이 NFT를 구매할 수 있게 되며,\n원할 때 언제든 다시 비판매로 변경할 수 있어요.</string>
+    <string name="not_sale_dialog_content">사용자들이 NFT를 구매할 수 없게 되며,\n원할 때 언제든 다시 판매로 변경할 수 있어요.</string>
+</resources>

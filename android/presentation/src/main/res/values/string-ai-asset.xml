@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ai_asset_title1">내 손으로 직접 만드는</string>
+    <string name="ai_asset_title2">AI 에셋</string>
+    <string name="ai_asset_script1">그림을 그리거나, 설명하는 문장을 작성해 보세요!</string>
+    <string name="ai_asset_script2">AI가 알아서 에셋으로 변환해 줘요 (´▽｀)</string>
+    <string name="ai_asset_draw_btn">그림 그려서 제작하기</string>
+    <string name="ai_asset_prompt_btn">문장 작성으로 제작하기</string>
+    <string name="canvas_script">캔버스 위에 원하는 그림을 그려 보세요</string>
+    <string name="prompt_title">만들고 싶은 에셋을 설명하는 문장을\n자세히 영어로 작성해 주세요</string>
+    <string name="prompt_example">예시) a winking yellow-haired cat</string>
+    <string name="prompt_placeholder">만들고 싶은 에셋에 대한 설명을 적어 주세요 :-3</string>
+    <string name="prompt_done_btn_title">이렇게 제작해 주세요</string>
+</resources>

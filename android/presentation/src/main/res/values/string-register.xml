@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="input_nickname_message">닉네임을 입력해주세요</string>
+    <string name="input_password_message">비밀번호를 입력해주세요</string>
+    <string name="register_title">필요한 개인정보를\n입력해 주세요</string>
+    <string name="brush_need">필요한</string>
+    <string name="brush_persenal_info">개인정보</string>
+    <string name="register_message">설정 완료</string>
+    <string name="frame_add_title">프레임을 추가해 주세요</string>
+    <string name="frame_register_title">프레임 판매</string>
+    <string name="register_tag">태그</string>
+    <string name="coin_price_unit">Aho</string>
+    <string name="register_price">판매가</string>
+    <string name="register_frame_title">상품명</string>
+    <string name="register_frame_discription">설명</string>
+    <string name="register_btn_title">판매 등록</string>
+</resources>

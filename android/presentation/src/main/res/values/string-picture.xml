@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="picture_main_title">프레임 사이즈를 선택하고\n사진을 촬영해 보세요!</string>
+    <string name="frame_size1_title">1x4 사이즈</string>
+    <string name="frame_size1_script">가장 기본적인 사이즈</string>
+    <string name="frame_size2_title">2x2 사이즈</string>
+    <string name="frame_size2_script">크게 네 컷을 담고 싶을 때</string>
+    <string name="frame_size3_title">1x1 사이즈</string>
+    <string name="frame_size3_script">오로지 한 컷만!</string>
+    <string name="my_frame">내 프레임</string>
+    <string name="picture_date">촬영 일자 삽입</string>
+    <string name="no_available_frame_message">촬영할 수 있는 프레임이 없어요!</string>
+</resources>

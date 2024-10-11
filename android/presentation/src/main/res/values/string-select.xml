@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="img_select_title">현재 선택한 이미지로 제작하시겠어요?</string>
+    <string name="img_select_confirm">네, 제작할래요!</string>
+    <string name="img_select_again">다시 선택할게요</string>
+    <string name="img_select_style">원하는 화풍을 선택해 주세요 🙂</string>
+    <string name="loading_message">AI가 열심히 에셋을 제작하고 있어요...</string>
+    <string name="loading_sub_message">조금만 기다려 주세요  (。＾▽＾)</string>
+</resources>

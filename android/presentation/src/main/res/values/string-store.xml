@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="fab_label_sell_frame">프레임 판매</string>
+    <string name="fab_label_sell_asset">에셋 판매"</string>
+    
+    <string name="section_header_recent_popular_frame">최근 인기 프레임</string>
+    <string name="section_header_sell_frame">💸 판매 중인 프레임</string>
+    <string name="section_header_sell_asset">💸 판매 중인 에셋</string>
+
+    <string name="section_full_view">전체보기</string>
+    <string name="recent_popular_frame_header">🔥 최근 인기 프레임</string>
+
+</resources>
