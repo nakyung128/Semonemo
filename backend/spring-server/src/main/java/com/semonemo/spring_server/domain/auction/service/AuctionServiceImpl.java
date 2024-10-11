@@ -346,6 +346,16 @@ public class AuctionServiceImpl implements AuctionService {
 
         int anonym = -1;
 
+        AuctionEndDTO response = AuctionEndDTO.builder()
+                .auctionId(auctionId)
+                .finalPrice(lastBid != null ? lastBid.getBidAmount() : auction.getStartPrice())
+                .winner(lastBid != null ? lastBid.getUserId() : null)
+                .anonym(anonym)
+                .endTime(LocalDateTime.now().format(formatter))
+                .build();
+
+        messagingTemplate.convertAndSend("/topic/auction/" + auctionId + "/end", response);
+
         // 경매가 유찰된 경우
         if (lastBid == null) {
             auction.setStatus(AuctionStatus.CANCEL);
@@ -389,16 +399,6 @@ public class AuctionServiceImpl implements AuctionService {
                 throw new CustomException(ErrorCode.BLOCKCHAIN_ERROR);
             }
         }
-
-        AuctionEndDTO response = AuctionEndDTO.builder()
-                .auctionId(auctionId)
-                .finalPrice(lastBid != null ? lastBid.getBidAmount() : auction.getStartPrice())
-                .winner(lastBid != null ? lastBid.getUserId() : null)
-                .anonym(anonym)
-                .endTime(LocalDateTime.now().format(formatter))
-                .build();
-
-        messagingTemplate.convertAndSend("/topic/auction/" + auctionId + "/end", response);
 
         // 경매 종료 후 Redis 에서 경매 로그 데이터 삭제
         redisTemplate.delete(logKey);
