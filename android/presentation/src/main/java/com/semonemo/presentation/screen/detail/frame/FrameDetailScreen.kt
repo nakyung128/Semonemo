@@ -55,7 +55,6 @@ import com.semonemo.presentation.component.HashTag
 import com.semonemo.presentation.component.ImageLoadingProgress
 import com.semonemo.presentation.component.LoadingDialog
 import com.semonemo.presentation.component.LongBlackButton
-import com.semonemo.presentation.component.LongUnableButton
 import com.semonemo.presentation.component.NameWithBadge
 import com.semonemo.presentation.component.TopAppBar
 import com.semonemo.presentation.screen.nft.NftViewModel
@@ -117,6 +116,30 @@ fun FrameDetailRoute(
         navigateToProfile = {
             navigateToProfile(uiState.value.frame.seller.userId)
         },
+        cancelSale = {
+            nftViewModel.sendTransaction(
+                function =
+                    Function(
+                        "cancelMarket",
+                        listOf(
+                            Uint256(
+                                uiState.value.frame.nftInfo.tokenId,
+                            ),
+                        ),
+                        listOf<TypeReference<*>>(object : TypeReference<Uint256>() {}),
+                    ),
+                onSuccess = { txHash ->
+                    viewModel.cancelSaleNft(
+                        txHash = txHash,
+                        marketId = uiState.value.frame.marketId,
+                    )
+                },
+                onError = {
+                    onShowSnackBar(it)
+                },
+                contractAddress = BuildConfig.SYSTEM_CONTRACT_ADDRESS,
+            )
+        },
     )
 }
 
@@ -133,6 +156,7 @@ fun FrameDetailContent(
     frame: FrameDetail = FrameDetail(),
     navigateToDetail: (Long) -> Unit = {},
     navigateToProfile: () -> Unit = {},
+    cancelSale: () -> Unit = {},
 ) {
     LaunchedEffect(uiEvent) {
         uiEvent.collectLatest { event ->
@@ -140,6 +164,10 @@ fun FrameDetailContent(
                 is FrameDetailUiEvent.Error -> onShowSnackBar(event.errorMessage)
                 is FrameDetailUiEvent.LoadCoin -> sendTransaction()
                 FrameDetailUiEvent.Success -> popUpBackStack()
+                is FrameDetailUiEvent.CancelSale -> {
+                    onShowSnackBar(event.errorMessage)
+                    popUpBackStack()
+                }
             }
         }
     }
@@ -164,11 +192,11 @@ fun FrameDetailContent(
         navigateToDetail = navigateToDetail,
         canPurchase = (uiState.userId == frame.seller.userId).not(),
         navigateToProfile = navigateToProfile,
+        cancelSale = cancelSale,
     )
     if (uiState.isLoading) {
         LoadingDialog(
             lottieRes = R.raw.normal_load,
-            loadingMessage = stringResource(R.string.frame_purchase_loading_title),
             subMessage = stringResource(R.string.loading_sub_message),
         )
     }
@@ -194,6 +222,7 @@ fun FrameDetailScreen(
     navigateToDetail: (Long) -> Unit = {},
     canPurchase: Boolean = false,
     navigateToProfile: () -> Unit = {},
+    cancelSale: () -> Unit = {},
 ) {
     val (expanded, isExpanded) =
         remember {
@@ -433,13 +462,14 @@ fun FrameDetailScreen(
                             onClick = { onClickedPurchase(price.toLong()) },
                         )
                     } else {
-                        LongUnableButton(
+                        LongBlackButton(
                             modifier =
                                 Modifier
                                     .weight(1f)
-                                    .padding(end = 10.dp)
                                     .height(50.dp),
-                            text = "본인이 제작한 프레임은 구매할 수 없습니다.",
+                            icon = R.drawable.ic_color_sene_coin,
+                            text = "프레임 판매 취소",
+                            onClick = { cancelSale() },
                         )
                     }
                 }

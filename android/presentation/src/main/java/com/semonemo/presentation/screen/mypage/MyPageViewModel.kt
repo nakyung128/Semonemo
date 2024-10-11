@@ -186,6 +186,7 @@ class MyPageViewModel
                     } else if (state is MyPageUiState.Success) {
                         _uiState.value =
                             state.copy(
+                                isMe = updatedUiState.isMe,
                                 userId = updatedUiState.userId,
                                 profileImageUrl = updatedUiState.profileImageUrl,
                                 nickname = updatedUiState.nickname,
