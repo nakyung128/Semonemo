@@ -188,6 +188,10 @@ class FrameViewModel
                 if (pin1 is ApiResponse.Success && pin2 is ApiResponse.Success) {
                     _uiEvent.emit(FrameUiEvent.NavigateMoment) // 성공 시 원하는 동작 수행
                 }
+            }.onStart {
+                _uiState.update { it.copy(isLoading = true) }
+            }.onCompletion {
+                _uiState.update { it.copy(isLoading = false) }
             }.collectLatest { it ->
                 Log.d("jaehan", "$it")
             }
