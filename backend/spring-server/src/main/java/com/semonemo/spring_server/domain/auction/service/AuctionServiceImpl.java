@@ -345,6 +345,13 @@ public class AuctionServiceImpl implements AuctionService {
                 .orElseThrow(() -> new CustomException(ErrorCode.NFT_NOT_FOUND_ERROR));
 
         int anonym = -1;
+        if (lastBid != null
+                && hashOps.hasKey(AUCTION_PARTICIPANT_KEY_PREFIX + auctionId, String.valueOf(lastBid.getUserId()))) {
+            anonym = Integer.parseInt(String.valueOf(
+                    hashOps.get(AUCTION_PARTICIPANT_KEY_PREFIX + auctionId,
+                            String.valueOf(lastBid.getUserId()))
+            ));
+        }
 
         AuctionEndDTO response = AuctionEndDTO.builder()
                 .auctionId(auctionId)
@@ -378,8 +385,8 @@ public class AuctionServiceImpl implements AuctionService {
             nft.getOwner().plusBalance(lastBid.getBidAmount());
 
             anonym = Integer.parseInt(String.valueOf(
-                hashOps.get(AUCTION_PARTICIPANT_KEY_PREFIX + auctionId,
-                    String.valueOf(lastBid.getUserId()))
+                    hashOps.get(AUCTION_PARTICIPANT_KEY_PREFIX + auctionId,
+                            String.valueOf(lastBid.getUserId()))
             ));
 
             try {
