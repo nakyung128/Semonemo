@@ -32,10 +32,6 @@ class AuctionViewModel
         var shortAuctionList = mutableStateOf<List<Auction>>(listOf())
             private set
 
-        init {
-//            loadShortAuction()
-        }
-
         fun loadShortAuction() {
             viewModelScope.launch {
                 auctionRepository.getAllAuction().collectLatest { response ->

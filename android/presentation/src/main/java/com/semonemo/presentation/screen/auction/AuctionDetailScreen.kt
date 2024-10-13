@@ -189,6 +189,7 @@ fun AuctionDetailScreen(
                     onBidUpdate = {
                         viewModel.updateBidLog(it.toAuctionBidLog())
                         viewModel.adjustClear()
+                        viewModel.adjustUserBidButton()
                         viewModel.updateBidPriceUnit()
                         viewModel.observeBidMessage(it)
                         viewModel.validateUserBid()
@@ -475,7 +476,7 @@ fun AuctionDetailScreen(
             )
         }
     }
-    if(viewModel.userStatus.value == UserStatus.IN_PROGRESS) {
+    if (viewModel.userStatus.value == UserStatus.IN_PROGRESS) {
         Box(
             modifier = modifier.fillMaxSize(),
             contentAlignment = Alignment.TopCenter,
@@ -496,14 +497,12 @@ fun AuctionDetailScreen(
         }
     }
 
-
     // Composable이 사라질 때 leaveAuction() 호출
     DisposableEffect(Unit) {
         onDispose {
-            if(viewModel.userStatus.value == UserStatus.READY || viewModel.userStatus.value == UserStatus.IN_PROGRESS) {
+            if (viewModel.userStatus.value == UserStatus.READY || viewModel.userStatus.value == UserStatus.IN_PROGRESS) {
                 viewModel.leaveAuction()
             }
-
         }
     }
 

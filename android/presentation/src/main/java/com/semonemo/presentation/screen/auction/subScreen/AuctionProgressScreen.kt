@@ -43,8 +43,10 @@ fun AuctionProgressScreen(
                 CustomAuctionProgressBar(auctionStatus = viewModel.auctionStatus.value, endTime = adjustEndTime ?: viewModel.endTime.value)
                 Spacer(modifier = Modifier.height(10.dp))
                 BidInfo(
+                    modifier = Modifier,
                     bidLogList = viewModel.auctionBidLog.value,
                     startPrice = viewModel.topPrice.longValue,
+                    userId = viewModel.userId,
                     // 위에서 선언한 auctionBidLog
                 )
 
@@ -69,6 +71,7 @@ fun AuctionProgressScreen(
                     bidPriceUnit = viewModel.bidPriceUnit.longValue * 10,
                     onClick = {
                         viewModel.adjustBidPrice(viewModel.bidPriceUnit.longValue * 10, 100)
+                        viewModel.adjustUserBidButton()
                     },
                 )
                 BidPriceUnitButton(
@@ -77,6 +80,7 @@ fun AuctionProgressScreen(
                     bidPriceUnit = viewModel.bidPriceUnit.longValue * 5,
                     onClick = {
                         viewModel.adjustBidPrice(viewModel.bidPriceUnit.longValue * 5, 50)
+                        viewModel.adjustUserBidButton()
                     },
                 )
                 BidPriceUnitButton(
@@ -85,6 +89,7 @@ fun AuctionProgressScreen(
                     bidPriceUnit = viewModel.bidPriceUnit.longValue,
                     onClick = {
                         viewModel.adjustBidPrice(viewModel.bidPriceUnit.longValue, 10)
+                        viewModel.adjustUserBidButton()
                     },
                 )
             }

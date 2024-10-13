@@ -62,6 +62,7 @@ class AuctionDetailViewModel
             private set
 
         var validateUserBid = mutableStateOf(true)
+        var validateUserBidButton = mutableStateOf(Triple(true, true, true))
 
         var userId: Long = -1L // 유저 ID
         var registerId: Long = 0L // 경매 등록자 ID
@@ -309,6 +310,21 @@ class AuctionDetailViewModel
         }
 
         fun validateUserBid() {
-            validateUserBid.value = registerId != userId && topUserId.longValue != userId
+            validateUserBid.value =
+                registerId != userId &&
+                topUserId.longValue != userId &&
+                topPrice.longValue < (topPrice.longValue + myBidPrice.longValue)
+        }
+
+        fun adjustUserBidButton() {
+            if (topPrice.longValue + myBidPrice.longValue + bidPriceUnit.longValue * 1 > userCoinBalance.longValue) {
+                validateUserBidButton.value = Triple(false, false, false)
+            } else if (topPrice.longValue + myBidPrice.longValue + bidPriceUnit.longValue * 5 > userCoinBalance.longValue) {
+                validateUserBidButton.value = Triple(false, false, true)
+            } else if (topPrice.longValue + myBidPrice.longValue + bidPriceUnit.longValue * 10 > userCoinBalance.longValue) {
+                validateUserBidButton.value = Triple(false, true, true)
+            } else {
+                validateUserBidButton.value = Triple(true, true, true)
+            }
         }
     }
