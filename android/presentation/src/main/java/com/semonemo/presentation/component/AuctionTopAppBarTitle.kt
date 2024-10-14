@@ -42,6 +42,7 @@ fun AuctionTopAppBarTitle(
                 keywords = listOf("축하", "프레임", "낙찰")
             } else {
                 fullText = "경매가 종료되었습니다."
+                keywords = listOf("종료")
             }
         }
 

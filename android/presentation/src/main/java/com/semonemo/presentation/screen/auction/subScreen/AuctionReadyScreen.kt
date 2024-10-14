@@ -62,12 +62,12 @@ fun AuctionReadyScreen(
                 style = Typography.bodyMedium,
             )
             Spacer(modifier = Modifier.weight(1f))
-            if(viewModel.registerId == viewModel.userId) {
+            if (viewModel.registerId == viewModel.userId) {
                 if (viewModel.auctionStatus.value == AuctionStatus.READY) {
                     LongBlackButton(
                         modifier =
-                        Modifier
-                            .fillMaxWidth(),
+                            Modifier
+                                .fillMaxWidth(),
                         text = stringResource(R.string.auction_start_button_title),
                         icon = null,
                         onClick = {
@@ -77,8 +77,8 @@ fun AuctionReadyScreen(
                 } else {
                     LongUnableButton(
                         modifier =
-                        Modifier
-                            .fillMaxWidth(),
+                            Modifier
+                                .fillMaxWidth(),
                         text = stringResource(R.string.auction_start_button_title),
                     )
                 }
