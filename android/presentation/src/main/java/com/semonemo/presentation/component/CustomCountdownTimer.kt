@@ -1,13 +1,9 @@
 package com.semonemo.presentation.component
 
-import android.util.Log
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -25,12 +21,12 @@ import androidx.compose.ui.unit.sp
 import com.semonemo.presentation.theme.GunMetal
 import com.semonemo.presentation.theme.Typography
 import com.semonemo.presentation.theme.White
-import com.semonemo.presentation.theme.WhiteGray
 import kotlinx.coroutines.delay
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 
 private const val TAG = "CustomCountdownTimer"
+
 @Composable
 fun CustomCountdownTimer(deadline: LocalDateTime) {
     var currentTime by remember { mutableStateOf(LocalDateTime.now()) }
@@ -42,21 +38,20 @@ fun CustomCountdownTimer(deadline: LocalDateTime) {
             currentTime = LocalDateTime.now()
             remainingTime = calculateRemainingTime(currentTime, deadline).first
             breakKey = calculateRemainingTime(currentTime, deadline).second
-            if(!breakKey) {
+            if (!breakKey) {
                 break
             }
         }
     }
-    if(!breakKey) {
+    if (!breakKey) {
         remainingTime = RemainingTime(0, 0, 0, 0)
     }
     Row(
         modifier =
-        Modifier
-            .background(Color.Unspecified)
-            .padding(2.dp),
-
-        verticalAlignment = Alignment.CenterVertically
+            Modifier
+                .background(Color.Unspecified)
+                .padding(2.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         TimeUnitBox(String.format("%02d", remainingTime.hours))
         Separator()
@@ -70,9 +65,9 @@ fun CustomCountdownTimer(deadline: LocalDateTime) {
 fun TimeUnitBox(text: String) {
     Box(
         modifier =
-        Modifier
-            .background(White)
-            .wrapContentSize(),
+            Modifier
+                .background(White)
+                .wrapContentSize(),
         contentAlignment = Alignment.Center,
     ) {
         Text(
@@ -87,10 +82,10 @@ fun TimeUnitBox(text: String) {
 fun Separator() {
     Box(
         modifier =
-        Modifier
-            .background(White)
-            .wrapContentSize()
-            .padding(bottom = 1.dp),
+            Modifier
+                .background(White)
+                .wrapContentSize()
+                .padding(bottom = 1.dp),
         contentAlignment = Alignment.Center,
     ) {
         Text(
@@ -119,10 +114,8 @@ fun calculateRemainingTime(
     val minutes = (duration % 3600) / 60
     val seconds = duration % 60
 
-    Log.d(TAG, "calculateRemainingTime: $days, $hours, $minutes, $seconds")
-    if(days < 0L || hours < 0L || minutes < 0L || seconds < 0L) {
+    if (days < 0L || hours < 0L || minutes < 0L || seconds < 0L) {
         return Pair(RemainingTime(0, 0, 0, 0), false)
-
     }
     return Pair(RemainingTime(days, hours, minutes, seconds), true)
 }
