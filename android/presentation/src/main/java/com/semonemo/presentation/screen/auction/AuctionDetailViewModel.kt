@@ -62,7 +62,9 @@ class AuctionDetailViewModel
             private set
 
         var validateUserBid = mutableStateOf(true)
+            private set
         var validateUserBidButton = mutableStateOf(Triple(true, true, true))
+            private set
 
         var userId: Long = -1L // 유저 ID
         var registerId: Long = 0L // 경매 등록자 ID

@@ -40,7 +40,10 @@ fun AuctionProgressScreen(
             Column(
                 modifier = Modifier.weight(1f),
             ) {
-                CustomAuctionProgressBar(auctionStatus = viewModel.auctionStatus.value, endTime = adjustEndTime ?: viewModel.endTime.value)
+                CustomAuctionProgressBar(
+                    auctionStatus = viewModel.auctionStatus.value,
+                    endTime = adjustEndTime ?: viewModel.endTime.value,
+                )
                 Spacer(modifier = Modifier.height(10.dp))
                 BidInfo(
                     modifier = Modifier,
@@ -58,7 +61,11 @@ fun AuctionProgressScreen(
                 currentPrice = viewModel.topPrice.longValue,
                 adjustedAmount = viewModel.myBidPrice.longValue,
                 adjustedPercentage = viewModel.myPercentage.intValue,
-                onClear = { viewModel.adjustClear() },
+                onClear = {
+                    viewModel.adjustClear()
+                    viewModel.adjustUserBidButton()
+                    viewModel.validateUserBid()
+                },
             )
             Spacer(modifier = Modifier.height(10.dp))
             Row(
@@ -69,27 +76,33 @@ fun AuctionProgressScreen(
                     modifier = Modifier.weight(1f),
                     bidPricePercentage = 100,
                     bidPriceUnit = viewModel.bidPriceUnit.longValue * 10,
+                    adjustButton = viewModel.validateUserBidButton.value,
                     onClick = {
                         viewModel.adjustBidPrice(viewModel.bidPriceUnit.longValue * 10, 100)
                         viewModel.adjustUserBidButton()
+                        viewModel.validateUserBid()
                     },
                 )
                 BidPriceUnitButton(
                     modifier = Modifier.weight(1f),
                     bidPricePercentage = 50,
                     bidPriceUnit = viewModel.bidPriceUnit.longValue * 5,
+                    adjustButton = viewModel.validateUserBidButton.value,
                     onClick = {
                         viewModel.adjustBidPrice(viewModel.bidPriceUnit.longValue * 5, 50)
                         viewModel.adjustUserBidButton()
+                        viewModel.validateUserBid()
                     },
                 )
                 BidPriceUnitButton(
                     modifier = Modifier.weight(1f),
                     bidPricePercentage = 10,
                     bidPriceUnit = viewModel.bidPriceUnit.longValue,
+                    adjustButton = viewModel.validateUserBidButton.value,
                     onClick = {
                         viewModel.adjustBidPrice(viewModel.bidPriceUnit.longValue, 10)
                         viewModel.adjustUserBidButton()
+                        viewModel.validateUserBid()
                     },
                 )
             }

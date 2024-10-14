@@ -178,6 +178,7 @@ fun AuctionDetailScreen(
                         viewModel.updateStartMessage(it)
                         viewModel.updateBidPriceUnit()
                         viewModel.validateUserBid()
+                        viewModel.adjustUserBidButton()
                     },
                 )
             }
@@ -189,10 +190,10 @@ fun AuctionDetailScreen(
                     onBidUpdate = {
                         viewModel.updateBidLog(it.toAuctionBidLog())
                         viewModel.adjustClear()
-                        viewModel.adjustUserBidButton()
                         viewModel.updateBidPriceUnit()
                         viewModel.observeBidMessage(it)
                         viewModel.validateUserBid()
+                        viewModel.adjustUserBidButton()
                     },
                 )
             }

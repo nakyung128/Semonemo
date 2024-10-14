@@ -16,7 +16,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.semonemo.presentation.R
-import com.semonemo.presentation.theme.Gray03
+import com.semonemo.presentation.theme.Gray02
 import com.semonemo.presentation.theme.SemonemoTheme
 import com.semonemo.presentation.theme.Typography
 import com.semonemo.presentation.theme.White
@@ -41,7 +41,7 @@ fun BidPriceUnitButton(
                 adjustButton.third
             }
         }
-    val color = if (flag) White else Gray03
+    val color = if (flag) White else Gray02
     Surface(
         modifier = modifier.fillMaxWidth().padding(2.dp),
         onClick =
